@@ -1,0 +1,23 @@
+# .dockerignore
+
+# Git and Docker files
+.git
+.gitignore
+.dockerignore
+Dockerfile
+
+# Python cache and virtual environments
+__pycache__/
+*.pyc
+venv/
+.env
+
+# Generated artifacts (these will be generated inside the container)
+results/
+plots/Figs/
+data/
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
