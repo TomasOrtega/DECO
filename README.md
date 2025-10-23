@@ -101,10 +101,13 @@ After the command completes, all results and figures will be available in their 
 If you use this code in your research, please cite:
 
 ```bibtex
-@misc{deco2025,
-  title={Decentralized Parameter-Free Online Learning},
-  author={Tomas Ortega and Hamid Jafarkhani},
-  year={2025},
-  url={https://github.com/TomasOrtega/DECO}
+@misc{ortega2025decentralizedparameterfreeonlinelearning,
+      title={Decentralized Parameter-Free Online Learning}, 
+      author={Tomas Ortega and Hamid Jafarkhani},
+      year={2025},
+      eprint={2510.15644},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2510.15644}, 
 }
 ```
