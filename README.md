@@ -18,6 +18,7 @@ DECO/
   │   ├── run_connectivity_experiment.py
   │   ├── run_gossip_tradeoff_experiment.py
   │   ├── run_multi_dataset_comparison.py
+  │   ├── run_review_baseline_experiment.py
   │   ├── run_synthetic_experiment.py
   │   └── tune_dgd.py
   ├── plots/
@@ -74,6 +75,18 @@ In these instructions we will use the Anaconda or Miniconda package manager.
         run_all.bat
         ```
 
+### Review Baseline and Communication-Cost Experiment
+
+The review-response revision adds `experiments/run_review_baseline_experiment.py` to compare DECO against decentralized adaptive-gradient baselines requested by the reviewers: AdaGrad, RMSProp, Adam, AdamW, momentum, and Nesterov. The script also reports scalar communication cost, distinguishing DECO-i's `(wealth, G)` messages from DECO-ii's `G`-only messages.
+
+The lightweight default run is included in `run_all.sh` and `run_all.bat`. To run a larger version manually, increase the number of rounds or seeds:
+
+```bash
+python -m experiments.run_review_baseline_experiment --T 1000 --seeds 0 1 2
+```
+
+The summary is written to `results/review_baseline_summary.csv` with cumulative network loss, average network loss, cumulative local loss, and total communicated scalars.
+
 ### Method 2: Docker (Recommended for Full Reproducibility)
 
 This is the easiest and most reliable method. It uses Docker to build a self-contained image with all code, data, and dependencies, ensuring the results are identical regardless of your local machine's configuration.
@@ -92,6 +105,12 @@ This is the easiest and most reliable method. It uses Docker to build a self-con
     **If you are on Windows, make sure to use PowerShell.**
     ```bash
     docker run --rm -v "$(pwd)/results:/app/results" -v "$(pwd)/plots/Figs:/app/plots/Figs" deco-repro
+    ```
+
+3.  **Run only the review baseline experiment inside Docker:**
+    ```bash
+    docker run --rm -v "$(pwd)/results:/app/results" deco-repro \
+        python -m experiments.run_review_baseline_experiment --T 1000 --seeds 0 1 2
     ```
 
 After the command completes, all results and figures will be available in their respective local directories.
