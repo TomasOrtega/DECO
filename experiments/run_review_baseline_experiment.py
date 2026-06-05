@@ -24,7 +24,7 @@ DEFAULT_TOPOLOGIES = ("cycle", "erdos_renyi")
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--T", type=int, default=200, help="online rounds")
+    parser.add_argument("--T", type=int, default=100, help="online rounds")
     parser.add_argument("--N", type=int, default=20, help="number of agents")
     parser.add_argument("--dim", type=int, default=10, help="decision dimension")
     parser.add_argument("--seeds", type=int, nargs="+", default=[0], help="random seeds")
@@ -155,9 +155,7 @@ def main():
         rng = np.random.default_rng(seed)
         u_star = rng.standard_normal(args.dim)
         for topology in args.topologies:
-            # Keep Erdos-Renyi reproducible without changing existing graph APIs.
-            np.random.seed(seed)
-            W = create_gossip_matrix(args.N, topology=topology, p=0.2)
+            W = create_gossip_matrix(args.N, topology=topology, p=0.2, seed=seed)
             for name, algo_config in make_algorithms().items():
                 np.random.seed(seed)
                 env = SyntheticRegression(
