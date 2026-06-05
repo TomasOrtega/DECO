@@ -1,0 +1,28 @@
+\textcolor{blue}{For the revision, we added real-data adaptive-baseline experiments in addition to the original LIBSVM comparison.}
+The added experiments use real bundled datasets (diabetes, breast-cancer, and digits) so that the Docker workflow can run even if external dataset mirrors are unavailable, while preserving the original LIBSVM download path.
+The results are summarized in \Cref{tab:review_realdata} for $T=100$ review runs on a cycle graph.
+They show that tuned adaptive decentralized baselines can be competitive or better on some datasets and horizons.
+Therefore, the empirical conclusion is not that \algname{} uniformly dominates tuned adaptive methods; rather, \algname{} provides learning-rate-free decentralized coin-betting updates with explicit communication accounting and regret guarantees in the convex online-learning setting.
+
+\begin{table}[tbp]
+    \centering
+    \caption{Communication-normalized review experiments with $T=100$, $N=20$, and $q(t)=1$. Lower cumulative network loss is better. ``Scalars'' is the total number of real scalars exchanged by gossip.}
+    \label{tab:review_realdata}
+    \resizebox{\columnwidth}{!}{%
+    \begin{tabular}{llrr}
+        \hline
+        Dataset / graph & Method & Cum. network loss & Scalars \\
+        \hline
+        Synthetic cycle & \algname{}-i (KT) & 27.24 & 44,000 \\
+        Synthetic cycle & \algname{}-ii (KT) & 46.20 & 40,000 \\
+        Synthetic cycle & D-RMSProp & 20.67 & 40,000 \\
+        Diabetes & \algname{}-i (KT) & 64.47 & 44,000 \\
+        Diabetes & DGD & 59.41 & 40,000 \\
+        Breast cancer & \algname{}-i (KT) & 38.31 & 124,000 \\
+        Breast cancer & DGD & 35.76 & 120,000 \\
+        Digits & \algname{}-i (KT) & 81.08 & 260,000 \\
+        Digits & D-RMSProp & 63.03 & 256,000 \\
+        \hline
+    \end{tabular}%
+    }
+\end{table}

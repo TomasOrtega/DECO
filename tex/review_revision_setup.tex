@@ -1,0 +1,10 @@
+\subsubsection*{Revision: communication accounting and adaptive baselines}
+\textcolor{blue}{In response to the reviewers' concerns about constrained networks and fair empirical comparisons, we explicitly account for communication in all new review experiments.}
+One gossip round consists of one local exchange over every directed neighbor relation induced by the graph.
+If $d$ is the model dimension and $|E_{\mathrm{dir}}|$ is the number of directed non-self neighbor transmissions, then one gossip round communicates $|E_{\mathrm{dir}}|d$ real scalars for \algname{}-\pmb{ii}, DOGD, and the adaptive decentralized baselines, and $|E_{\mathrm{dir}}|(d+1)$ real scalars for \algname{}-\pmb{i} because it additionally communicates the scalar wealth.
+Thus, with a constant schedule $q(t)=1$, the communication cost is $\mathcal{O}(T |E_{\mathrm{dir}}| d)$ for \algname{}-\pmb{ii}, whereas a linear schedule has $\mathcal{O}(T^2 |E_{\mathrm{dir}}| d)$ cost.
+This is why our practical experiments emphasize the constrained regime $q(t)=1$ and report the theoretical linear schedule as a sufficient, not mandatory, condition for the current proof.
+
+\textcolor{blue}{We also added decentralized adaptive-gradient baselines using the same gossip interface as DOGD: AdaGrad, RMSProp, Adam, AdamW, momentum, and Nesterov-type momentum.}
+These methods are not parameter-free in the sense of our theoretical claims because they still require stepsize, momentum, and/or decay choices, but they are important controls for the reviewers' question of whether DECO's behavior is merely an effect of adapting the update magnitude to past gradients.
+The added code reports cumulative network loss, average network loss, cumulative local loss, and total communicated scalars for each method.

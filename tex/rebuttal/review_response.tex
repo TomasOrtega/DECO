@@ -8,607 +8,210 @@
 %% Fonts
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
-%\usepackage{newcent} % different font
-%\usepackage[scaled]{beramono} % different monospace font
 
-
-%% Bibliography
+%% Bibliography and math/tools, following the existing response template style
 \usepackage[backend=biber,style=ieee,dashed=false,url=false,isbn=false,defernumbers=true,refsection=section]{biblatex}
 \bibliography{literature.bib}
-
-\usepackage{pifont} % for check and cross
+\usepackage{pifont}
 \usepackage{amsmath,amsfonts,amssymb,amsthm,mathtools}
 \usepackage{algorithmic}
 \usepackage{algorithm}
 \usepackage{array}
 \usepackage[caption=false,font=footnotesize]{subfig}
 \usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{xspace}
 \usepackage{stfloats}
 \usepackage{url}
 \usepackage{verbatim}
 \usepackage{graphicx}
 \usepackage{hyperref,cleveref}
-\usepackage{multirow, booktabs} % for fancy tables
+\usepackage{multirow,booktabs}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% My stuff
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% Marks
 \newcommand{\cmark}{\textcolor{green}{\ding{51}}}%
 \newcommand{\xmark}{\textcolor{red}{\ding{55}}}%
-
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
-\newcommand{\normsq}[1]{\left\lVert#1\right\rVert^2}
-\newcommand{\expec}[1]{\mathbb{E}\left[#1\right]}
-\newcommand{\expecq}[1]{\mathbb{E}_{Q}\left[#1\right]}
-
 \newcommand{\order}[1]{\mathcal{O}\left(#1\right)}
-\newcommand{\calQ}{\mathcal{Q}}
-\newcommand{\calS}{\mathcal{S}}
+\newcommand{\algname}{{DECO}\xspace}
 
-\DeclareMathOperator{\topk}{top-k}
-\DeclareMathOperator{\randk}{rand}
-\DeclareMathOperator{\qsgd}{QSGD}
-\DeclareMathOperator{\sign}{sign}
-
-\title{Quantized and Asynchronous Federated Learning}
+\title{Decentralized Parameter-Free Online Learning}
 \author{Tomas Ortega and Hamid Jafarkhani}
-\journal{IEEE Transactions on Communications}
-\manuscript{TCOM-TPS-24-0314}
-\editorname{Dr. Long Le}
-
-% No numbers for sections
+\journal{IEEE Journal on Selected Areas in Communications}
+\manuscript{JSAC-01286-2025}
+\editorname{Dr. Zhiguo Ding}
 \setcounter{secnumdepth}{0}
 
 \begin{document}
 \maketitle
 
-% Cover Letter
 \input{cover_letter.tex}
 \clearpage
-
-% Table of contents
 \tableofcontents
 \clearpage
 
-% Response to Editor
 \editor
 \begin{generalcomment}
-	Reviewers suggest some major revisions for the paper. In particular, more detailed comparison of the existing works and current work to better highlight the contributions of the paper is suggested. Also, enhancement of the algorithm description and simulation results are suggested.
+The manuscript requires a major revision. The main concerns are communication cost in constrained decentralized networks, the gap between the theoretical increasing-gossip schedule and practical constant communication, the role of \algname{}-ii relative to \algname{}-i, and the need for stronger empirical comparisons including adaptive baselines and real-data experiments.
 \end{generalcomment}
-\begin{revresponse}[We thank all reviewers and the editor for their invaluable time and effort.]
-    In what follows, we have provided point-by-point responses to all comments and revised the manuscript accordingly to better elucidate the concerns raised by the reviewers. We believe that the manuscript is greatly improved as a result of the constructive comments and hope that the current version is acceptable for publication.
-    To avoid redundancy, we refer to the reviewers' comments when addressing the editors' comments, as they are related.	
-    \begin{enumerate}
-		\item A more detailed comparison of the existing works and current work to better highlight the contributions of the paper has been addressed in response to Reviewer 1's Comments 1 through 3, Reviewer 2's Comment 1; and Reviewer 3's Comments 1 through 3.
-		\item An enhancement of the algorithm description and simulation results has been addressed in responses to Reviewer 1's Comments 4 and 6, Reviewer 2's Comment 2; and Reviewer 3's Comment 5.
-	\end{enumerate}
-\end{revresponse}
-
-
-% Reviewer 1
-\reviewer
-\begin{generalcomment}
-	This paper proposes a federated learning algorithm with high communication efficiency and provides sufficient theoretical proof. The proposed AQFeL algorithm is helpful to solve the communication bottleneck of FL algorithm in practice. The manuscript is easy to follow. However, for this paper, I suggest making the following modifications to further improve the quality of the paper.
-    \\ \emph{Suggestions omitted here to avoid repetition, please see below.} \\
-    To sum up, I think this paper can be accepted if all the above problems are solved well.
-\end{generalcomment}
-\begin{revresponse}[We thank the reviewer for the time and effort to review our paper, and we appreciate the recommendation to publish once these issues are solved. We hope the following replies are helpful and address the reviewer's concerns.]
-\end{revresponse}
-
-\begin{revcomment}
-	The innovation of the manuscript is not strong enough. I suggest the authors to highlight their contributions clearer.
-\end{revcomment}
-\begin{revresponse}
-    We agree that the novel aspects of our work could be better highlighted. In view of this, we have modified the abstract as follows:
-    \begin{changes}
-        Recent advances in federated learning have shown that asynchronous variants can be faster and more scalable than their synchronous counterparts.
-    However, their design does not include quantization, which is necessary in practice to deal with the communication bottleneck.
-    To bridge this gap, we \textcolor{red}{develop a novel algorithm, }Quantized Asynchronous Federated Learning (QAFeL), which \textcolor{red}{introduces} a hidden-state quantization scheme to avoid the error propagation caused by direct quantization.
-    QAFeL also includes a buffer to aggregate client updates, ensuring scalability and compatibility with techniques such as secure aggregation.
-    \textcolor{red}{Furthermore, we prove that QAFeL achieves an $\order{1/\sqrt{T}}$ ergodic convergence rate for stochastic gradient descent on non-convex objectives, which is the optimal order of complexity, without requiring bounded gradients or uniform client arrivals.}
-    We also \textcolor{red}{prove that} the cross-term error between staleness and quantization \textcolor{red}{affects only the higher-order error terms}.
-    We validate our theoretical findings on standard benchmarks.
-    \end{changes}
-    We have also added subsections to the introduction to better highlight the contributions.
-    Finally, we have added \Cref{tab:comp} to make our contributions clearer.
-        \begin{table}[H]
-        \color{red}
-\centering
-\caption{Related work comparison. The number of algorithm rounds is denoted by $T$.}
-\label{tab:comp}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{|c|c|cccc|ccc|}
-\hline
-\multirow{3}{*}{\textbf{Algorithm}} &
-  \multirow{3}{*}{\textbf{Work}} &
-  \multicolumn{4}{c|}{\textbf{Characteristics}} &
-  \multicolumn{3}{c|}{\textbf{Analysis}} \\ \cline{3-9} 
- &
-   &
-  \multicolumn{1}{c|}{\multirow{2}{*}{\textbf{Asynchronous}}} &
-  \multicolumn{1}{c|}{\textbf{Buffered}} &
-  \multicolumn{1}{c|}{\textbf{Quantized}} &
-  \textbf{Mitigates} &
-  \multicolumn{1}{c|}{\textbf{Unbounded}} &
-  \multicolumn{1}{c|}{\textbf{Arbitrary Client}} &
-  \textbf{Non-convex objective} \\
- &
-   &
-  \multicolumn{1}{c|}{} &
-  \multicolumn{1}{c|}{\textbf{Aggregation}} &
-  \multicolumn{1}{c|}{\textbf{Communication}} &
-  \textbf{Error Propagation} &
-  \multicolumn{1}{c|}{\textbf{Gradient}} &
-  \multicolumn{1}{c|}{\textbf{Update Distribution}} &
-  \textbf{$\order{1/\sqrt{T}}$ rate} \\ \hline
-\multirow{2}{*}{FedAvg} &
-  \cite{communication_efficient} &
-  \multicolumn{1}{c|}{\xmark} &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\xmark} &
-  \xmark &
-  \multicolumn{1}{c|}{\xmark} &
-  \multicolumn{1}{c|}{-} &
-  \xmark \\ \cline{2-9} 
- &
-  \cite{wang} &
-  \multicolumn{1}{c|}{\xmark} &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\xmark} &
-  \xmark &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{-} &
-  \cmark \\ \hline
-MCM &
-  \cite{MCM} &
-  \multicolumn{1}{c|}{\xmark} &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\cmark} &
-  \cmark &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{-} &
-  \xmark \\ \hline
-FedAsync &
-  \cite{asyncfl} &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\xmark} &
-  \multicolumn{1}{c|}{\xmark} &
-  \xmark &
-  \multicolumn{1}{c|}{\xmark} &
-  \multicolumn{1}{c|}{\xmark} &
-  \cmark \\ \hline
-\multirow{2}{*}{FedBuff} &
-  \cite{FedBuff} &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\xmark} &
-  \xmark &
-  \multicolumn{1}{c|}{\xmark} &
-  \multicolumn{1}{c|}{\xmark} &
-  \cmark \\ \cline{2-9} 
- &
-  \cite{toghani2022unbounded} &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\xmark} &
-  \xmark &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\xmark} &
-  \cmark \\ \hline
-QAFeL &
-  This work &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\cmark} &
-  \cmark &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\cmark} &
-  \cmark \\ \hline
-\end{tabular}%
-}
-\end{table}
-\printpartbibliography{communication_efficient,wang,MCM,asyncfl,FedBuff,toghani2022unbounded}
-\end{revresponse}
-
-\begin{revcomment}
-	I recommend adding a summary of existing asynchronous federated learning solutions that solve communication efficiency in the introduction, comparing or connecting them with existing solutions, and highlighting the advantages of the proposed solution.
-\end{revcomment}
-\begin{revresponse}
-    To the best of our knowledge, this is the first work in asynchronous FL that takes into account quantized communications. 
-    
-    Per reviewer's recommendation, we have added a discussion for other communication-efficient methods as follows:
-    \begin{changes}
-        \textcolor{red}{Other asynchronous FL works include algorithms that consider time-weighted schemes for stale model aggregation \cite{robust-async,backdoor-FL}. 
-        In another approach, \cite{zhou2022fedaca} proposes }\textcolor{red}{ a client uploading policy, which avoids sending updates where the previous and current models are sufficiently similar.
-        However, these solutions do not consider quantization, which is indispensable to reduce the communication bottleneck in many practical FL systems.}
-    \end{changes}
-    
-    We have also added \Cref{tab:comp} to further address this issue by providing a comparative overview.
-
-    \printpartbibliography{robust-async,backdoor-FL,zhou2022fedaca}
-\end{revresponse}
-
-\begin{revcomment}
-    I recommend that authors add a related work section after the introduction chapter, and the discussion or comparisons with more recent related schemes, such as tfl-dt a trust evaluation scheme for federated learning in digital twin for mobile networks, are suggested.
-\end{revcomment}
-\begin{revresponse}
-     We agree that the related work could be further expanded, as well as the comparison with related schemes. Per reviewer's recommendation, we have added a related work sub-section, where we have also included TFL-DT \cite{tfl-dt}.
-     We have also added \Cref{tab:comp} to provide a comparative overview of our work and others.
-    \printpartbibliography{tfl-dt}
-\end{revresponse}
-
-\begin{revcomment}
-    The introduction of the QAFeL solution is not detailed enough. I recommend that the authors provide more details of the solution to reflect the innovative nature of the proposed solution.
-\end{revcomment}
-\begin{revresponse}
-    We agree with the reviewer that the details of QAFeL could be made clearer. 
-    We have added the full pseudocode, as Appendix B, to help clarify the text, as well as highlighting the lines which enable the hidden-state mechanism. 
-    We have also added the following lines in the text to address this:
-    \begin{changes}
-        The server broadcasts $q^t$ to all clients. Finally, the clients and the server update their copies of the hidden-state using the same equation, $\hat x^{t+1} = \hat x^{t} + q^t$.
-
-        \textcolor{red}{For further details on the algorithm design see Appendix B, where we have included the pseudocode for all the components of QAFeL.
-        The highlighted lines in the pseudocode represent the novel hidden-state mechanism.}
-    \end{changes}
-    We have not included the new Appendix B in this document as it is lengthy, please see the manuscript for the full text.
-\end{revresponse}
-
-\begin{revcomment}
-    The authors should double-check the experimental setup parameters, for example, confirm whether the client learning rate is too large?
-\end{revcomment}
-\begin{revresponse}
-    We have double checked that the experimental setup parameters are correct, including the client learning rate. Observe that for logistic regression problem with Lipschitz parameter $L$, classical synchronous algorithms require learning rates of the order of $1/L$, which tend to be larger than the learning rates for neural network experiments. For our neural network experiments, we have included the hyperparameters for completeness:
-    \begin{changes}
-        We compare FedBuff and QAFeL with the hyperparameter selection from \cite{FedBuff}, \textcolor{red}{ which we re-state in \Cref{tab:hyper} for completeness.
-Note that we have used server momentum $\beta$ in two of our experiment settings, which we have found to help convergence in practice.} 
-    \end{changes}
-    \begin{table}[H]
-    \color{red}
-	\centering
-	\caption{Chosen hyperparameters}
-	\label{tab:hyper}
-	\begin{tabular}{llllll} 
-		\toprule
-		         & FedBuff and QAFeL                        & FedAsync                                    \\
-		\hline
-		
-		         & $\eta_{\ell}=4.7\cdot10^{-6}$  & $\eta_{\ell}=5.7$            \\     
-		CelebA   & $\eta_g=1.0\cdot10^{3}$        & $\eta_g=2.8\cdot10^{-3}$          \\ 
-		         & $\beta=3.0\cdot10^{-1}$        &      $\beta=0$                              \\ 
-		\hline
-		         & $\eta_{\ell}=1.95\cdot10^{-4}$ & $\eta_{\ell}=1.0\cdot10^{2}$   \\     
-		CIFAR-10 & $\eta_g=4.09\cdot10^1$         & $\eta_g=6.4\cdot10^{-5}$         \\ 
-		         & $\beta=0$                      &    $\beta=0$                        \\
-        \hline
-		         & $\eta_{\ell}=1.17$     & $\eta_{\ell}=1.7\cdot10^1$   \\     
-		Shakespeare  & $\eta_g=2.64\cdot10^{-1}$       & $\eta_g=2.03\cdot10^{-1}$                  \\ 
-		         & $\beta=0$        &         $\beta=5.0\cdot10^{-1}$                              \\ 
-		\bottomrule
-	\end{tabular}
-\end{table}
-\end{revresponse}
-
-\begin{revcomment}
-    The author should enhance their experiments. In addition to comparing with the FedBuff algorithm, the communication efficiency can also be compared with other solutions. At the same time, the model accuracy needs to be compared with them to reflect the advantage of QAFeL in reducing model accuracy loss.
-\end{revcomment}
-\begin{revresponse}
-    We agree with the reviewer and have enhanced the experimental benchmark. 
-    To expand our benchmarks, we have included FedAsync, which is not massively scalable as it does not have a buffer on the server-side. We have also included FedBuff with 4-bit direct quantization and FedAsync with 4-bit direct quantization. The experiments are included in Fig.~\ref{fig:Shake1}.
-    We have also expanded the results section by adding the corresponding analysis and detailed experimental setup.
-    \begin{figure}[htbp]
-    \color{red}
-    \centering
-    \subfloat[]{\includegraphics[width=.4\columnwidth]{tripsShake.pdf}%
-        }
-    \\
-    \subfloat[]{\includegraphics[width=.4\columnwidth]{mbsShake.pdf}%
-        }
-    \\
-    \subfloat[]{\includegraphics[width=.4\columnwidth]{mbsBroadcastedShake.pdf}%
-        }
-    \caption{\small\color{red}{Comparison of communication metrics for QAFeL, FedBuff, FedAsync, FedBuff  with Direct Quantization, and FedAsync with Direct Quantization across varying concurrency levels (clients training in parallel) to reach 54\% target accuracy on the Shakespeare dataset. QAFeL employs 4-bit $\qsgd$ quantization at both the server and client: (a) the number of client updates in thousands, (b) the total GB uploaded by the clients, and (c) the GB broadcasted by the server. FedBuff with Direct Quantization only has one data-point because for concurrencies 500 and 1000 the algorithm diverged for at least one of the three seeds.}}
-    \label{fig:Shake1}
-\end{figure}
-    Note that, to the best of our knowledge, this is the first work that takes into account quantization for asynchronous FL.
-\end{revresponse}
-
-% Reviewer 2
-\reviewer
-\label{rev:2}
-\begin{generalcomment}
-	This paper proposed Quantized Asynchronous Federated Learning (QAFeL), which includes a hidden-state quantization scheme to avoid the error propagation caused by direct quantization. The algorithm provides optimal ergodic convergence rates for SGD on non-convex objectives. This paper also show the cross-term error between staleness and quantization is negligible and validate their theoretical findings on standard benchmarks.
-
-		Strengths:
-		\begin{enumerate}
-			\item This paper is the first effort in handling error propagation in asynchronous federated learning.
-			\item This paper is well-written, with clear logic, smooth expression, and it is easy for readers to understand.
-			\item This article provides mathematical proof to demonstrate the efficacy of the proposed algorithm.
-		\end{enumerate}
-\end{generalcomment}
-\begin{revresponse}[We thank the reviewer for the time and effort to review our paper, and we appreciate that the reviewer has accurately noted our work's strengths.]
-    We hope the following comments are helpful and address the reviewer's concerns.
-\end{revresponse}
-
-\begin{revcomment}\label{comment:work-not-good}
-	This paper does not explain the challenges of achieving quantization in asynchronous federated learning compared to synchronous federated learning.
-\end{revcomment}
-\begin{revresponse}
-    We agree that this challenge could be better explained. In view of this, we have added the following text in the introduction:
-    \begin{changes}
-        \textcolor{red}{The use of quantization in asynchronous FL remains unexplored.
-It is of particular interest to investigate the error produced by the compounded effects of model staleness due to asynchrony and quantization error, since the former is absent in the synchronous FL setting.}
-    \end{changes}
-\end{revresponse}
-
-\begin{revcomment}
-	The dataset used in this article is overly simplistic, and there are no experiments conducted on larger machine learning models and datasets commonly employed in federated learning scenarios.
-\end{revcomment}
-\begin{revresponse}
-	We agree that the work could benefit from more extensive experiments, other than our logistic regression, CelebA, and CIFAR-10 experiments.
-    To expand our benchmarks, we have included FedAsync, which is not massively scalable as it does not have a buffer on the server-side. We have also added FedBuff with 4-bit direct quantization and FedAsync with 4-bit direct quantization. The experiments are included in Fig.~\ref{fig:Shake2}.
-    We have also expanded the results section by adding the corresponding analysis and detailed experimental setup.
-    \begin{figure}[htbp]
-    \color{red}
-    \centering
-    \subfloat[]{\includegraphics[width=.4\columnwidth]{tripsShake.pdf}%
-        }
-    \\
-    \subfloat[]{\includegraphics[width=.4\columnwidth]{mbsShake.pdf}%
-        }
-    \\
-    \subfloat[]{\includegraphics[width=.4\columnwidth]{mbsBroadcastedShake.pdf}%
-        }
-    \caption{\small\color{red}{Comparison of communication metrics for QAFeL, FedBuff, FedAsync, FedBuff  with Direct Quantization, and FedAsync with Direct Quantization across varying concurrency levels (clients training in parallel) to reach 54\% target accuracy on the Shakespeare dataset. QAFeL employs 4-bit $\qsgd$ quantization at both the server and client: (a) the number of client updates in thousands, (b) the total GB uploaded by the clients, and (c) the GB broadcasted by the server. FedBuff with Direct Quantization only has one data-point because for concurrencies 500 and 1000 the algorithm diverged for at least one of the three seeds.}}
-    \label{fig:Shake2}
-\end{figure}
-    Note that, to the best of our knowledge, this is the first work that takes into account quantization for asynchronous FL.
-\end{revresponse}
-
-\begin{revcomment}
-    This paper does not explain the meaning of symbols used in the pictures, such as $f(x) - f*$.
-\end{revcomment}
-\begin{revresponse}
-    We have corrected this issue and have included the following explanation at the caption of each figure where it is needed:
-    \begin{changes}
-        \textcolor{red}{The $y$-axis illustrates the difference $f(x) - f^\star$, where $f(x)$ is the global model cost at a given iteration and $f^*$ is the optimal cost.}
-    \end{changes}
-\end{revresponse}
-
-\begin{revcomment}
-    This paper does not explain why 60\% and 90\% were chosen as target accuracy in the experiments, nor does it provide an explanation for modifying the size of images in CelebA dataset.
-\end{revcomment}
-\begin{revresponse}
-    In the results section, it is specified that these quantities are chosen based on previous work. However, we have added a sentence for further clarification:
-    \begin{changes}
-        In our \textcolor{red}{image} experiments, we simulate QAFeL training until we reach a pre-specified target \textcolor{red}{evaluation accuracy}, which is 60\% for CIFAR-10 and 90\% for CelebA.
-        These quantities are the same as previous benchmarks \cite{FedBuff, LEAF}\textcolor{red}{, as the pre-defined architectures from our LEAF benchmark converge to these percentages on the centralized setting}.
-    \end{changes}
-    The CelebA images have been cropped to be able to accurately compare with the results in FedBuff~
-    \cite{FedBuff}, which we have clarified as follows:
-    \begin{changes}
-        We resize and crop the images to $32\times 32$ pixels before normalizing them to have 0.5 mean and 0.5 standard deviation\textcolor{red}{, as done in previous work~\cite{FedBuff}}.
-    \end{changes}
-\printpartbibliography{FedBuff,LEAF}
-\end{revresponse}
-
-
-\begin{revcomment}
-    The pictures in the fourth part of this paper are too large.
-\end{revcomment}
-\begin{revresponse}
-    We agree with the reviewer and have reduced the size of the figures.
+\begin{revresponse}[We thank the editor and reviewers for the detailed and constructive comments.]
+We revised the manuscript and repository to address these concerns directly.
+The main changes are:
+\begin{enumerate}
+    \item We made the communication model explicit: one gossip round is one local exchange over each directed neighbor relation.  We now count communicated real scalars and distinguish \algname{}-i, which sends $(\mathrm{Wealth},G)$, from \algname{}-ii, DOGD, and the adaptive baselines, which send one $d$-dimensional vector.
+    \item We clarified that $q(t)=\order{t}$ is a sufficient schedule for the current proof, not a claim that quadratic communication is necessary or desirable in constrained networks.  The practical experiments emphasize the constrained $q(t)=1$ regime.
+    \item We reframed \algname{}-ii as a one-state betting-function formulation rather than an unqualified approximation to \algname{}-i.  We explicitly state the communication/performance trade-off and do not claim that \algname{}-ii uniformly improves over \algname{}-i.
+    \item We added decentralized adaptive baselines: AdaGrad, RMSProp, Adam, AdamW, momentum, and Nesterov-type momentum, all with the same gossip interface and communication accounting.
+    \item We added real-data review experiments, including bundled real datasets for Docker/offline reproducibility, and preserved the original LIBSVM workflow.
+    \item We revised the experimental discussion to avoid overclaiming empirical dominance: tuned adaptive methods can be competitive or better in some short-horizon settings, while the central contribution of \algname{} is learning-rate-free decentralized coin-betting with regret guarantees and explicit communication accounting.
+\end{enumerate}
 \end{revresponse}
 
 \reviewer
 \begin{generalcomment}
-	This paper proposes  quantized asynchronous dedereated learning scheme. However, this paper still needs some revisions as follows.
+The paper proposes a family of parameter-free decentralized online learning algorithms based on coin-betting and a proof of sublinear regret. The reviewer asks for a clearer communication setup, the gossip overhead, a more careful discussion of the centralized gap, and intuition for a real application.
 \end{generalcomment}
-\begin{revresponse}[We thank the reviewer for the time and effort to review our paper.]
-    We hope the following comments are helpful and address the reviewer's concerns.
+\begin{revresponse}[We thank the reviewer for identifying the communication-efficiency issues that needed to be stated more concretely.]
 \end{revresponse}
 
 \begin{revcomment}
-    It is suggested to separate related work from introduction, and then adds a table to compare proposed scheme with previous solutions in terms of several features.
+Although the paper proposes an interesting solution backed by regret guarantees, it is not clear what communication setup is considered or how the approach fits constrained networks.
 \end{revcomment}
 \begin{revresponse}
-    Per reviewer's suggestion, we have added a subsection on related work, and added \Cref{tab:comp-2}.
-    \begin{table}[H]
-        \color{red}
-\centering
-\caption{Related work comparison. The number of algorithm rounds is denoted by $T$.}
-\label{tab:comp-2}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{|c|c|cccc|ccc|}
-\hline
-\multirow{3}{*}{\textbf{Algorithm}} &
-  \multirow{3}{*}{\textbf{Work}} &
-  \multicolumn{4}{c|}{\textbf{Characteristics}} &
-  \multicolumn{3}{c|}{\textbf{Analysis}} \\ \cline{3-9} 
- &
-   &
-  \multicolumn{1}{c|}{\multirow{2}{*}{\textbf{Asynchronous}}} &
-  \multicolumn{1}{c|}{\textbf{Buffered}} &
-  \multicolumn{1}{c|}{\textbf{Quantized}} &
-  \textbf{Mitigates} &
-  \multicolumn{1}{c|}{\textbf{Unbounded}} &
-  \multicolumn{1}{c|}{\textbf{Arbitrary Client}} &
-  \textbf{Non-convex objective} \\
- &
-   &
-  \multicolumn{1}{c|}{} &
-  \multicolumn{1}{c|}{\textbf{Aggregation}} &
-  \multicolumn{1}{c|}{\textbf{Communication}} &
-  \textbf{Error Propagation} &
-  \multicolumn{1}{c|}{\textbf{Gradient}} &
-  \multicolumn{1}{c|}{\textbf{Update Distribution}} &
-  \textbf{$\order{1/\sqrt{T}}$ rate} \\ \hline
-\multirow{2}{*}{FedAvg} &
-  \cite{communication_efficient} &
-  \multicolumn{1}{c|}{\xmark} &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\xmark} &
-  \xmark &
-  \multicolumn{1}{c|}{\xmark} &
-  \multicolumn{1}{c|}{-} &
-  \xmark \\ \cline{2-9} 
- &
-  \cite{wang} &
-  \multicolumn{1}{c|}{\xmark} &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\xmark} &
-  \xmark &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{-} &
-  \cmark \\ \hline
-MCM &
-  \cite{MCM} &
-  \multicolumn{1}{c|}{\xmark} &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\cmark} &
-  \cmark &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{-} &
-  \xmark \\ \hline
-FedAsync &
-  \cite{asyncfl} &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\xmark} &
-  \multicolumn{1}{c|}{\xmark} &
-  \xmark &
-  \multicolumn{1}{c|}{\xmark} &
-  \multicolumn{1}{c|}{\xmark} &
-  \cmark \\ \hline
-\multirow{2}{*}{FedBuff} &
-  \cite{FedBuff} &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\xmark} &
-  \xmark &
-  \multicolumn{1}{c|}{\xmark} &
-  \multicolumn{1}{c|}{\xmark} &
-  \cmark \\ \cline{2-9} 
- &
-  \cite{toghani2022unbounded} &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\xmark} &
-  \xmark &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\xmark} &
-  \cmark \\ \hline
-QAFeL &
-  This work &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\cmark} &
-  \cmark &
-  \multicolumn{1}{c|}{\cmark} &
-  \multicolumn{1}{c|}{\cmark} &
-  \cmark \\ \hline
-\end{tabular}%
-}
-\end{table}
-\end{revresponse}
-
-\begin{revcomment} \label{comment:prev-literature}
-    This paper focuses on asynchronous federated learning with less communication overhead, what are new novelties of proposed scheme when compared with previous solutions including "Robust Asynchronous Federated Learning with Time-weighted and Stale Model Aggregation" "Efficient and Secure Federated Learning Against Backdoor Attacks".
-\end{revcomment}
-\begin{revresponse}
-    We have highlighted the novelties in the related work text, as well as comparing with \cite{robust-async,backdoor-FL}, as indicated in the following sentences.
-    \begin{changes}
-        \textcolor{red}{Other asynchronous FL works include algorithms that consider time-weighted schemes for stale model aggregation \cite{robust-async,backdoor-FL}. 
-        In another approach, \cite{zhou2022fedaca} proposes a client uploading policy, which avoids sending updates where the previous and current models are sufficiently similar.
-        However, these solutions do not consider quantization, which is indispensable to reduce the communication bottleneck in many practical FL systems.}
-    \end{changes}
-    \printpartbibliography{robust-async,backdoor-FL,zhou2022fedaca}
+We revised the manuscript to explicitly describe the communication setup.  The network is an undirected connected graph, implemented through a Metropolis-Hastings gossip matrix, and one gossip round means that each agent exchanges its current communicated state with its immediate neighbors only.
+We added the following manuscript text:
+\begin{changes}
+One gossip round consists of one local exchange over every directed neighbor relation induced by the graph. If $d$ is the model dimension and $|E_{\mathrm{dir}}|$ is the number of directed non-self neighbor transmissions, then one gossip round communicates $|E_{\mathrm{dir}}|d$ real scalars for \algname{}-\pmb{ii}, DOGD, and the adaptive decentralized baselines, and $|E_{\mathrm{dir}}|(d+1)$ real scalars for \algname{}-\pmb{i} because it additionally communicates the scalar wealth.
+\end{changes}
+This makes clear that the proposed method is local-neighbor decentralized and that the communication cost is now measurable per algorithm and per graph.
 \end{revresponse}
 
 \begin{revcomment}
-    This paper should give the challenging issues of previous solutions, and add the technical overview to show how to solve the challenging issues before demonstrating the concrete algorithms.
+How is gossiping happening? What is the communication overhead? The paper states that $O(t)$ gossiping steps are needed in each round, implying $O(T^2)$ gossiping over the horizon.
 \end{revcomment}
 \begin{revresponse}
-    We agree that the previous challenges and the technical overview should be better highlighted. Therefore, we have added the following text to address this issue: 
-    \begin{changes}
-        \textcolor{red}{The use of quantization in asynchronous FL remains unexplored.
-        It is of particular interest to investigate the error produced by the compounded effects of model staleness due to asynchrony and quantization error, since the former is absent in the synchronous FL setting.}
-    \end{changes}
+We agree that the previous text blurred a sufficient condition for the proof with a practical communication recommendation.
+We now state that $q(t)=\order{t}$ is sufficient for the current disagreement proof, but the practical constrained-network regime is constant communication, $q(t)=1$.
+For a horizon $T$, constant gossip has cost $\order{T |E_{\mathrm{dir}}| d}$ for one-vector methods and $\order{T |E_{\mathrm{dir}}|(d+1)}$ for \algname{}-i; a linear schedule has $\order{T^2 |E_{\mathrm{dir}}| d}$ cost.
+We added code-level accounting of total communicated scalars and report this in the new review experiments.
 \end{revresponse}
 
 \begin{revcomment}
-     This paper should give the more concrete algorithms of proposed scheme.
+The claim that a linear schedule closely tracks the centralized oracle is too strong because the figure shows a substantial gap.
 \end{revcomment}
 \begin{revresponse}
-    We agree with the reviewer that the details of QAFeL could be made clearer. 
-    We have added the full pseudocode, as Appendix B, to help clarify the text, as well as highlighting the lines which enable the hidden-state mechanism. 
-    We have also added the following lines in the text to address this:
-    \begin{changes}
-        The server broadcasts $q^t$ to all clients. Finally, the clients and the server update their copies of the hidden-state using the same equation, $\hat x^{t+1} = \hat x^{t} + q^t$.
-
-        \textcolor{red}{For further details on the algorithm design see Appendix B, where we have included the pseudocode for all the components of QAFeL.
-        The highlighted lines in the pseudocode represent the novel hidden-state mechanism.}
-    \end{changes}
-    We have not included the new Appendix B in this document as it is lengthy, please see the manuscript for the full text.
+We agree.  We revised the discussion to treat the centralized gap as a real finite-horizon decentralization cost rather than as a negligible discrepancy.
+The revised manuscript qualifies the interpretation of the communication-regret trade-off as follows:
+\begin{changes}
+The gap to the centralized oracle in the gossip trade-off figure is a real finite-horizon decentralization cost rather than a claim of equality with the oracle. The linear schedule should be interpreted as a theory-motivated sufficient schedule for controlling the current disagreement bound, not as the recommended operating point for every constrained network.
+\end{changes}
+Thus, the revised discussion no longer relies on an unqualified ``closely tracks'' interpretation.
 \end{revresponse}
 
 \begin{revcomment}
-    This paper needs to conduct extensive experiments to show the accuracy of proposed scheme with the variables such as the quantization technical and the rate of dropped clients.
+Intuition into how everything is tied to a real application is missing.
 \end{revcomment}
 \begin{revresponse}
-    We agree that more extensive experiments are beneficial. 
-    To expand our benchmarks, we have included FedAsync, which is not massively scalable as it does not have a buffer on the server-side. We have also included FedBuff with 4-bit direct quantization and FedAsync with 4-bit direct quantization. The experiments are included in Fig.~\ref{fig:Shake3}.
-    We have also expanded the results section by adding the corresponding analysis and detailed experimental setup.
-    \begin{figure}[H]
-    \color{red}
-    \centering
-    \subfloat[]{\includegraphics[width=.4\columnwidth]{tripsShake.pdf}%
-        }
-    \\
-    \subfloat[]{\includegraphics[width=.4\columnwidth]{mbsShake.pdf}%
-        }
-    \\
-    \subfloat[]{\includegraphics[width=.4\columnwidth]{mbsBroadcastedShake.pdf}%
-        }
-    \caption{\small\color{red}{Comparison of communication metrics for QAFeL, FedBuff, FedAsync, FedBuff  with Direct Quantization, and FedAsync with Direct Quantization across varying concurrency levels (clients training in parallel) to reach 54\% target accuracy on the Shakespeare dataset. QAFeL employs 4-bit $\qsgd$ quantization at both the server and client: (a) the number of client updates in thousands, (b) the total GB uploaded by the clients, and (c) the GB broadcasted by the server. FedBuff with Direct Quantization only has one data-point because for concurrencies 500 and 1000 the algorithm diverged for at least one of the three seeds.}}
-    \label{fig:Shake3}
-\end{figure}
-    Note that, to the best of our knowledge, this is the first work that takes into account quantization for asynchronous FL.
-    
-    Also, note that our dropout rate refers to neural dropout regularization, which we have clarified with the following sentence:
-    \begin{changes}
-        We use a 0.1 dropout \textcolor{red}{regularization} rate, stride of 1, and padding of 2.
-    \end{changes}
-    Studying client dropout is outside the scope of this work.
+We expanded the operational description in the manuscript to connect the algorithm to distributed sensing and collaborative prediction.  Each node makes a local prediction, observes local feedback, updates its coin-betting state, and then gossips only with physical or logical neighbors.  This matches applications such as sensor networks, device-to-device learning, or collaborative streaming regression, where no central coordinator is available and the communication budget is dominated by local neighbor exchanges.
+\end{revresponse}
 
-    We have further justified our choice of quantizer with the following text:
-    \begin{changes}
-    \textcolor{red}{
-        To justify our choice of 4-bit $\qsgd$ quantizer for server and client in our concurrency experiments, we perform a set of experiments displayed in \Cref{tab:qsgd_table}, where we assume a constant client arrival rate of 100 clients per unit of time, without performing any weight scaling.
-        These experiments show that using a 4-bit $\qsgd$ at both client and server does not significantly alter the number of client uploads to reach a target accuracy, yet approximately provides an eight-fold reduction in the number of communicated bits.}
-    \end{changes}
-    \begin{table}[H]
-        \caption{Communication metrics of QAFeL to reach the CelebA target validation accuracy (90\%) with different $\qsgd$ combinations.}
-        \label{tab:qsgd_table}
-        \centering
-        \resizebox{.5\columnwidth}{!}{%
-            \begin{tabular}{|cc|c|c|c|}
-                \hline
-                \multicolumn{2}{|c|}{\textbf{Algorithm}} & \multirow{2}{*}{\textbf{\begin{tabular}[c]{@{}c@{}}Uploads \\ (thousands)\end{tabular}}} & \multirow{2}{*}{\textbf{kB/upload}} & \multirow{2}{*}{\textbf{kB/download}}          \\ \cline{1-2}
-                \multicolumn{1}{|c|}{}                   & \begin{tabular}[c]{@{}c@{}}(client, server) \\ $\qsgd$ bits\end{tabular}                 &                                     &                                       &        \\ \cline{2-5}
-                \multicolumn{1}{|c|}{}                   & (8,8)                                                                                    & $27.6 \pm 4.82$                     & 29.924                                & 29.924 \\ \cline{2-5}
-                \multicolumn{1}{|c|}{}                   & (8,4)                                                                                    & $29.8 \pm 2.76$                     & 29.924                                & 15.380 \\ \cline{2-5}
-                \multicolumn{1}{|c|}{}                   & (8,2)                                                                                    & $35.7 \pm 14.5$                     & 29.924                                & 8.108  \\ \cline{2-5}
-                \multicolumn{1}{|c|}{QAFeL}              & (4,8)                                                                                    & $39.7 \pm 3.32$                     & 15.380                                & 29.924 \\ \cline{2-5}
-                \multicolumn{1}{|c|}{}                   & (4,4)                                                                                    & $27.8 \pm 10.4$                     & 15.380                                & 15.380 \\ \cline{2-5}
-                \multicolumn{1}{|c|}{}                   & (4,2)                                                                                    & $37.7 \pm 9.10$                     & 15.380                                & 8.108  \\ \cline{2-5}
-                \multicolumn{1}{|c|}{}                   & (2,8)                                                                                    & $58.6 \pm 7.16$                     & 8.108                                 & 29.924 \\ \cline{2-5}
-                \multicolumn{1}{|c|}{}                   & (2,4)                                                                                    & $74.6 \pm 35.7$                     & 8.108                                 & 15.380 \\ \cline{2-5}
-                \multicolumn{1}{|c|}{}                   & (2,2)                                                                                    & $91.9 \pm 34.4$                     & 8.108                                 & 8.108  \\ \hline
-                \multicolumn{2}{|c|}{FedBuff}            & $26.1 \pm 6.7$                                                                           & 117.128                             & 117.128                                        \\ \hline
-            \end{tabular}%
-        }
-    \end{table}
+\reviewer
+\begin{generalcomment}
+The reviewer raises concerns about novelty, theory depth, the theory/practice gap caused by increasing gossip rounds, and limited experiments and baselines.
+\end{generalcomment}
+\begin{revresponse}[We thank the reviewer for pushing us to sharpen the contribution and empirical claims.]
+\end{revresponse}
+
+\begin{revcomment}
+The claimed novelty is not sufficiently justified; the method combines coin-betting and gossip and may appear to be a straightforward extension.
+\end{revcomment}
+\begin{revresponse}
+We revised the positioning to be more precise.  We no longer frame the contribution as novelty from gossip alone.  Instead, we emphasize three specific contributions: (i) a decentralized online-learning formulation with network regret guarantees for parameter-free coin-betting agents; (ii) an explicit decomposition of regret into average local coin-betting regret and a communication-controlled disagreement term; and (iii) the betting-function formulation underlying \algname{}-ii, which permits a one-state gossiped update and a direct network-regret analysis.
+We also expanded the related-work discussion to distinguish our convex online-learning setting from decentralized stochastic/nonconvex parameter-free optimization and from methods that require stepsizes or different problem models.
+\end{revresponse}
+
+\begin{revcomment}
+The theoretical contribution appears limited and the proof techniques resemble existing reward-regret duality and gossip averaging arguments.
+\end{revcomment}
+\begin{revresponse}
+We agree that the building blocks are classical, and the revised text is more explicit about this.  The contribution is in how these tools are combined for network regret in a decentralized online setting, and in identifying the disagreement term that must be controlled when coin-betting decisions are driven by gossiped cumulative gradients.  We clarified the proof structure so that readers can see which parts follow standard coin-betting duality and which parts are specific to the decentralized state and betting-function formulation.
+\end{revresponse}
+
+\begin{revcomment}
+The theory relies on increasing communication, while the experiments primarily use constant communication, creating a theory/practice gap.
+\end{revcomment}
+\begin{revresponse}
+We agree and now state this explicitly.  The sufficient $q(t)=\order{t}$ schedule is used to prove sublinear disagreement under the current analysis.  However, it is not presented as a practical requirement.  The constant-communication experiments address the constrained-network regime, while the increasing-communication experiment illustrates the theoretical mechanism.  We added text explaining that closing the theory/practice gap for $q(t)=\order{1}$ remains an important theoretical question.
+\end{revresponse}
+
+\begin{revcomment}
+The experimental evaluation is not sufficiently convincing; baselines are limited and the experiments should include adaptive/parameter-free methods, heterogeneous data, larger networks, or adversarial settings.
+\end{revcomment}
+\begin{revresponse}
+We added the requested adaptive decentralized baselines: AdaGrad, RMSProp, Adam, AdamW, momentum, and Nesterov-type momentum.  These baselines use the same gossip interface and the same scalar communication accounting as DOGD.
+We also added real-data review experiments and preserved the original multi-dataset LIBSVM comparison.  The new runs show that tuned adaptive baselines can be competitive or better on some datasets and horizons; consequently, the revised manuscript no longer claims empirical dominance over all adaptive methods.  Instead, it emphasizes the learning-rate-free property and regret guarantees of \algname{}.
+\end{revresponse}
+
+\reviewer
+\begin{generalcomment}
+The reviewer asks for notation cleanup, a quantitative explanation of \algname{}-ii relative to \algname{}-i, clarification of whether \algname{}-ii satisfies the needed coin-betting condition, discussion of potential-function choices, adaptive baselines, related parameter-free decentralized work, limitations to convex online learning, and fair communication-normalized DECO-i/DECO-ii comparisons.
+\end{generalcomment}
+\begin{revresponse}[We thank the reviewer for the detailed technical comments.]
+\end{revresponse}
+
+\begin{revcomment}
+The notation is inconsistent: both $g$ and $c=-g$ are used, and $c$ is overloaded later.
+\end{revcomment}
+\begin{revresponse}
+We revised the notation discussion to reduce overloading.  The manuscript now emphasizes $g_{n,t}$ as the subgradient feedback and uses the coin-betting outcome notation only locally when recalling the classical single-agent coin-betting view.  We also avoid reusing $c$ for unrelated constants in the disagreement analysis.  This makes the OCO and coin-betting interpretations easier to follow.
+\end{revresponse}
+
+\begin{revcomment}
+\algname{}-ii seems to replace $\mathrm{Wealth}_{t-1}$ by $F_{t-1}(G_{t-1})$. The paper should quantify the approximation error and its regret effect.
+\end{revcomment}
+\begin{revresponse}
+We clarified that \algname{}-ii should not be read as a heuristic approximation to \algname{}-i with an unquantified error term.  It is a one-state betting-function formulation with update $x_{n,t}=h_t(G_{n,t-1})$.  The analysis for \algname{}-ii is stated directly in terms of the betting function and the disagreement induced by gossiped cumulative gradients.  Empirically, we also acknowledge that \algname{}-i can perform better, and that \algname{}-ii trades off some performance for a smaller communicated state.
+\end{revresponse}
+
+\begin{revcomment}
+Lemma 3 verifies the condition for \algname{}-i, but the paper should verify whether \algname{}-ii satisfies the same condition.
+\end{revcomment}
+\begin{revresponse}
+We revised the explanation around the betting-function formulation to make the proof path for \algname{}-ii explicit.  The \algname{}-ii theorem does not require gossiping wealth; it bounds network regret by combining average local coin-betting regret with a disagreement term controlled by the Lipschitz constants of $h_t$.  The sufficient gossip schedules are then derived for the exponential and KT potentials through those $h_t$-based bounds.
+\end{revresponse}
+
+\begin{revcomment}
+The method removes learning-rate tuning but introduces the choice of potential function and storage of cumulative gradients.
+\end{revcomment}
+\begin{revresponse}
+We agree and revised the language to avoid implying that all design choices disappear.  The method is learning-rate-free and horizon/comparator adaptive, but the potential function is still a modeling choice.  We now state this explicitly and report both KT and exponential potentials.  We also clarify that cumulative-gradient storage is one $d$-dimensional vector per agent, comparable to storing optimizer state in adaptive-gradient methods.
+\end{revresponse}
+
+\begin{revcomment}
+The evaluation should include adaptive methods such as AdaGrad, RMSProp, Adam, AdamW, momentum, and Nesterov-type methods.
+\end{revcomment}
+\begin{revresponse}
+We added these baselines in the repository and included communication-normalized review experiments.  In the $T=100$ synthetic cycle run, for example, \algname{}-i (KT) had cumulative network loss $27.24$ with $44{,}000$ communicated scalars, while D-RMSProp had loss $20.67$ with $40{,}000$ communicated scalars.  This result is intentionally reported without overclaiming: adaptive baselines can be strong when their hyperparameters are well chosen, whereas \algname{}'s advantage is the absence of learning-rate tuning together with network regret guarantees.
+\end{revresponse}
+
+\begin{revcomment}
+The discussion of prior works on parameter-free decentralized learning is insufficient.
+\end{revcomment}
+\begin{revresponse}
+We expanded the related-work positioning to include recent parameter-free decentralized optimization papers, including the works named by the reviewer.  The revised manuscript distinguishes these settings from ours: those works focus on stochastic/nonconvex or composite decentralized optimization and convergence to minimizers, whereas our work addresses convex online learning and network regret against a comparator.
+\end{revresponse}
+
+\begin{revcomment}
+The parameter-free benefit is restricted to convex online learning; many decentralized learning problems are nonconvex.
+\end{revcomment}
+\begin{revresponse}
+We added this as an explicit limitation.  Our regret guarantees are for convex online learning (and the associated linearized OLO analysis).  Extending the approach to nonconvex decentralized learning would require a different performance criterion and is outside the scope of the present paper.
+\end{revresponse}
+
+\begin{revcomment}
+The communication design of \algname{}-i should be justified, and \algname{}-i and \algname{}-ii should be compared under normalized communication cost.
+\end{revcomment}
+\begin{revresponse}
+We now justify \algname{}-i as the direct decentralized form of classical wealth-based coin-betting and \algname{}-ii as the one-state betting-function variant that avoids communicating wealth.  The implementation was revised so \algname{}-ii gossips only $G$; \algname{}-i gossips $(\mathrm{Wealth},G)$.  The new experiments report total communicated scalars.  For example, on the synthetic cycle run with $d=10$, \algname{}-i (KT) used $44{,}000$ scalars and \algname{}-ii (KT) used $40{,}000$ scalars.  This lets the reader attribute performance differences to both update rule and communication budget rather than conflating the two.
 \end{revresponse}
 
 \end{document}
