@@ -19,6 +19,7 @@ DECO/
   │   ├── run_gossip_tradeoff_experiment.py
   │   ├── run_multi_dataset_comparison.py
   │   ├── run_review_baseline_experiment.py
+  │   ├── run_review_real_data_experiment.py
   │   ├── run_synthetic_experiment.py
   │   └── tune_dgd.py
   ├── plots/
@@ -59,11 +60,13 @@ In these instructions we will use the Anaconda or Miniconda package manager.
     conda activate deco-env
     ```
 3.  **Download regression datasets:**
-    The experiments require several public datasets. This script will download them into a `data/` directory.
+    The original LIBSVM experiments require several public datasets. This script will download them into a `data/` directory.
     ```bash
     python src/deco/download_datasets.py
     ```
-4.  **Run the script:**
+    The review real-data experiment below also supports bundled scikit-learn datasets, so it can run even when external dataset mirrors are unavailable.
+
+4.  **Run the full workflow:**
     This single script will execute all experiments, save the results to the `results/` directory, and then generate the final plots in the `plots/Figs/` directory.
 
       * On **macOS or Linux**:
@@ -75,17 +78,22 @@ In these instructions we will use the Anaconda or Miniconda package manager.
         run_all.bat
         ```
 
-### Review Baseline and Communication-Cost Experiment
+### Review Baseline and Communication-Cost Experiments
 
-The review-response revision adds `experiments/run_review_baseline_experiment.py` to compare DECO against decentralized adaptive-gradient baselines requested by the reviewers: AdaGrad, RMSProp, Adam, AdamW, momentum, and Nesterov. The script also reports scalar communication cost, distinguishing DECO-i's `(wealth, G)` messages from DECO-ii's `G`-only messages.
+The review-response revision adds two focused experiment scripts.
 
-The lightweight default run is included in `run_all.sh` and `run_all.bat`. To run a larger version manually, increase the number of rounds or seeds:
+`experiments/run_review_baseline_experiment.py` compares DECO against decentralized adaptive-gradient baselines requested by the reviewers: AdaGrad, RMSProp, Adam, AdamW, momentum, and Nesterov. The script reports cumulative network loss and scalar communication cost, distinguishing DECO-i's `(wealth, G)` messages from DECO-ii's `G`-only messages.
+
+`experiments/run_review_real_data_experiment.py` repeats the same comparison on real datasets. It defaults to bundled scikit-learn datasets (`diabetes`, `breast_cancer`, and `digits`) for offline/Docker reproducibility while preserving the existing LIBSVM dataset support in `RealDataEnvironment`.
+
+The lightweight default runs are included in `run_all.sh` and `run_all.bat`. To run larger versions manually, increase the number of rounds or seeds:
 
 ```bash
 python -m experiments.run_review_baseline_experiment --T 1000 --seeds 0 1 2
+python -m experiments.run_review_real_data_experiment --T 1000 --seeds 0 1 2 --datasets diabetes breast_cancer digits
 ```
 
-The summary is written to `results/review_baseline_summary.csv` with cumulative network loss, average network loss, cumulative local loss, and total communicated scalars.
+The summaries are written to `results/review_baseline_summary.csv` and `results/review_real_data_summary.csv` with cumulative network loss, average network loss, cumulative local loss, and total communicated scalars.
 
 ### Method 2: Docker (Recommended for Full Reproducibility)
 
@@ -107,10 +115,13 @@ This is the easiest and most reliable method. It uses Docker to build a self-con
     docker run --rm -v "$(pwd)/results:/app/results" -v "$(pwd)/plots/Figs:/app/plots/Figs" deco-repro
     ```
 
-3.  **Run only the review baseline experiment inside Docker:**
+3.  **Run only the review experiments inside Docker:**
     ```bash
     docker run --rm -v "$(pwd)/results:/app/results" deco-repro \
         python -m experiments.run_review_baseline_experiment --T 1000 --seeds 0 1 2
+
+    docker run --rm -v "$(pwd)/results:/app/results" deco-repro \
+        python -m experiments.run_review_real_data_experiment --T 1000 --seeds 0 1 2 --datasets diabetes breast_cancer digits
     ```
 
 After the command completes, all results and figures will be available in their respective local directories.
