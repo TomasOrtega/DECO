@@ -1,7 +1,15 @@
 # src/deco/environments.py
-import numpy as np
 import os
-from sklearn.datasets import load_svmlight_file
+
+import numpy as np
+from sklearn.datasets import (
+    load_breast_cancer,
+    load_diabetes,
+    load_digits,
+    load_linnerud,
+    load_svmlight_file,
+    load_wine,
+)
 
 
 def normalize_data(X: np.ndarray) -> np.ndarray:
@@ -22,6 +30,27 @@ def normalize_data(X: np.ndarray) -> np.ndarray:
     norms[norms < 1e-8] = 1  # Prevent division by zero
     X_normalized = X / norms
     return X_normalized
+
+
+def standardize_features(X: np.ndarray) -> np.ndarray:
+    """Center and scale each feature with only NumPy dependencies."""
+    X = np.nan_to_num(np.asarray(X, dtype=float))
+    mean = np.mean(X, axis=0, keepdims=True)
+    std = np.std(X, axis=0, keepdims=True)
+    std[std < 1e-12] = 1.0
+    return (X - mean) / std
+
+
+def standardize_targets(y: np.ndarray) -> np.ndarray:
+    """Normalize targets to comparable scale across real-data experiments."""
+    y = np.asarray(y, dtype=float)
+    if y.ndim > 1:
+        # Linnerud has multiple targets; use one target to keep the OLO task scalar.
+        y = y[:, 0]
+    y_std = np.std(y)
+    if y_std > 1e-12:
+        y = (y - np.mean(y)) / y_std
+    return y
 
 
 class SyntheticRegression:
@@ -104,18 +133,53 @@ class RealDataEnvironment:
             "description": "Finance data.",
             "file_path": "data/E2006",
         },
+        # Offline-friendly scikit-learn datasets used by the review-response tests.
+        # They preserve the same absolute-loss OLO interface and make the Docker
+        # sanity checks independent of external dataset mirrors.
+        "diabetes": {
+            "loader": load_diabetes,
+            "task_type": "regression",
+            "description": "Diabetes progression regression dataset bundled with scikit-learn",
+            "file_path": None,
+        },
+        "linnerud": {
+            "loader": load_linnerud,
+            "task_type": "regression",
+            "description": "Linnerud exercise/physiology dataset bundled with scikit-learn",
+            "file_path": None,
+        },
+        "breast_cancer": {
+            "loader": load_breast_cancer,
+            "task_type": "binary-as-regression",
+            "description": "Breast cancer diagnostic dataset bundled with scikit-learn",
+            "file_path": None,
+        },
+        "wine": {
+            "loader": load_wine,
+            "task_type": "label-regression",
+            "description": "Wine recognition dataset bundled with scikit-learn",
+            "file_path": None,
+        },
+        "digits": {
+            "loader": load_digits,
+            "task_type": "label-regression",
+            "description": "Handwritten digits dataset bundled with scikit-learn",
+            "file_path": None,
+        },
     }
 
-    def __init__(self, N, dataset="cadata"):
+    def __init__(self, N, dataset="cadata", seed=0):
         """
         Initialize environment with a specific regression dataset.
 
         Args:
             N: Number of agents
             dataset: Dataset name from DATASETS dict
+            seed: Random seed for stream ordering
         """
         self.N = N
         self.dataset_name = dataset
+        self.rng = np.random.default_rng(seed)
 
         if dataset not in self.DATASETS:
             available = list(self.DATASETS.keys())
@@ -126,10 +190,10 @@ class RealDataEnvironment:
 
         # Load the dataset
         if dataset_info["loader"] is not None:
-            # UCI datasets
             loader = dataset_info["loader"]
-            self.X = loader.data.features
-            self.y = loader.data.targets
+            data = loader()
+            self.X = np.asarray(data.data, dtype=float)
+            self.y = standardize_targets(data.target)
         else:
             # LIBSVM format datasets
             file_path = dataset_info["file_path"]
@@ -138,35 +202,34 @@ class RealDataEnvironment:
                     f"Dataset file {file_path} not found. "
                     f"Please run download_datasets.py first."
                 )
-            # Load LIBSVM file
             X_sparse, self.y = load_svmlight_file(file_path)[:2]
-            # Convert to dense array (handle both sparse and dense inputs)
             try:
                 self.X = X_sparse.toarray()
             except AttributeError:
                 self.X = np.asarray(X_sparse)
+            self.y = standardize_targets(self.y)
 
-        # Standardize features
-        self.X = normalize_data(self.X)
+        # Standardize and then normalize features to ensure bounded gradients.
+        self.X = normalize_data(standardize_features(self.X))
         self.n_samples, self.dim = self.X.shape
 
-        # Compute optimal parameters using least squares for regression
+        # Compute optimal parameters using least squares for regression.
         self.u_star = np.linalg.lstsq(self.X, self.y, rcond=None)[0]
 
         self.indices = np.arange(self.n_samples)
-        np.random.shuffle(self.indices)
+        self.rng.shuffle(self.indices)
 
     def get_context(self, t, decisions):
         """Get context for time step t."""
-        # At each step, each agent gets one unique sample
-        if t * self.N + self.N > self.n_samples:
-            np.random.shuffle(self.indices)  # Reshuffle data for next epoch
-
-        batch_indices = self.indices[
-            (t * self.N) % self.n_samples : (t * self.N + self.N) % self.n_samples
-        ]
-        if len(batch_indices) < self.N:  # handle wrap-around
-            batch_indices = self.indices[0 : self.N]
+        # At each step, each agent gets one unique sample. We wrap and reshuffle
+        # at epoch boundaries so the bundled datasets can support arbitrary T.
+        start = (t * self.N) % self.n_samples
+        if start + self.N <= self.n_samples:
+            batch_indices = self.indices[start : start + self.N]
+        else:
+            self.rng.shuffle(self.indices)
+            overflow = start + self.N - self.n_samples
+            batch_indices = np.concatenate([self.indices[start:], self.indices[:overflow]])
 
         agent_features = self.X[batch_indices]
         agent_labels = self.y[batch_indices]
@@ -185,7 +248,6 @@ class RealDataEnvironment:
             grad = grad_sign * features
 
             grad_norm = np.linalg.norm(grad)
-            # assert that grad_norm is no greater than one
             assert grad_norm <= (
                 1 + 1e-4
             ), f"Grad norm larger than one! It is {grad_norm}"
