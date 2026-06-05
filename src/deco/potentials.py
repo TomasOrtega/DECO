@@ -1,7 +1,7 @@
 # src/deco/potentials.py
+import math
 import numpy as np
 from abc import ABC, abstractmethod
-from scipy.special import betaln
 
 
 class BasePotential(ABC):
@@ -57,15 +57,22 @@ class KTPotential(BasePotential):
     Implements the Krichevsky-Trofimov (KT) potential using its
     mathematically simplified form with the Beta function.
 
-    This implementation is highly stable, relying on scipy's log-beta
-    function (`betaln`) for its core calculation.
+    This implementation relies on the standard-library log-gamma function.
+    It avoids importing scipy in the hot path and therefore keeps the Docker
+    review experiments lightweight while preserving the log-domain computation
+    used for numerical stability.
     """
 
     def __init__(self, epsilon=1.0):
         super().__init__(epsilon)
         # Pre-calculate logs of constants for efficiency.
-        self.log_epsilon_over_pi = np.log(epsilon / np.pi)
-        self.log_2 = np.log(2)
+        self.log_epsilon_over_pi = math.log(epsilon / math.pi)
+        self.log_2 = math.log(2.0)
+
+    @staticmethod
+    def _betaln(a, b):
+        """Compute log(Beta(a,b)) using log-gamma identities."""
+        return math.lgamma(a) + math.lgamma(b) - math.lgamma(a + b)
 
     def F(self, t, x):
         """
@@ -76,7 +83,7 @@ class KTPotential(BasePotential):
         if t == 0:
             return self.epsilon
 
-        abs_x = np.abs(x)
+        abs_x = abs(float(np.asarray(x)))
 
         # The domain requires |x| < t + 1.
         if abs_x >= t + 1:
@@ -86,12 +93,15 @@ class KTPotential(BasePotential):
         a = (t + 1 + abs_x) / 2
         b = (t + 1 - abs_x) / 2
 
-        # Calculate the log of the potential using betaln for max stability.
+        # Calculate the log of the potential for max stability.
         # log(F) = log(epsilon/pi) + t*log(2) + log(Beta(a, b))
-        log_F = self.log_epsilon_over_pi + t * self.log_2 + betaln(a, b)
+        log_F = self.log_epsilon_over_pi + t * self.log_2 + self._betaln(a, b)
 
         # Convert back from log-space to get the final value.
-        return np.exp(log_F)
+        # Avoid an OverflowError if an experiment leaves the intended domain.
+        if log_F > 700:
+            return float("inf")
+        return math.exp(log_F)
 
     def beta(self, t, x):
         if t == 0:
