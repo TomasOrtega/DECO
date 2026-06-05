@@ -3,7 +3,7 @@ import networkx as nx
 import numpy as np
 
 
-def create_gossip_matrix(N, topology="cycle", p=0.2):
+def create_gossip_matrix(N, topology="cycle", p=0.2, seed=None):
     """
     Creates a graph and its Metropolis-Hastings doubly stochastic gossip matrix.
 
@@ -11,6 +11,7 @@ def create_gossip_matrix(N, topology="cycle", p=0.2):
         N (int): Number of nodes.
         topology (str): Graph type ('cycle', 'complete', 'erdos_renyi').
         p (float): Connection probability for Erdos-Renyi graphs.
+        seed (int, optional): Random seed for Erdos-Renyi graph generation.
 
     Returns:
         np.ndarray: The N x N gossip matrix W.
@@ -23,7 +24,7 @@ def create_gossip_matrix(N, topology="cycle", p=0.2):
     elif topology == "complete":
         G = nx.complete_graph(N)
     elif topology == "erdos_renyi":
-        G = nx.erdos_renyi_graph(N, p)
+        G = nx.erdos_renyi_graph(N, p, seed=seed)
         if not nx.is_connected(G):
             # Ensure the graph is connected by adding edges
             components = list(nx.connected_components(G))
