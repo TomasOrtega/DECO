@@ -1,0 +1,31 @@
+\begin{algorithmic}[1]
+    \STATE{} \textbf{Initialize:} For each agent $n=1, \dots, N$:
+    \STATE{} \hspace{\algorithmicindent} $G_{n,0} = \mathbf{0}$.
+    \STATE{} \hspace{\algorithmicindent} \colorbox{red!30}{(\pmb{i}) $\w_{n,0} = \epsilon > 0$.}
+    \STATE{} \textbf{for} $t=1, 2, \dots, T$ \textbf{do}
+    \STATE{} \hspace{\algorithmicindent} \textbf{for each agent} $n=1, \dots, N$ \textbf{in parallel do}
+    \STATE{} \hspace{\algorithmicindent}\hspace{\algorithmicindent} \colorbox{red!30}{(\pmb{i}) Compute bet:}
+    \begin{center}
+        \colorbox{red!30}{$x_{n,t} = \beta_t(G_{n, t-1}) \cdot \w_{n, t-1}$.}
+    \end{center}
+    \STATE{} \hspace{\algorithmicindent}\hspace{\algorithmicindent} \colorbox{green!30}{(\pmb{ii}) Compute bet using betting function:}
+    \begin{center}
+        \colorbox{green!30}{$x_{n,t} = h_t(G_{n, t-1})$.}
+    \end{center}
+    \STATE{} \hspace{\algorithmicindent}\hspace{\algorithmicindent} Play $x_{n,t}$ and receive subgradient $g_{n,t}$.
+    \STATE{} \hspace{\algorithmicindent}\hspace{\algorithmicindent} Update local accumulated gradient: \\
+    \begin{center}
+        $\hat{G}_{n,t} = G_{n,t-1} - g_{n,t}$.
+    \end{center}
+    \STATE{} \hspace{\algorithmicindent}\hspace{\algorithmicindent} \colorbox{red!30}{(\pmb{i}) Update local wealth:} \\
+    \begin{center}
+        \colorbox{red!30}{$\hat{\w}_{n,t} = \w_{n,t-1} - \langle g_{n,t}, x_{n,t} \rangle$.}
+    \end{center}
+    \STATE{} \hspace{\algorithmicindent} \textbf{end for}
+    \STATE{} \hspace{\algorithmicindent} \textbf{Gossip Step:} Perform $q(t)$ rounds of gossip.
+    \STATE{} \hspace{\algorithmicindent} \textbf{for each agent} $n=1, \dots, N$ \textbf{in parallel do}
+    \STATE{} \hspace{\algorithmicindent}\hspace{\algorithmicindent} $G_{n,t} = \sum_{m=1}^N {(W^{q(t)})}_{nm} \hat{G}_{m,t}$.
+    \STATE{} \hspace{\algorithmicindent}\hspace{\algorithmicindent} \colorbox{red!30}{(\pmb{i}) $\w_{n,t} = \sum_{m=1}^N {(W^{q(t)})}_{nm} \hat{\w}_{m,t}$.}
+    \STATE{} \hspace{\algorithmicindent} \textbf{end for}
+    \STATE{} \textbf{end for}
+\end{algorithmic}

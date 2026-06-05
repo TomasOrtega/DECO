@@ -1,4 +1,0 @@
-[submodule "tex"]
-	path = tex
-	url = git@github.com:TomasOrtega/Decentralized-Parameter-Free-Online-Learning.git
-	branch = reviewed
