@@ -109,4 +109,3 @@ However, the central claims do not yet appear to be fully supported. Although DE
     [5] Y. Wang, Y. Xu, Q. Shi and T. -H. Chang, "Quantized Federated Learning Under Transmission Delay and Outage Constraints," in IEEE Journal on Selected Areas in Communications, vol. 40, no. 1, pp. 323-341, Jan. 2022.  
     [6] Z. Zhai, X. Yuan, X. Wang and G. Y. Li, "Decentralized Federated Learning With Distributed Aggregation Weight Optimization," in IEEE Transactions on Pattern Analysis and Machine Intelligence, vol. 48, no. 3, pp. 3899-3910, March 2026.
 
-**Additional Questions:**
