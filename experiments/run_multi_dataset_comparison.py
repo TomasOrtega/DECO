@@ -1,12 +1,13 @@
 # experiments/run_multi_dataset_comparison.py
-import h5py
 import os
 import time
+
+import h5py
 from tqdm import tqdm
 
 from src.deco.algorithms import run_simulation
-from src.deco.graph import create_gossip_matrix
 from src.deco.environments import RealDataEnvironment
+from src.deco.graph import create_gossip_matrix
 from src.deco.online_baselines import (
     LEARNING_RATES,
     ONLINE_BASELINE_NAMES,
@@ -73,10 +74,7 @@ def run_single_dataset_experiment(dataset_name):
         return None
 
     T = int(base_env.n_samples // CONFIG["N"])
-    print(
-        f"  Using T={T} iterations "
-        f"(floor({base_env.n_samples} / {CONFIG['N']}))"
-    )
+    print(f"  Using T={T} iterations (floor({base_env.n_samples} / {CONFIG['N']}))")
 
     W = create_gossip_matrix(CONFIG["N"], topology=CONFIG["TOPOLOGY"])
     U_STAR = base_env.u_star

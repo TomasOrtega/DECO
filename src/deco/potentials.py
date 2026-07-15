@@ -1,7 +1,8 @@
 # src/deco/potentials.py
 import math
-import numpy as np
 from abc import ABC, abstractmethod
+
+import numpy as np
 
 
 class BasePotential(ABC):

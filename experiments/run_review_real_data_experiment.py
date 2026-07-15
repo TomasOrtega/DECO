@@ -23,7 +23,6 @@ from src.deco.online_baselines import (
 )
 from src.deco.potentials import ExponentialPotential, KTPotential
 
-
 DEFAULT_DATASETS = ("diabetes", "breast_cancer", "digits")
 
 
@@ -31,7 +30,9 @@ def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--T", type=int, default=100, help="online rounds")
     parser.add_argument("--N", type=int, default=20, help="number of agents")
-    parser.add_argument("--seeds", type=int, nargs="+", default=[0], help="random seeds")
+    parser.add_argument(
+        "--seeds", type=int, nargs="+", default=[0], help="random seeds"
+    )
     parser.add_argument(
         "--learning-rates",
         type=float,

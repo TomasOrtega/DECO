@@ -1,0 +1,29 @@
+[project]
+name = "deco"
+version = "0.1.0"
+description = "Decentralized coin-betting algorithms for online learning"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "h5py==3.15.0",
+    "matplotlib==3.10.7",
+    "networkx==3.5",
+    "numpy==2.3.3",
+    "requests==2.32.4",
+    "scikit-learn==1.7.2",
+    "scipy==1.16.2",
+    "tqdm==4.67.1",
+    "urllib3==2.5.0",
+]
+
+[dependency-groups]
+dev = [
+    "prek==0.4.9",
+    "ruff==0.15.21",
+]
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+extend-select = ["I"]

@@ -1,10 +1,11 @@
 # src/download_datasets.py
 
-import os
-import requests
-from requests.exceptions import RequestException
 import bz2
+import os
+
+import requests
 import urllib3
+from requests.exceptions import RequestException
 
 
 def download_file(url: str, save_path: str) -> None:
@@ -78,16 +79,14 @@ def download_datasets() -> None:
             "regression/cpusmall"
         ),
         "cadata": (
-            "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/"
-            "regression/cadata"
+            "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/cadata"
         ),
         "space_ga": (
             "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/"
             "regression/space_ga"
         ),
         "abalone": (
-            "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/"
-            "regression/abalone"
+            "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/abalone"
         ),
     }
     data_dir = "data"  # The directory where datasets will be saved

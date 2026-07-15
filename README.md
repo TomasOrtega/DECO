@@ -9,8 +9,8 @@ This repository contains the code for the paper "Decentralized Parameter-Free On
 DECO/
   ├── README.md
   ├── Dockerfile
-  ├── environment.yml
-  ├── requirements.txt
+  ├── pyproject.toml
+  ├── uv.lock
   ├── run_all.bat
   ├── run_all.sh
   ├── .dockerignore
@@ -46,23 +46,19 @@ For either method, you need to **clone the repository** first
 ```
 Next, follow the instructions for one of the two methods:
 
-### Method 1: Local Execution (Using Conda)
+### Method 1: Local Execution (Using uv)
 
-To run the code locally, it is recommended to use a virtual environment for consistency.
-In these instructions we will use the Anaconda or Miniconda package manager.
-1.  **Install Conda:**
-    If you don't have Conda installed, you can download and install it from [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html).
+1.  **Install uv:**
+    Follow the [uv installation instructions](https://docs.astral.sh/uv/getting-started/installation/) if it is not already available.
 
-2.  **Create and activate the Conda environment:**
-    This command will create a new environment named `deco-env` with the exact dependencies listed in the `environment.yml` file.
+2.  **Create the environment and install the locked dependencies:**
     ```bash
-    conda env create -f environment.yml
-    conda activate deco-env
+    uv sync --locked
     ```
 3.  **Download regression datasets:**
     The original LIBSVM experiments require several public datasets. This script will download them into a `data/` directory.
     ```bash
-    python src/deco/download_datasets.py
+    uv run --locked python src/deco/download_datasets.py
     ```
     The review real-data experiment below also supports bundled scikit-learn datasets, so it can run even when external dataset mirrors are unavailable.
 
@@ -78,6 +74,12 @@ In these instructions we will use the Anaconda or Miniconda package manager.
         run_all.bat
         ```
 
+5.  **Install the development hooks (optional):**
+    The hooks run Ruff's linter and formatter through `prek`.
+    ```bash
+    uv run --locked prek install
+    ```
+
 ### Review Baseline and Communication-Cost Experiments
 
 The review-response revision adds two focused experiment scripts.
@@ -89,8 +91,8 @@ The review-response revision adds two focused experiment scripts.
 The lightweight default runs are included in `run_all.sh` and `run_all.bat`. To run larger versions manually, increase the number of rounds or seeds:
 
 ```bash
-python -m experiments.run_review_baseline_experiment --T 1000 --seeds 0 1 2
-python -m experiments.run_review_real_data_experiment --T 1000 --seeds 0 1 2 --datasets diabetes breast_cancer digits
+uv run --locked python -m experiments.run_review_baseline_experiment --T 1000 --seeds 0 1 2
+uv run --locked python -m experiments.run_review_real_data_experiment --T 1000 --seeds 0 1 2 --datasets diabetes breast_cancer digits
 ```
 
 The summaries are written to `results/review_baseline_summary.csv` and `results/review_real_data_summary.csv` with the initial learning rate, cumulative network loss, average network loss, cumulative local loss, and total communicated scalars. The full workflow also writes `results/online_baseline_table.csv` and regenerates the manuscript PDFs directly under `tex/Figs/`.
@@ -118,10 +120,10 @@ This is the easiest and most reliable method. It uses Docker to build a self-con
 3.  **Run only the review experiments inside Docker:**
     ```bash
     docker run --rm -v "$(pwd)/results:/app/results" deco-repro \
-        python -m experiments.run_review_baseline_experiment --T 1000 --seeds 0 1 2
+        uv run --locked --no-dev python -m experiments.run_review_baseline_experiment --T 1000 --seeds 0 1 2
 
     docker run --rm -v "$(pwd)/results:/app/results" deco-repro \
-        python -m experiments.run_review_real_data_experiment --T 1000 --seeds 0 1 2 --datasets diabetes breast_cancer digits
+        uv run --locked --no-dev python -m experiments.run_review_real_data_experiment --T 1000 --seeds 0 1 2 --datasets diabetes breast_cancer digits
     ```
 
 After the command completes, all results and figures will be available in their respective local directories.

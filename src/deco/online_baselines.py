@@ -4,7 +4,6 @@ from copy import deepcopy
 
 import numpy as np
 
-
 ADAPTIVE_BASELINE_NAMES = ("D-AdaGrad", "D-RMSProp", "D-Adam")
 ONLINE_BASELINE_NAMES = ("DOGD", *ADAPTIVE_BASELINE_NAMES)
 LEARNING_RATES = np.logspace(-3, 3, num=25)

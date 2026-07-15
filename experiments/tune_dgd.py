@@ -1,7 +1,8 @@
 # experiments/tune_dgd.py
-import numpy as np
-import h5py
 import os
+
+import h5py
+import numpy as np
 
 from src.deco.algorithms import run_simulation
 from src.deco.environments import SyntheticRegression
@@ -27,6 +28,7 @@ def make_environment(u_star):
     """Recreate the same online stream for every method and learning rate."""
     np.random.seed(CONFIG["SEED"])
     return SyntheticRegression(CONFIG["N"], CONFIG["DIM"], u_star)
+
 
 if __name__ == "__main__":
     os.makedirs(CONFIG["RESULTS_DIR"], exist_ok=True)
@@ -57,9 +59,7 @@ if __name__ == "__main__":
             )
         all_results[name] = rate_results
 
-    filepath = os.path.join(
-        CONFIG["RESULTS_DIR"], "online_baseline_tuning_results.h5"
-    )
+    filepath = os.path.join(CONFIG["RESULTS_DIR"], "online_baseline_tuning_results.h5")
     with h5py.File(filepath, "w") as f:
         save_results_to_hdf5(f, all_results)
     print(f"\nOnline baseline tuning results saved to {filepath}")

@@ -1,11 +1,12 @@
 # experiments/run_synthetic_experiment.py
-import numpy as np
-import h5py
 import os
 
+import h5py
+import numpy as np
+
 from src.deco.algorithms import run_simulation
-from src.deco.graph import create_gossip_matrix
 from src.deco.environments import SyntheticRegression
+from src.deco.graph import create_gossip_matrix
 from src.deco.online_baselines import (
     ADAPTIVE_BASELINE_NAMES,
     REFERENCE_LEARNING_RATE,
@@ -23,6 +24,7 @@ CONFIG = {
     "RESULTS_DIR": "results",
     "SEED": 0,
 }
+
 
 def make_environment(u_star):
     np.random.seed(CONFIG["SEED"])

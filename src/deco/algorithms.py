@@ -1,8 +1,9 @@
 # src/deco/algorithms.py
 import numpy as np
 from tqdm import tqdm
+
+from .agents import AdaptiveDGDAgent, CentralizedAgent, DecoAgent, DGDAgent
 from .metrics import calculate_losses
-from .agents import DecoAgent, DGDAgent, AdaptiveDGDAgent, CentralizedAgent
 
 
 def _off_diagonal_messages(W):

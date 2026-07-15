@@ -1,15 +1,17 @@
 # plots/plot_script.py
 import csv
+import os
+
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 
 from src.deco.online_baselines import (
     ADAPTIVE_BASELINE_NAMES,
     ONLINE_BASELINE_NAMES,
     best_rate_and_loss,
 )
+from src.deco.plotting import mask_large_losses
 from src.deco.utils import load_results_from_hdf5
 
 # --- Configuration and Styling ---
@@ -183,9 +185,7 @@ def save_fig(fig, name):
 
 
 # --- FIGURE 1: Online baseline learning-rate sensitivity ---
-baseline_tuning_file = os.path.join(
-    RESULTS_DIR, "online_baseline_tuning_results.h5"
-)
+baseline_tuning_file = os.path.join(RESULTS_DIR, "online_baseline_tuning_results.h5")
 deco_results_file = os.path.join(RESULTS_DIR, "synthetic_results_cycle.h5")
 
 if os.path.exists(baseline_tuning_file) and os.path.exists(deco_results_file):
@@ -196,26 +196,38 @@ if os.path.exists(baseline_tuning_file) and os.path.exists(deco_results_file):
 
     fig1, ax1 = plt.subplots(figsize=(3.5, 2.8))
 
-    learning_rates = None
+    baseline_rates = {}
+    plot_losses = {}
     for name in ONLINE_BASELINE_NAMES:
         rate_results = baseline_results[name]
         ordered = sorted(rate_results.items(), key=lambda item: float(item[0]))
-        rates = [float(key) for key, _ in ordered]
-        losses = [np.sum(history["network_loss"]) for _, history in ordered]
-        learning_rates = rates
-        ax1.plot(rates, losses, label=name, **get_plot_style(name, len(rates)))
+        baseline_rates[name] = [float(key) for key, _ in ordered]
+        plot_losses[name] = [np.sum(history["network_loss"]) for _, history in ordered]
 
     deco_final_losses = {
         name: np.sum(data["network_loss"])
         for name, data in deco_results.items()
         if name in {"DECO-i (KT)", "DECO-ii (KT)", "Centralized"}
     }
-
+    reference_rates = baseline_rates[ONLINE_BASELINE_NAMES[0]]
     for name, loss in deco_final_losses.items():
-        loss_vector = [loss] * len(learning_rates)
+        plot_losses[name] = [loss] * len(reference_rates)
+
+    plot_losses = mask_large_losses(plot_losses)
+    for name in ONLINE_BASELINE_NAMES:
+        rates = baseline_rates[name]
+        ax1.plot(
+            rates,
+            plot_losses[name],
+            label=name,
+            **get_plot_style(name, len(rates)),
+        )
+
+    for name in deco_final_losses:
+        loss_vector = plot_losses[name]
         style = get_plot_style(name, len(loss_vector))
         display_label = get_display_label(name)
-        ax1.plot(learning_rates, loss_vector, label=display_label, **style)
+        ax1.plot(reference_rates, loss_vector, label=display_label, **style)
 
     ax1.set_xscale("log")
     ax1.set_yscale("log")
@@ -309,29 +321,39 @@ def plot_multi_dataset_sensitivity(all_data):
         dataset_name = data["dataset_name"]
         results = data["results"]
         tuned_results = results["Online_tune"]
-        learning_rates = None
+        baseline_rates = {}
+        plot_losses = {}
 
         for name in ONLINE_BASELINE_NAMES:
             rate_results = tuned_results[name]
             ordered = sorted(rate_results.items(), key=lambda item: float(item[0]))
-            rates = [float(key) for key, _ in ordered]
-            losses = [np.sum(history["network_loss"]) for _, history in ordered]
-            learning_rates = rates
+            baseline_rates[name] = [float(key) for key, _ in ordered]
+            plot_losses[name] = [
+                np.sum(history["network_loss"]) for _, history in ordered
+            ]
+
+        reference_rates = baseline_rates[ONLINE_BASELINE_NAMES[0]]
+        for name in algos_to_plot:
+            if name in results:
+                final_loss = np.sum(results[name]["network_loss"])
+                plot_losses[name] = [final_loss] * len(reference_rates)
+
+        plot_losses = mask_large_losses(plot_losses)
+        for name in ONLINE_BASELINE_NAMES:
+            rates = baseline_rates[name]
             ax.plot(
                 rates,
-                losses,
+                plot_losses[name],
                 label=name,
                 **get_plot_style(name, len(rates)),
             )
 
         for name in algos_to_plot:
             if name in results:
-                res_data = results[name]
-                final_loss = np.sum(res_data["network_loss"])
-                loss_vector = [final_loss] * len(learning_rates)
+                loss_vector = plot_losses[name]
                 style = get_plot_style(name, len(loss_vector))
                 display_label = get_display_label(name)
-                ax.plot(learning_rates, loss_vector, label=display_label, **style)
+                ax.plot(reference_rates, loss_vector, label=display_label, **style)
 
         ax.set_xscale("log")
         ax.set_yscale("log")
@@ -373,9 +395,7 @@ def write_online_baseline_table(all_data):
                     "dataset": dataset_name,
                     "method": name,
                     "selected_eta0": "",
-                    "cumulative_network_loss": float(
-                        np.sum(history["network_loss"])
-                    ),
+                    "cumulative_network_loss": float(np.sum(history["network_loss"])),
                     "communication_scalars": float(
                         np.sum(history["communication_scalars"])
                     ),

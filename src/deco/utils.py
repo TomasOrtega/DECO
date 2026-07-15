@@ -1,6 +1,7 @@
 # src/deco/utils.py
-import h5py
 import json
+
+import h5py
 
 
 def save_results_to_hdf5(group, data):

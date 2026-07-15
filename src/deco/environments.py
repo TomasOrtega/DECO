@@ -229,7 +229,9 @@ class RealDataEnvironment:
         else:
             self.rng.shuffle(self.indices)
             overflow = start + self.N - self.n_samples
-            batch_indices = np.concatenate([self.indices[start:], self.indices[:overflow]])
+            batch_indices = np.concatenate(
+                [self.indices[start:], self.indices[:overflow]]
+            )
 
         agent_features = self.X[batch_indices]
         agent_labels = self.y[batch_indices]
@@ -248,9 +250,9 @@ class RealDataEnvironment:
             grad = grad_sign * features
 
             grad_norm = np.linalg.norm(grad)
-            assert grad_norm <= (
-                1 + 1e-4
-            ), f"Grad norm larger than one! It is {grad_norm}"
+            assert grad_norm <= (1 + 1e-4), (
+                f"Grad norm larger than one! It is {grad_norm}"
+            )
             gradients[i] = grad
 
         return losses, gradients, agent_features, agent_labels
