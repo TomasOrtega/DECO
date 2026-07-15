@@ -1,13 +1,20 @@
 # plots/plot_script.py
+import csv
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+
+from src.deco.online_baselines import (
+    ADAPTIVE_BASELINE_NAMES,
+    ONLINE_BASELINE_NAMES,
+    best_rate_and_loss,
+)
 from src.deco.utils import load_results_from_hdf5
 
 # --- Configuration and Styling ---
 RESULTS_DIR = "results"
-SAVE_DIR = "plots/Figs"
+SAVE_DIR = "tex/Figs"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
 # IEEE Publication Standards Configuration
@@ -49,6 +56,9 @@ BASE_COLORS = {
     "DECO-ii (exp)": "#FE6100",
     "DECO-ii (KT)": "#FFB000",
     "DOGD": "#dc267f",
+    "D-AdaGrad": "#008b8b",
+    "D-RMSProp": "#7a5195",
+    "D-Adam": "#2ca02c",
     "Centralized": "#393939",
 }
 
@@ -82,6 +92,26 @@ STYLE_GUIDE = {
         "color": BASE_COLORS["DOGD"],
         "linestyle": BASE_LINESTYLES["DOGD"],
         "marker": "v",
+    },
+    "DOGD": {
+        "color": BASE_COLORS["DOGD"],
+        "linestyle": "-",
+        "marker": "v",
+    },
+    "D-AdaGrad": {
+        "color": BASE_COLORS["D-AdaGrad"],
+        "linestyle": "--",
+        "marker": "o",
+    },
+    "D-RMSProp": {
+        "color": BASE_COLORS["D-RMSProp"],
+        "linestyle": "-.",
+        "marker": "s",
+    },
+    "D-Adam": {
+        "color": BASE_COLORS["D-Adam"],
+        "linestyle": ":",
+        "marker": "^",
     },
     "Centralized": {
         "color": BASE_COLORS["Centralized"],
@@ -121,12 +151,25 @@ LATEX_LABEL_MAP = {
 
 def get_display_label(name):
     """Convert algorithm name to a nicely formatted LaTeX label for display."""
+    for baseline_name in ADAPTIVE_BASELINE_NAMES:
+        if name.startswith(baseline_name) and ("(p=" in name or "(q=" in name):
+            return baseline_name
+    if "eta0=" in name:
+        prefix, remainder = name.split("eta0=", 1)
+        value, separator, suffix = remainder.partition(")")
+        closing = ")" if separator else ""
+        return f"{prefix}$\\eta_0={value}${closing}{suffix}"
     return LATEX_LABEL_MAP.get(name, name)
 
 
 def get_plot_style(name, data_length):
     """Fetches a consistent style for a given algorithm name from the guide."""
-    base_style = STYLE_GUIDE.get(name, STYLE_GUIDE["default"]).copy()
+    style_name = name
+    for baseline_name in ONLINE_BASELINE_NAMES:
+        if name.startswith(baseline_name):
+            style_name = baseline_name
+            break
+    base_style = STYLE_GUIDE.get(style_name, STYLE_GUIDE["default"]).copy()
     base_style["linewidth"] = 1.5
     base_style["markersize"] = 4
     base_style["markevery"] = max(1, data_length // 8)
@@ -139,36 +182,33 @@ def save_fig(fig, name):
     print(f"Saved figure to {path}")
 
 
-# --- FIGURE 1: DGD Sensitivity ---
-dgd_tuning_file = os.path.join(RESULTS_DIR, "dgd_tuning_results.h5")
+# --- FIGURE 1: Online baseline learning-rate sensitivity ---
+baseline_tuning_file = os.path.join(
+    RESULTS_DIR, "online_baseline_tuning_results.h5"
+)
 deco_results_file = os.path.join(RESULTS_DIR, "synthetic_results_cycle.h5")
 
-if os.path.exists(dgd_tuning_file) and os.path.exists(deco_results_file):
-    with h5py.File(dgd_tuning_file, "r") as f:
-        dgd_results = load_results_from_hdf5(f)
+if os.path.exists(baseline_tuning_file) and os.path.exists(deco_results_file):
+    with h5py.File(baseline_tuning_file, "r") as f:
+        baseline_results = load_results_from_hdf5(f)
     with h5py.File(deco_results_file, "r") as f:
         deco_results = load_results_from_hdf5(f)
 
-    learning_rates = []
-    final_losses = []
-    # Convert string keys from HDF5 back to float for correct numeric sorting
-    sorted_lrs = sorted([float(k) for k in dgd_results.keys()])
-    for lr in sorted_lrs:
-        data = dgd_results[str(lr)]
-        learning_rates.append(lr)
-        # Access the 'network_loss' field of the structured array
-        final_losses.append(np.sum(data["network_loss"]))
+    fig1, ax1 = plt.subplots(figsize=(3.5, 2.8))
 
-    # IEEE single column width is ~3.5 inches, double column is ~7 inches
-    fig1, ax1 = plt.subplots(figsize=(3.5, 2.6))  # IEEE single column, 3:4 aspect ratio
-
-    style_dgd = get_plot_style("DOGD_curve", len(final_losses))
-    ax1.plot(learning_rates, final_losses, label="DOGD", **style_dgd)
+    learning_rates = None
+    for name in ONLINE_BASELINE_NAMES:
+        rate_results = baseline_results[name]
+        ordered = sorted(rate_results.items(), key=lambda item: float(item[0]))
+        rates = [float(key) for key, _ in ordered]
+        losses = [np.sum(history["network_loss"]) for _, history in ordered]
+        learning_rates = rates
+        ax1.plot(rates, losses, label=name, **get_plot_style(name, len(rates)))
 
     deco_final_losses = {
         name: np.sum(data["network_loss"])
         for name, data in deco_results.items()
-        if "DECO" in name or name == "Centralized"
+        if name in {"DECO-i (KT)", "DECO-ii (KT)", "Centralized"}
     }
 
     for name, loss in deco_final_losses.items():
@@ -179,11 +219,11 @@ if os.path.exists(dgd_tuning_file) and os.path.exists(deco_results_file):
 
     ax1.set_xscale("log")
     ax1.set_yscale("log")
-    ax1.set_xlabel("Initial Learning Rate ($\\eta_0$)")
+    ax1.set_xlabel("Base / Initial Learning-Rate Scale ($\\eta_0$)")
     ax1.set_ylabel("Final Cumulative Network Loss")
-    ax1.legend()
+    ax1.legend(fontsize=7, ncol=2)
     ax1.grid(True, which="both", linestyle="--", alpha=0.3)
-    save_fig(fig1, "dgd_sensitivity.pdf")
+    save_fig(fig1, "online_baseline_sensitivity.pdf")
     plt.close()
 
 
@@ -212,7 +252,7 @@ if os.path.exists(connectivity_file):
 
     ax_cum.set_ylabel("Cumulative Network Loss")
     ax_cum.grid(True, which="both", linestyle="--", alpha=0.3)
-    ax_cum.legend()
+    ax_cum.legend(fontsize=6.5, ncol=2)
 
     # Panel 2: Per-Round Network Loss (Smoothed)
     smoothing_window = 250
@@ -228,7 +268,7 @@ if os.path.exists(connectivity_file):
     ax_inst.set_xlabel("Time (t)")
     ax_inst.set_ylabel("Per-Round Network Loss\n(Smoothed)")
     ax_inst.grid(True, which="both", linestyle="--", alpha=0.3)
-    ax_inst.legend()
+    ax_inst.legend(fontsize=6.5, ncol=2)
     ax_inst.set_yscale("log")
     save_fig(fig2, "connectivity_impact.pdf")
     plt.close()
@@ -248,22 +288,19 @@ if os.path.exists(gossip_tradeoff_file):
 
     ax3.set_xlabel("Time (t)")
     ax3.set_ylabel("Cumulative Network Loss")
-    ax3.legend()
+    ax3.legend(fontsize=6.5, ncol=2)
     save_fig(fig3, "gossip_tradeoff.pdf")
     plt.close()
 
 
 def plot_multi_dataset_sensitivity(all_data):
-    """
-    Creates a multi-panel plot showing DOGD sensitivity and DECO performance
-    for each real-world dataset.
-    """
+    """Plot all online baseline sweeps and parameter-free references."""
     dataset_results = [res for res in all_data["results"] if res is not None]
     n_datasets = len(dataset_results)
     n_cols = 2
     n_rows = (n_datasets + n_cols - 1) // n_cols
 
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(7, 2.8 * n_rows), sharex=False)
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(7, 3 * n_rows), sharex=False)
     axes_flat = axes.flatten()
     algos_to_plot = ["DECO-i (KT)", "DECO-ii (KT)", "Centralized"]
 
@@ -271,52 +308,27 @@ def plot_multi_dataset_sensitivity(all_data):
         ax = axes_flat[i]
         dataset_name = data["dataset_name"]
         results = data["results"]
-        all_losses = []
-        learning_rates = []
-        final_losses = []
+        tuned_results = results["Online_tune"]
+        learning_rates = None
 
-        if "DGD_tune" in results:
-            dgd_tune_results = results["DGD_tune"]
-            learning_rates = sorted([float(k) for k in dgd_tune_results.keys()])
-            final_losses = [
-                np.sum(dgd_tune_results[str(lr)]["network_loss"])
-                for lr in learning_rates
-            ]
-            all_losses.extend(final_losses)
-
-        for name in algos_to_plot:
-            if name in results:
-                res_data = results[name]
-                final_loss = np.sum(res_data["network_loss"])
-                all_losses.append(final_loss)
-
-        # Calculate threshold: 5 times the minimum
-        threshold = None
-        if all_losses:
-            threshold = 5 * min(all_losses)
-
-        # Plot DOGD curve with NaN for values above threshold
-        if final_losses and threshold is not None:
-            final_losses_filtered = np.array(final_losses, dtype=float)
-            final_losses_filtered[final_losses_filtered > threshold] = np.nan
-            style_dgd = get_plot_style("DOGD_curve", len(final_losses_filtered))
+        for name in ONLINE_BASELINE_NAMES:
+            rate_results = tuned_results[name]
+            ordered = sorted(rate_results.items(), key=lambda item: float(item[0]))
+            rates = [float(key) for key, _ in ordered]
+            losses = [np.sum(history["network_loss"]) for _, history in ordered]
+            learning_rates = rates
             ax.plot(
-                learning_rates,
-                final_losses_filtered,
-                label=get_display_label("DOGD"),
-                **style_dgd,
+                rates,
+                losses,
+                label=name,
+                **get_plot_style(name, len(rates)),
             )
 
         for name in algos_to_plot:
             if name in results:
                 res_data = results[name]
                 final_loss = np.sum(res_data["network_loss"])
-                display_loss = (
-                    final_loss
-                    if threshold is None or final_loss <= threshold
-                    else np.nan
-                )
-                loss_vector = [display_loss] * len(learning_rates)
+                loss_vector = [final_loss] * len(learning_rates)
                 style = get_plot_style(name, len(loss_vector))
                 display_label = get_display_label(name)
                 ax.plot(learning_rates, loss_vector, label=display_label, **style)
@@ -327,15 +339,71 @@ def plot_multi_dataset_sensitivity(all_data):
         ax.set_ylabel("Final Cumulative Network Loss")
         ax.grid(True, which="both", linestyle="--", alpha=0.3)
         if i >= n_datasets - n_cols:
-            ax.set_xlabel("Initial Learning Rate ($\\eta_0$)")
-        ax.legend()
+            ax.set_xlabel("Base / Initial Learning-Rate Scale ($\\eta_0$)")
 
     for j in range(i + 1, len(axes_flat)):
         axes_flat[j].set_visible(False)
 
-    plt.tight_layout()
+    handles, labels = axes_flat[0].get_legend_handles_labels()
+    fig.legend(
+        handles,
+        labels,
+        loc="lower center",
+        ncol=4,
+        fontsize=8,
+        bbox_to_anchor=(0.5, 0.01),
+    )
+    plt.tight_layout(rect=(0, 0.1, 1, 1))
     save_fig(fig, "multi_dataset_sensitivity.pdf")
     plt.close()
+
+
+def write_online_baseline_table(all_data):
+    """Write the exact best-in-grid values used in the manuscript table."""
+    rows = []
+    for data in all_data["results"]:
+        if data is None:
+            continue
+        dataset_name = data["dataset_name"]
+        results = data["results"]
+        for name in ("DECO-i (KT)", "DECO-ii (KT)"):
+            history = results[name]
+            rows.append(
+                {
+                    "dataset": dataset_name,
+                    "method": name,
+                    "selected_eta0": "",
+                    "cumulative_network_loss": float(
+                        np.sum(history["network_loss"])
+                    ),
+                    "communication_scalars": float(
+                        np.sum(history["communication_scalars"])
+                    ),
+                }
+            )
+        for name in ONLINE_BASELINE_NAMES:
+            rate_results = results["Online_tune"][name]
+            rate, loss = best_rate_and_loss(rate_results)
+            rate_key = min(rate_results, key=lambda key: abs(float(key) - rate))
+            history = rate_results[rate_key]
+            rows.append(
+                {
+                    "dataset": dataset_name,
+                    "method": name,
+                    "selected_eta0": rate,
+                    "cumulative_network_loss": loss,
+                    "communication_scalars": float(
+                        np.sum(history["communication_scalars"])
+                    ),
+                }
+            )
+
+    path = os.path.join(RESULTS_DIR, "online_baseline_table.csv")
+    with open(path, "w", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=rows[0].keys())
+        writer.writeheader()
+        writer.writerows(rows)
+    print(f"Saved table values to {path}")
 
 
 # --- FIGURE 4: Performance on Real-World Datasets (New Version) ---
@@ -344,3 +412,4 @@ if os.path.exists(multi_dataset_file):
     with h5py.File(multi_dataset_file, "r") as f:
         all_data = load_results_from_hdf5(f)
     plot_multi_dataset_sensitivity(all_data)
+    write_online_baseline_table(all_data)

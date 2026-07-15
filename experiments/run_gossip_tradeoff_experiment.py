@@ -6,6 +6,11 @@ import math
 from src.deco.algorithms import run_simulation
 from src.deco.graph import create_gossip_matrix
 from src.deco.environments import SyntheticRegression
+from src.deco.online_baselines import (
+    ADAPTIVE_BASELINE_NAMES,
+    REFERENCE_LEARNING_RATE,
+    make_online_baseline_config,
+)
 from src.deco.potentials import KTPotential
 from src.deco.utils import save_results_to_hdf5
 
@@ -20,16 +25,19 @@ CONFIG = {
 
 GOSSIP_SCHEDULES = {
     "Constant (q=1)": lambda t: 1,
-    "Logarithmic (q=log(t))": lambda t: math.ceil(math.log(t + 1)),
-    "Linear (q=0.1*t)": lambda t: math.ceil(0.1 * t),
+    "Logarithmic (q=log(t))": lambda t: math.ceil(math.log(t + 2)),
+    "Linear (q=0.1*t)": lambda t: math.ceil(0.1 * (t + 1)),
 }
+
+def make_environment(u_star):
+    np.random.seed(CONFIG["SEED"])
+    return SyntheticRegression(CONFIG["N"], CONFIG["DIM"], u_star)
+
 
 if __name__ == "__main__":
     os.makedirs(CONFIG["RESULTS_DIR"], exist_ok=True)
-    # fix random seed for reproducibility
-    np.random.seed(CONFIG["SEED"])
-    U_STAR = np.random.randn(CONFIG["DIM"])
-    env = SyntheticRegression(CONFIG["N"], CONFIG["DIM"], U_STAR)
+    rng = np.random.default_rng(CONFIG["SEED"])
+    U_STAR = rng.standard_normal(CONFIG["DIM"])
     W = create_gossip_matrix(CONFIG["N"], topology=CONFIG["TOPOLOGY"])
 
     centralized_config = {
@@ -42,7 +50,13 @@ if __name__ == "__main__":
     # Run Centralized Oracle
     print("===== Running on Centralized Oracle =====")
     results = run_simulation(
-        CONFIG["T"], CONFIG["N"], CONFIG["DIM"], env, W, centralized_config, U_STAR
+        CONFIG["T"],
+        CONFIG["N"],
+        CONFIG["DIM"],
+        make_environment(U_STAR),
+        W,
+        centralized_config,
+        U_STAR,
     )
     all_results["Centralized"] = results
 
@@ -57,9 +71,35 @@ if __name__ == "__main__":
             "q_t": schedule_fn,
         }
         results = run_simulation(
-            CONFIG["T"], CONFIG["N"], CONFIG["DIM"], env, W, deco_config, U_STAR
+            CONFIG["T"],
+            CONFIG["N"],
+            CONFIG["DIM"],
+            make_environment(U_STAR),
+            W,
+            deco_config,
+            U_STAR,
         )
         all_results[name] = results
+
+    for name in ADAPTIVE_BASELINE_NAMES:
+        print(f"===== Running {name} with q(t)=1 =====")
+        config = make_online_baseline_config(
+            name,
+            REFERENCE_LEARNING_RATE,
+            gossip=True,
+            disable_tqdm=True,
+            q_t=lambda t: 1,
+        )
+        label = f"{name} (q=1, eta0={REFERENCE_LEARNING_RATE:g})"
+        all_results[label] = run_simulation(
+            CONFIG["T"],
+            CONFIG["N"],
+            CONFIG["DIM"],
+            make_environment(U_STAR),
+            W,
+            config,
+            U_STAR,
+        )
 
     filepath = os.path.join(CONFIG["RESULTS_DIR"], "gossip_tradeoff_results.h5")
     with h5py.File(filepath, "w") as f:

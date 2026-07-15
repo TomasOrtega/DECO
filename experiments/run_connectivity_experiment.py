@@ -5,6 +5,11 @@ import os
 from src.deco.algorithms import run_simulation
 from src.deco.graph import create_gossip_matrix
 from src.deco.environments import SyntheticRegression
+from src.deco.online_baselines import (
+    ADAPTIVE_BASELINE_NAMES,
+    REFERENCE_LEARNING_RATE,
+    make_online_baseline_config,
+)
 from src.deco.potentials import KTPotential
 from src.deco.utils import save_results_to_hdf5
 
@@ -17,12 +22,15 @@ CONFIG = {
     "SEED": 0,
 }
 
+def make_environment(u_star):
+    np.random.seed(CONFIG["SEED"])
+    return SyntheticRegression(CONFIG["N"], CONFIG["DIM"], u_star)
+
+
 if __name__ == "__main__":
     os.makedirs(CONFIG["RESULTS_DIR"], exist_ok=True)
-    # fix random seed for reproducibility
-    np.random.seed(CONFIG["SEED"])
-    U_STAR = np.random.randn(CONFIG["DIM"])
-    env = SyntheticRegression(CONFIG["N"], CONFIG["DIM"], U_STAR)
+    rng = np.random.default_rng(CONFIG["SEED"])
+    U_STAR = rng.standard_normal(CONFIG["DIM"])
 
     centralized_config = {
         "agent_type": "Centralized",
@@ -45,7 +53,7 @@ if __name__ == "__main__":
         CONFIG["T"],
         CONFIG["N"],
         CONFIG["DIM"],
-        env,
+        make_environment(U_STAR),
         W_centralized,
         centralized_config,
         U_STAR,
@@ -56,12 +64,46 @@ if __name__ == "__main__":
     for p in CONFIG["CONNECTIVITY_PROBS"]:
         topo_name = f"ER (p={p})"
         print(f"===== Running on Topology: {topo_name} =====")
-        W = create_gossip_matrix(CONFIG["N"], topology="erdos_renyi", p=p)
+        W = create_gossip_matrix(
+            CONFIG["N"], topology="erdos_renyi", p=p, seed=CONFIG["SEED"]
+        )
 
         results = run_simulation(
-            CONFIG["T"], CONFIG["N"], CONFIG["DIM"], env, W, deco_config, U_STAR
+            CONFIG["T"],
+            CONFIG["N"],
+            CONFIG["DIM"],
+            make_environment(U_STAR),
+            W,
+            deco_config,
+            U_STAR,
         )
         all_results[topo_name] = results
+
+    reference_p = 0.3
+    reference_W = create_gossip_matrix(
+        CONFIG["N"],
+        topology="erdos_renyi",
+        p=reference_p,
+        seed=CONFIG["SEED"],
+    )
+    for name in ADAPTIVE_BASELINE_NAMES:
+        print(f"===== Running {name} reference at p={reference_p} =====")
+        config = make_online_baseline_config(
+            name,
+            REFERENCE_LEARNING_RATE,
+            gossip=True,
+            disable_tqdm=True,
+        )
+        label = f"{name} (p={reference_p}, eta0={REFERENCE_LEARNING_RATE:g})"
+        all_results[label] = run_simulation(
+            CONFIG["T"],
+            CONFIG["N"],
+            CONFIG["DIM"],
+            make_environment(U_STAR),
+            reference_W,
+            config,
+            U_STAR,
+        )
 
     filepath = os.path.join(CONFIG["RESULTS_DIR"], "connectivity_results.h5")
     with h5py.File(filepath, "w") as f:

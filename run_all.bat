@@ -2,10 +2,10 @@
 REM This script runs all experiments required to generate the data for the paper's plots.
 REM It stops if any experiment fails.
 
-echo --- (1/7) Running DGD Tuning Experiment ---
+echo --- (1/7) Running Online Baseline Learning-Rate Sweeps ---
 python -m experiments.tune_dgd
 if %ERRORLEVEL% neq 0 (
-    echo DGD tuning failed. Aborting.
+    echo Online baseline tuning failed. Aborting.
     exit /b %ERRORLEVEL%
 )
 

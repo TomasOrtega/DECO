@@ -5,6 +5,7 @@ If $d$ is the model dimension and $|E_{\mathrm{dir}}|$ is the number of directed
 Thus, with a constant schedule $q(t)=1$, the communication cost is $\mathcal{O}(T |E_{\mathrm{dir}}| d)$ for \algname{}-\pmb{ii}, whereas a linear schedule has $\mathcal{O}(T^2 |E_{\mathrm{dir}}| d)$ cost.
 This is why our practical experiments emphasize the constrained regime $q(t)=1$ and report the theoretical linear schedule as a sufficient, not mandatory, condition for the current proof.
 
-\textcolor{blue}{We also added decentralized adaptive-gradient baselines using the same gossip interface as DOGD: AdaGrad, RMSProp, Adam, AdamW, momentum, and Nesterov-type momentum.}
-These methods are not parameter-free in the sense of our theoretical claims because they still require stepsize, momentum, and/or decay choices, but they are important controls for the reviewers' question of whether DECO's behavior is merely an effect of adapting the update magnitude to past gradients.
-The added code reports cumulative network loss, average network loss, cumulative local loss, and total communicated scalars for each method.
+\textcolor{blue}{We added three representative online decentralized adaptive-gradient baselines using the same gossip interface as DOGD: D-AdaGrad, D-RMSProp, and D-Adam.}
+Each method predicts, observes one local gradient, updates its local moment state, and then gossips its decision vector.
+The methods are not parameter-free because they retain a base learning-rate scale and moment parameters.
+The added code sweeps the same 25 values of $\eta_0$ for every baseline and reports cumulative network loss and total communicated scalars.

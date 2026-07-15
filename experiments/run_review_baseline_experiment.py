@@ -16,6 +16,10 @@ import numpy as np
 from src.deco.algorithms import run_simulation
 from src.deco.environments import SyntheticRegression
 from src.deco.graph import create_gossip_matrix
+from src.deco.online_baselines import (
+    ONLINE_BASELINE_NAMES,
+    make_online_baseline_config,
+)
 from src.deco.potentials import ExponentialPotential, KTPotential
 
 
@@ -28,6 +32,13 @@ def parse_args():
     parser.add_argument("--N", type=int, default=20, help="number of agents")
     parser.add_argument("--dim", type=int, default=10, help="decision dimension")
     parser.add_argument("--seeds", type=int, nargs="+", default=[0], help="random seeds")
+    parser.add_argument(
+        "--learning-rates",
+        type=float,
+        nargs="+",
+        default=[0.01, 0.1, 1.0],
+        help="base learning-rate scales for DOGD and adaptive baselines",
+    )
     parser.add_argument(
         "--topologies",
         nargs="+",
@@ -53,9 +64,9 @@ def parse_args():
     return parser.parse_args()
 
 
-def make_algorithms():
+def make_algorithms(learning_rates):
     common = {"gossip": True, "disable_tqdm": True}
-    return {
+    algorithms = {
         "DECO-ii KT q=1": {
             "agent_type": "Deco",
             "potential": KTPotential(),
@@ -74,51 +85,21 @@ def make_algorithms():
             "version": "ii",
             **common,
         },
-        "DGD lr=1/sqrt(t)": {"agent_type": "DGD", "lr": 1.0, **common},
-        "D-AdaGrad lr=0.3": {
-            "agent_type": "AdaptiveDGD",
-            "method": "adagrad",
-            "lr": 0.3,
-            **common,
-        },
-        "D-RMSProp lr=0.03": {
-            "agent_type": "AdaptiveDGD",
-            "method": "rmsprop",
-            "lr": 0.03,
-            "beta2": 0.99,
-            **common,
-        },
-        "D-Adam lr=0.03": {
-            "agent_type": "AdaptiveDGD",
-            "method": "adam",
-            "lr": 0.03,
-            **common,
-        },
-        "D-AdamW lr=0.03": {
-            "agent_type": "AdaptiveDGD",
-            "method": "adamw",
-            "lr": 0.03,
-            "weight_decay": 1e-3,
-            **common,
-        },
-        "D-Momentum lr=0.1": {
-            "agent_type": "AdaptiveDGD",
-            "method": "momentum",
-            "lr": 0.1,
-            **common,
-        },
-        "D-Nesterov lr=0.1": {
-            "agent_type": "AdaptiveDGD",
-            "method": "nesterov",
-            "lr": 0.1,
-            **common,
-        },
         "Centralized KT": {
             "agent_type": "Centralized",
             "potential": KTPotential(),
             "disable_tqdm": True,
         },
     }
+    for name in ONLINE_BASELINE_NAMES:
+        for learning_rate in learning_rates:
+            label = f"{name} eta0={learning_rate:g}"
+            algorithms[label] = make_online_baseline_config(
+                name,
+                learning_rate,
+                **common,
+            )
+    return algorithms
 
 
 def summarize(history):
@@ -135,6 +116,7 @@ def write_summary(rows, out_path):
         "seed",
         "topology",
         "algorithm",
+        "initial_lr",
         "final_cumulative_network_loss",
         "final_average_network_loss",
         "final_cumulative_local_loss",
@@ -156,7 +138,7 @@ def main():
         u_star = rng.standard_normal(args.dim)
         for topology in args.topologies:
             W = create_gossip_matrix(args.N, topology=topology, p=0.2, seed=seed)
-            for name, algo_config in make_algorithms().items():
+            for name, algo_config in make_algorithms(args.learning_rates).items():
                 np.random.seed(seed)
                 env = SyntheticRegression(
                     args.N,
@@ -167,7 +149,12 @@ def main():
                 history = run_simulation(
                     args.T, args.N, args.dim, env, W, algo_config, u_star
                 )
-                row = {"seed": seed, "topology": topology, "algorithm": name}
+                row = {
+                    "seed": seed,
+                    "topology": topology,
+                    "algorithm": name,
+                    "initial_lr": algo_config.get("lr", ""),
+                }
                 row.update(summarize(history))
                 rows.append(row)
                 print(row)

@@ -59,12 +59,12 @@ The manuscript requires a major revision. The main concerns are communication co
 We revised the manuscript and repository to address these concerns directly.
 The main changes are:
 \begin{enumerate}
-    \item We made the communication model explicit: one gossip round is one local exchange over each directed neighbor relation.  We now count communicated real scalars and distinguish \algname{}-i, which sends $(\mathrm{Wealth},G)$, from \algname{}-ii, DOGD, and the adaptive baselines, which send one $d$-dimensional vector.
+    \item We made the communication model explicit: one gossip round is one local exchange over each directed neighbor relation.  We now count communicated real scalars and distinguish \algname{}-i, which sends $(\mathrm{Wealth},G)$, from \algname{}-ii, DOGD, and the three adaptive baselines, which send one $d$-dimensional vector.
     \item We clarified that $q(t)=\order{t}$ is a sufficient schedule for the current proof, not a claim that quadratic communication is necessary or desirable in constrained networks.  The practical experiments emphasize the constrained $q(t)=1$ regime.
     \item We reframed \algname{}-ii as a one-state betting-function formulation rather than an unqualified approximation to \algname{}-i.  We explicitly state the communication/performance trade-off and do not claim that \algname{}-ii uniformly improves over \algname{}-i.
-    \item We added decentralized adaptive baselines: AdaGrad, RMSProp, Adam, AdamW, momentum, and Nesterov-type momentum, all with the same gossip interface and communication accounting.
-    \item We added real-data review experiments, including bundled real datasets for offline and Docker reproducibility, and preserved the original LIBSVM workflow.
-    \item We revised the experimental discussion to avoid overclaiming empirical dominance: tuned adaptive methods can be competitive or better in some short-horizon settings, while the central contribution of \algname{} is learning-rate-free decentralized coin-betting with regret guarantees and explicit communication accounting.
+    \item We added three representative online decentralized adaptive baselines---D-AdaGrad, D-RMSProp, and D-Adam---with the same gossip interface and communication accounting as DOGD.
+    \item We swept DOGD and all three adaptive baselines over the same 25 learning-rate scales on identical synthetic and LIBSVM online streams, and included them in every experimental figure and the real-data table.
+    \item We revised the experimental discussion to avoid overclaiming empirical dominance: the best-in-grid adaptive methods can be competitive or better on some streams, while the central contribution of \algname{} is avoiding learning-rate selection while retaining network-regret guarantees and explicit communication accounting.
 \end{enumerate}
 For transparency, the exact added or modified manuscript text supporting every item is reproduced under the corresponding point-by-point response below; no separate manuscript change was made solely for this summary.
 \end{revresponse}
@@ -125,7 +125,9 @@ The linear schedule reduces loss relative to the constant and logarithmic schedu
 This gap is a real decentralization cost rather than a claim of equality with the oracle.
 The linear schedule should be interpreted as a theory-motivated sufficient schedule for controlling the current disagreement bound, not as the recommended operating point for every constrained network.
 
-\emph{Revised figure caption:} Cumulative network loss of \algname{}-ii (KT) on a cycle graph with different gossip schedules, $q(t)$. Increasing the communication budget from constant to logarithmic and linear progressively reduces loss, but the linear schedule retains a visible finite-horizon gap to the centralized oracle. The schedules illustrate the trade-off between communication cost and learning performance.
+The figure also includes D-AdaGrad, D-RMSProp, and D-Adam with $q(t)=1$ and $\eta_0=0.1$ as online adaptive reference curves; only \algname{} is varied across gossip schedules.
+
+\emph{Revised figure caption:} Cumulative network loss on the synthetic online stream. \algname{}-\pmb{ii} (KT) is shown with constant, logarithmic, and linear gossip schedules; D-AdaGrad, D-RMSProp, and D-Adam use $q(t)=1$ and $\eta_0=0.1$. Increasing \algname{}'s communication budget reduces loss, while the adaptive curves provide same-communication references.
 \end{changes}
 Thus, the revised discussion no longer relies on an unqualified ``closely tracks'' interpretation.
 \end{revresponse}
@@ -199,47 +201,99 @@ Accordingly, the constant-communication experiments evaluate the practically con
 The experimental evaluation is not sufficiently convincing; baselines are limited and the experiments should include adaptive/parameter-free methods, heterogeneous data, larger networks, or adversarial settings.
 \end{revcomment}
 \begin{revresponse}
-We added the requested adaptive decentralized baselines: AdaGrad, RMSProp, Adam, AdamW, momentum, and Nesterov-type momentum.  These baselines use the same gossip interface and the same scalar communication accounting as DOGD.
-We also added real-data review experiments and preserved the original multi-dataset LIBSVM comparison.  The new runs show that tuned adaptive baselines can be competitive or better on some datasets and horizons; consequently, the revised manuscript no longer claims empirical dominance over all adaptive methods.  Instead, it emphasizes the learning-rate-free property and regret guarantees of \algname{}.
-The exact added manuscript text is:
+We added three representative online decentralized adaptive baselines: D-AdaGrad, D-RMSProp, and D-Adam.  They cover cumulative second-moment adaptation, exponentially weighted second-moment adaptation, and combined first/second-moment adaptation, respectively.  We did not add AdamW as a near-duplicate of Adam with weight decay, or momentum/Nesterov as additional non-adaptive momentum controls; the selected three directly address the reviewer's request for adaptive-gradient comparisons without making the figures unreadable.
+Every baseline follows the same causal predict--observe--update--gossip protocol and is evaluated on an identical stream.  We ran DOGD and all three adaptive methods at the same 25 initial scales from $10^{-3}$ to $10^3$.  The complete sweeps appear in the synthetic and four-dataset figures, while the connectivity and gossip figures include all three adaptive methods at one clearly labeled reference setting.  The real-data table reports the measured best-in-grid result and communication count for every method.
+The exact added or modified manuscript text, including all affected figure captions and the complete table, is reproduced below in manuscript order:
 \begin{changes}
 We compare them against the following baselines:
 
-\textbf{Decentralized adaptive baselines}: AdaGrad, RMSProp, Adam, AdamW, momentum, and Nesterov-type momentum, each followed by the same gossip operation used by DOGD. These methods adapt their effective update magnitude to past gradients but still require stepsize, momentum, and/or decay choices.
+\textbf{Online decentralized adaptive baselines}: D-AdaGrad, D-RMSProp, and D-Adam. These three representatives respectively use cumulative second moments, exponentially weighted second moments, and combined first/second moments.
 
-For the added comparisons, we report cumulative network loss, average network loss, cumulative local loss, and total communicated scalars.
-The scalar count uses the same directed-neighbor accounting for every method: \algname{}-\pmb{i} sends $(\w,G)$, while \algname{}-\pmb{ii}, DOGD, and the adaptive baselines send one $d$-dimensional vector.
+All baselines use the same causal online protocol: predict, observe one local gradient, update the local optimizer state, and then gossip the decision vector once unless another schedule is stated.
+We sweep the same 25 values $\eta_0\in[10^{-3},10^3]$ for DOGD and the three adaptive methods on identical data streams.
+DOGD uses $\eta_t=\eta_0/\sqrt{t}$, whereas $\eta_0$ is the base scale multiplying the online moment-normalized update for D-AdaGrad, D-RMSProp, and D-Adam.
+The figures report cumulative network loss over the complete sweep; the table reports the best value in hindsight over that displayed grid and therefore does not portray the adaptive methods as parameter-free.
+The scalar count uses the same directed-neighbor accounting for every method: \algname{}-\pmb{i} sends $(\w,G)$, while \algname{}-\pmb{ii}, DOGD, and the three adaptive baselines send one $d$-dimensional vector.
 
-We additionally evaluate the adaptive baselines on bundled real datasets (diabetes, breast cancer, and digits), while preserving the original LIBSVM workflow.
-The bundled datasets make the review experiments reproducible in offline and Docker environments.
-The following table reports $T=100$ runs on a cycle graph with $N=20$ and $q(t)=1$.
+Final cumulative network loss on the synthetic online stream across the common base-rate grid $\eta_0\in[10^{-3},10^3]$. DOGD, D-AdaGrad, D-RMSProp, and D-Adam are swept over all 25 values; the horizontal lines are the untuned \algname{}-\pmb{i}/\pmb{ii} (KT) and centralized references.
 
-\emph{Communication-normalized experiments with $T=100$, $N=20$, and $q(t)=1$. Lower cumulative network loss is better. ``Scalars'' is the total number of real scalars exchanged by gossip.}
+A primary motivation for our work is the brittleness of online methods that require a user-chosen learning-rate scale.
+We therefore sweep DOGD, D-AdaGrad, D-RMSProp, and D-Adam over the same 25 values from $10^{-3}$ to $10^3$ on the same synthetic stream for $T=3000$ rounds.
+All four baselines operate sequentially without replaying future losses.
+
+As shown in Fig.~3, every baseline has a restricted useful range of $\eta_0$, and their losses deteriorate substantially outside it.
+The optimal scale also differs across DOGD, D-AdaGrad, D-RMSProp, and D-Adam.
+The horizontal \algname{} curves require no learning-rate sweep; this is the specific parameter-free advantage supported by the experiment.
+
+Since the KT and exponential potentials provide similar performance, the sensitivity figure and the remaining comparisons show the KT potential for \algname{} and the centralized reference to keep the seven-curve legends readable.
+
+For context, the same figure also reports D-AdaGrad, D-RMSProp, and D-Adam at the representative setting $p=0.3$, $q(t)=1$, and $\eta_0=0.1$; these reference curves are not additional connectivity sweeps.
+
+Synthetic online performance under varying connectivity. The ER curves sweep \algname{}-\pmb{ii} (KT) over $p\in\{0.1,0.3,1.0\}$; D-AdaGrad, D-RMSProp, and D-Adam are $p=0.3$, $q(t)=1$, $\eta_0=0.1$ references. \textbf{Top}: cumulative network loss. \textbf{Bottom}: per-round network loss smoothed over 250 rounds.
+
+The figure also includes D-AdaGrad, D-RMSProp, and D-Adam with $q(t)=1$ and $\eta_0=0.1$ as online adaptive reference curves; only \algname{} is varied across gossip schedules.
+
+Cumulative network loss on the synthetic online stream. \algname{}-\pmb{ii} (KT) is shown with constant, logarithmic, and linear gossip schedules; D-AdaGrad, D-RMSProp, and D-Adam use $q(t)=1$ and $\eta_0=0.1$. Increasing \algname{}'s communication budget reduces loss, while the adaptive curves provide same-communication references.
+
+Final cumulative network loss on four online LIBSVM streams. Each panel shows the complete 25-value $\eta_0$ sweep for DOGD, D-AdaGrad, D-RMSProp, and D-Adam on a log--log scale. Horizontal lines show \algname{}-\pmb{i}/\pmb{ii} (KT) and the centralized reference without learning-rate tuning.
+
+We evaluate DOGD, D-AdaGrad, D-RMSProp, and D-Adam on the same four LIBSVM online streams as \algname{}.
+Every run uses a cycle graph with $N=20$ and $q(t)=1$, and every baseline is swept over the same 25-value grid $\eta_0\in[10^{-3},10^3]$.
+Table~II reports the best cumulative network loss in hindsight over the displayed grid, together with the selected $\eta_0$ and total communicated scalars.
+
+\emph{Online LIBSVM experiments with $N=20$ and $q(t)=1$. For DOGD and the three adaptive baselines, ``Selected $\eta_0$'' is the best value in hindsight among the 25 values plotted in Fig.~6; it is not additional tuning hidden from the figure. Lower cumulative network loss is better.}
 \begin{center}
 \resizebox{\linewidth}{!}{%
-\begin{tabular}{llrr}
+\begin{tabular}{lrlrrr}
     \hline
-    Dataset / graph & Method & Cum. network loss & Scalars \\
+    Dataset & $T$ & Method & Selected $\eta_0$ & Cum. network loss & Scalars \\
     \hline
-    Synthetic cycle & \algname{}-i (KT) & 27.24 & 44,000 \\
-    Synthetic cycle & \algname{}-ii (KT) & 46.20 & 40,000 \\
-    Synthetic cycle & D-RMSProp & 20.67 & 40,000 \\
-    Diabetes & \algname{}-i (KT) & 64.47 & 44,000 \\
-    Diabetes & DGD & 59.41 & 40,000 \\
-    Breast cancer & \algname{}-i (KT) & 38.31 & 124,000 \\
-    Breast cancer & DGD & 35.76 & 120,000 \\
-    Digits & \algname{}-i (KT) & 81.08 & 260,000 \\
-    Digits & D-RMSProp & 63.03 & 256,000 \\
+    \texttt{space\_ga} & 155 & \algname{}-i (KT)  & --     & 92.51  & 43,400 \\
+    \texttt{space\_ga} & 155 & \algname{}-ii (KT) & --     & 101.76 & 37,200 \\
+    \texttt{space\_ga} & 155 & DOGD                 & 1      & 88.81  & 37,200 \\
+    \texttt{space\_ga} & 155 & D-AdaGrad            & 0.316  & 89.21  & 37,200 \\
+    \texttt{space\_ga} & 155 & D-RMSProp            & 0.0316 & 89.28  & 37,200 \\
+    \texttt{space\_ga} & 155 & D-Adam               & 0.178  & 89.53  & 37,200 \\
+    \hline
+    \texttt{cpusmall} & 409 & \algname{}-i (KT)  & --     & 136.59 & 212,680 \\
+    \texttt{cpusmall} & 409 & \algname{}-ii (KT) & --     & 147.13 & 196,320 \\
+    \texttt{cpusmall} & 409 & DOGD                 & 1.78   & 127.63 & 196,320 \\
+    \texttt{cpusmall} & 409 & D-AdaGrad            & 0.562  & 121.73 & 196,320 \\
+    \texttt{cpusmall} & 409 & D-RMSProp            & 0.0316 & 122.99 & 196,320 \\
+    \texttt{cpusmall} & 409 & D-Adam               & 0.1    & 122.09 & 196,320 \\
+    \hline
+    \texttt{cadata} & 1,032 & \algname{}-i (KT)  & --     & 517.87 & 371,520 \\
+    \texttt{cadata} & 1,032 & \algname{}-ii (KT) & --     & 583.69 & 330,240 \\
+    \texttt{cadata} & 1,032 & DOGD                 & 1.78   & 495.55 & 330,240 \\
+    \texttt{cadata} & 1,032 & D-AdaGrad            & 1      & 493.68 & 330,240 \\
+    \texttt{cadata} & 1,032 & D-RMSProp            & 0.0562 & 496.91 & 330,240 \\
+    \texttt{cadata} & 1,032 & D-Adam               & 0.1    & 499.85 & 330,240 \\
+    \hline
+    \texttt{abalone} & 208 & \algname{}-i (KT)  & --     & 130.13 & 74,880 \\
+    \texttt{abalone} & 208 & \algname{}-ii (KT) & --     & 137.66 & 66,560 \\
+    \texttt{abalone} & 208 & DOGD                 & 1.78   & 121.45 & 66,560 \\
+    \texttt{abalone} & 208 & D-AdaGrad            & 0.562  & 121.30 & 66,560 \\
+    \texttt{abalone} & 208 & D-RMSProp            & 0.0562 & 121.50 & 66,560 \\
+    \texttt{abalone} & 208 & D-Adam               & 0.1    & 121.07 & 66,560 \\
     \hline
 \end{tabular}%
 }
 \end{center}
 
-These short-horizon results show that tuned adaptive decentralized baselines can be competitive or better on some datasets.
-The empirical conclusion is therefore not that \algname{} uniformly dominates tuned adaptive methods; rather, \algname{} provides learning-rate-free decentralized coin-betting updates with explicit communication accounting and regret guarantees in the convex online-learning setting.
+The best-in-grid adaptive baselines are competitive with or better than \algname{} on several streams, but the selected scale varies by method and dataset.
+The empirical conclusion is therefore not that \algname{} uniformly dominates tuned adaptive methods; rather, \algname{} avoids this learning-rate sweep while providing explicit network-regret guarantees in the convex online setting.
+
+Finally, we evaluate \algname{}, DOGD, and the three online adaptive baselines on four real-world LIBSVM regression streams.
+The cycle graph, sample order, horizon, and one-gossip-round budget are identical for every method and every value of $\eta_0$.
+
+Fig.~6 shows that learning-rate sensitivity is not specific to DOGD.
+D-AdaGrad, D-RMSProp, and D-Adam also deteriorate outside method- and dataset-dependent ranges, even though their moment accumulators adapt the coordinate-wise update magnitudes online.
+Within their favorable ranges they can match or outperform \algname{}, as the best-in-grid values in Table~II make explicit.
+The supported conclusion is that \algname{} removes learning-rate selection, not that it uniformly improves upon every tuned adaptive optimizer.
+
+The results compare \algname{} with tuned DOGD, D-AdaGrad, D-RMSProp, and D-Adam across synthetic and real online streams. The tuned baselines can be better on some streams, while \algname{} remains competitive without selecting a learning-rate scale.
 \end{changes}
 \end{revresponse}
-
 \reviewer
 \begin{generalcomment}
 The reviewer asks for notation cleanup, a quantitative explanation of \algname{}-ii relative to \algname{}-i, clarification of whether \algname{}-ii satisfies the needed coin-betting condition, discussion of potential-function choices, adaptive baselines, related parameter-free decentralized work, limitations to convex online learning, and fair communication-normalized DECO-i/DECO-ii comparisons.
@@ -397,56 +451,113 @@ This memory is comparable to the vector state used by adaptive-gradient optimize
 The evaluation should include adaptive methods such as AdaGrad, RMSProp, Adam, AdamW, momentum, and Nesterov-type methods.
 \end{revcomment}
 \begin{revresponse}
-We added these baselines in the repository and included communication-normalized review experiments.  In the $T=100$ synthetic cycle run, for example, \algname{}-i (KT) had cumulative network loss $27.24$ with $44{,}000$ communicated scalars, while D-RMSProp had loss $20.67$ with $40{,}000$ communicated scalars.  This result is intentionally reported without overclaiming: adaptive baselines can be strong when their hyperparameters are well chosen, whereas \algname{}'s advantage is the absence of learning-rate tuning together with network regret guarantees.
-The exact baseline description and added results are:
+We selected D-AdaGrad, D-RMSProp, and D-Adam as three representative adaptive-gradient baselines.  Respectively, they cover cumulative second moments, exponentially weighted second moments, and combined first/second moments.  AdamW mainly adds weight decay to Adam, while momentum and Nesterov are not adaptive-gradient methods; using these three representatives keeps the seven-curve figures legible while directly testing the reviewer's adaptive-method concern.
+We implemented each method as a genuinely online decentralized algorithm: at every round it predicts, observes only the current local gradient, updates its local optimizer state, and gossips one decision vector.  DOGD and all three adaptive methods use the same 25-value initial-rate grid and identical streams.  We ran the complete synthetic and four-LIBSVM sweeps, added all three methods to every experimental figure, and report their measured results and communication counts in Table~II.
+The exact added or modified manuscript text, including all affected figure captions and the complete table, is:
 \begin{changes}
 We compare them against the following baselines:
 
-\textbf{Decentralized adaptive baselines}: AdaGrad, RMSProp, Adam, AdamW, momentum, and Nesterov-type momentum, each followed by the same gossip operation used by DOGD. These methods adapt their effective update magnitude to past gradients but still require stepsize, momentum, and/or decay choices.
+\textbf{Online decentralized adaptive baselines}: D-AdaGrad, D-RMSProp, and D-Adam. These three representatives respectively use cumulative second moments, exponentially weighted second moments, and combined first/second moments.
 
-For the added comparisons, we report cumulative network loss, average network loss, cumulative local loss, and total communicated scalars.
-The scalar count uses the same directed-neighbor accounting for every method: \algname{}-\pmb{i} sends $(\w,G)$, while \algname{}-\pmb{ii}, DOGD, and the adaptive baselines send one $d$-dimensional vector.
+All baselines use the same causal online protocol: predict, observe one local gradient, update the local optimizer state, and then gossip the decision vector once unless another schedule is stated.
+We sweep the same 25 values $\eta_0\in[10^{-3},10^3]$ for DOGD and the three adaptive methods on identical data streams.
+DOGD uses $\eta_t=\eta_0/\sqrt{t}$, whereas $\eta_0$ is the base scale multiplying the online moment-normalized update for D-AdaGrad, D-RMSProp, and D-Adam.
+The figures report cumulative network loss over the complete sweep; the table reports the best value in hindsight over that displayed grid and therefore does not portray the adaptive methods as parameter-free.
+The scalar count uses the same directed-neighbor accounting for every method: \algname{}-\pmb{i} sends $(\w,G)$, while \algname{}-\pmb{ii}, DOGD, and the three adaptive baselines send one $d$-dimensional vector.
 
-We additionally evaluate the adaptive baselines on bundled real datasets (diabetes, breast cancer, and digits), while preserving the original LIBSVM workflow.
-The bundled datasets make the review experiments reproducible in offline and Docker environments.
-The following table reports $T=100$ runs on a cycle graph with $N=20$ and $q(t)=1$.
+Final cumulative network loss on the synthetic online stream across the common base-rate grid $\eta_0\in[10^{-3},10^3]$. DOGD, D-AdaGrad, D-RMSProp, and D-Adam are swept over all 25 values; the horizontal lines are the untuned \algname{}-\pmb{i}/\pmb{ii} (KT) and centralized references.
 
-\emph{Communication-normalized experiments with $T=100$, $N=20$, and $q(t)=1$. Lower cumulative network loss is better. ``Scalars'' is the total number of real scalars exchanged by gossip.}
+A primary motivation for our work is the brittleness of online methods that require a user-chosen learning-rate scale.
+We therefore sweep DOGD, D-AdaGrad, D-RMSProp, and D-Adam over the same 25 values from $10^{-3}$ to $10^3$ on the same synthetic stream for $T=3000$ rounds.
+All four baselines operate sequentially without replaying future losses.
+
+As shown in Fig.~3, every baseline has a restricted useful range of $\eta_0$, and their losses deteriorate substantially outside it.
+The optimal scale also differs across DOGD, D-AdaGrad, D-RMSProp, and D-Adam.
+The horizontal \algname{} curves require no learning-rate sweep; this is the specific parameter-free advantage supported by the experiment.
+
+Since the KT and exponential potentials provide similar performance, the sensitivity figure and the remaining comparisons show the KT potential for \algname{} and the centralized reference to keep the seven-curve legends readable.
+
+For context, the same figure also reports D-AdaGrad, D-RMSProp, and D-Adam at the representative setting $p=0.3$, $q(t)=1$, and $\eta_0=0.1$; these reference curves are not additional connectivity sweeps.
+
+Synthetic online performance under varying connectivity. The ER curves sweep \algname{}-\pmb{ii} (KT) over $p\in\{0.1,0.3,1.0\}$; D-AdaGrad, D-RMSProp, and D-Adam are $p=0.3$, $q(t)=1$, $\eta_0=0.1$ references. \textbf{Top}: cumulative network loss. \textbf{Bottom}: per-round network loss smoothed over 250 rounds.
+
+The figure also includes D-AdaGrad, D-RMSProp, and D-Adam with $q(t)=1$ and $\eta_0=0.1$ as online adaptive reference curves; only \algname{} is varied across gossip schedules.
+
+Cumulative network loss on the synthetic online stream. \algname{}-\pmb{ii} (KT) is shown with constant, logarithmic, and linear gossip schedules; D-AdaGrad, D-RMSProp, and D-Adam use $q(t)=1$ and $\eta_0=0.1$. Increasing \algname{}'s communication budget reduces loss, while the adaptive curves provide same-communication references.
+
+Final cumulative network loss on four online LIBSVM streams. Each panel shows the complete 25-value $\eta_0$ sweep for DOGD, D-AdaGrad, D-RMSProp, and D-Adam on a log--log scale. Horizontal lines show \algname{}-\pmb{i}/\pmb{ii} (KT) and the centralized reference without learning-rate tuning.
+
+We evaluate DOGD, D-AdaGrad, D-RMSProp, and D-Adam on the same four LIBSVM online streams as \algname{}.
+Every run uses a cycle graph with $N=20$ and $q(t)=1$, and every baseline is swept over the same 25-value grid $\eta_0\in[10^{-3},10^3]$.
+Table~II reports the best cumulative network loss in hindsight over the displayed grid, together with the selected $\eta_0$ and total communicated scalars.
+
+\emph{Online LIBSVM experiments with $N=20$ and $q(t)=1$. For DOGD and the three adaptive baselines, ``Selected $\eta_0$'' is the best value in hindsight among the 25 values plotted in Fig.~6; it is not additional tuning hidden from the figure. Lower cumulative network loss is better.}
 \begin{center}
 \resizebox{\linewidth}{!}{%
-\begin{tabular}{llrr}
+\begin{tabular}{lrlrrr}
     \hline
-    Dataset / graph & Method & Cum. network loss & Scalars \\
+    Dataset & $T$ & Method & Selected $\eta_0$ & Cum. network loss & Scalars \\
     \hline
-    Synthetic cycle & \algname{}-i (KT) & 27.24 & 44,000 \\
-    Synthetic cycle & \algname{}-ii (KT) & 46.20 & 40,000 \\
-    Synthetic cycle & D-RMSProp & 20.67 & 40,000 \\
-    Diabetes & \algname{}-i (KT) & 64.47 & 44,000 \\
-    Diabetes & DGD & 59.41 & 40,000 \\
-    Breast cancer & \algname{}-i (KT) & 38.31 & 124,000 \\
-    Breast cancer & DGD & 35.76 & 120,000 \\
-    Digits & \algname{}-i (KT) & 81.08 & 260,000 \\
-    Digits & D-RMSProp & 63.03 & 256,000 \\
+    \texttt{space\_ga} & 155 & \algname{}-i (KT)  & --     & 92.51  & 43,400 \\
+    \texttt{space\_ga} & 155 & \algname{}-ii (KT) & --     & 101.76 & 37,200 \\
+    \texttt{space\_ga} & 155 & DOGD                 & 1      & 88.81  & 37,200 \\
+    \texttt{space\_ga} & 155 & D-AdaGrad            & 0.316  & 89.21  & 37,200 \\
+    \texttt{space\_ga} & 155 & D-RMSProp            & 0.0316 & 89.28  & 37,200 \\
+    \texttt{space\_ga} & 155 & D-Adam               & 0.178  & 89.53  & 37,200 \\
+    \hline
+    \texttt{cpusmall} & 409 & \algname{}-i (KT)  & --     & 136.59 & 212,680 \\
+    \texttt{cpusmall} & 409 & \algname{}-ii (KT) & --     & 147.13 & 196,320 \\
+    \texttt{cpusmall} & 409 & DOGD                 & 1.78   & 127.63 & 196,320 \\
+    \texttt{cpusmall} & 409 & D-AdaGrad            & 0.562  & 121.73 & 196,320 \\
+    \texttt{cpusmall} & 409 & D-RMSProp            & 0.0316 & 122.99 & 196,320 \\
+    \texttt{cpusmall} & 409 & D-Adam               & 0.1    & 122.09 & 196,320 \\
+    \hline
+    \texttt{cadata} & 1,032 & \algname{}-i (KT)  & --     & 517.87 & 371,520 \\
+    \texttt{cadata} & 1,032 & \algname{}-ii (KT) & --     & 583.69 & 330,240 \\
+    \texttt{cadata} & 1,032 & DOGD                 & 1.78   & 495.55 & 330,240 \\
+    \texttt{cadata} & 1,032 & D-AdaGrad            & 1      & 493.68 & 330,240 \\
+    \texttt{cadata} & 1,032 & D-RMSProp            & 0.0562 & 496.91 & 330,240 \\
+    \texttt{cadata} & 1,032 & D-Adam               & 0.1    & 499.85 & 330,240 \\
+    \hline
+    \texttt{abalone} & 208 & \algname{}-i (KT)  & --     & 130.13 & 74,880 \\
+    \texttt{abalone} & 208 & \algname{}-ii (KT) & --     & 137.66 & 66,560 \\
+    \texttt{abalone} & 208 & DOGD                 & 1.78   & 121.45 & 66,560 \\
+    \texttt{abalone} & 208 & D-AdaGrad            & 0.562  & 121.30 & 66,560 \\
+    \texttt{abalone} & 208 & D-RMSProp            & 0.0562 & 121.50 & 66,560 \\
+    \texttt{abalone} & 208 & D-Adam               & 0.1    & 121.07 & 66,560 \\
     \hline
 \end{tabular}%
 }
 \end{center}
 
-These short-horizon results show that tuned adaptive decentralized baselines can be competitive or better on some datasets.
-The empirical conclusion is therefore not that \algname{} uniformly dominates tuned adaptive methods; rather, \algname{} provides learning-rate-free decentralized coin-betting updates with explicit communication accounting and regret guarantees in the convex online-learning setting.
+The best-in-grid adaptive baselines are competitive with or better than \algname{} on several streams, but the selected scale varies by method and dataset.
+The empirical conclusion is therefore not that \algname{} uniformly dominates tuned adaptive methods; rather, \algname{} avoids this learning-rate sweep while providing explicit network-regret guarantees in the convex online setting.
+
+Finally, we evaluate \algname{}, DOGD, and the three online adaptive baselines on four real-world LIBSVM regression streams.
+The cycle graph, sample order, horizon, and one-gossip-round budget are identical for every method and every value of $\eta_0$.
+
+Fig.~6 shows that learning-rate sensitivity is not specific to DOGD.
+D-AdaGrad, D-RMSProp, and D-Adam also deteriorate outside method- and dataset-dependent ranges, even though their moment accumulators adapt the coordinate-wise update magnitudes online.
+Within their favorable ranges they can match or outperform \algname{}, as the best-in-grid values in Table~II make explicit.
+The supported conclusion is that \algname{} removes learning-rate selection, not that it uniformly improves upon every tuned adaptive optimizer.
+
+The results compare \algname{} with tuned DOGD, D-AdaGrad, D-RMSProp, and D-Adam across synthetic and real online streams. The tuned baselines can be better on some streams, while \algname{} remains competitive without selecting a learning-rate scale.
 \end{changes}
 \end{revresponse}
-
 \begin{revcomment}
 The discussion of prior works on parameter-free decentralized learning is insufficient.
 \end{revcomment}
 \begin{revresponse}
-We expanded the related-work positioning to include recent parameter-free decentralized optimization papers, including the works named by the reviewer.  The revised manuscript distinguishes these settings from ours: those works focus on stochastic/nonconvex or composite decentralized optimization and convergence to minimizers, whereas our work addresses convex online learning and network regret against a comparator.
-The added manuscript text (with its citations retained in the manuscript) is:
+We expanded the related-work positioning to include the recent parameter-free decentralized optimization papers named by the reviewer.  These methods optimize fixed stochastic, strongly convex smooth, or composite objectives and are evaluated by convergence to a minimizer; they do not implement the same sequential predict-before-feedback protocol or optimize network regret.  We therefore do not present them as directly interchangeable experimental baselines.  Instead, the empirical comparison uses D-AdaGrad, D-RMSProp, and D-Adam under exactly the same causal decentralized online protocol as DOGD and \algname{}.
+The relevant added manuscript text (with its citations retained in the manuscript) is:
 \begin{changes}
 Recent parameter-free decentralized optimization methods address nonconvex stochastic objectives~[17], strongly convex smooth objectives~[18], and composite convex objectives~[19].
 These works study convergence to a minimizer under their respective optimization models, whereas our setting considers sequential convex losses and network regret against a comparator.
 The problem models and performance criteria are therefore complementary rather than directly interchangeable.
+
+All baselines use the same causal online protocol: predict, observe one local gradient, update the local optimizer state, and then gossip the decision vector once unless another schedule is stated.
+We sweep the same 25 values $\eta_0\in[10^{-3},10^3]$ for DOGD and the three adaptive methods on identical data streams.
+DOGD uses $\eta_t=\eta_0/\sqrt{t}$, whereas $\eta_0$ is the base scale multiplying the online moment-normalized update for D-AdaGrad, D-RMSProp, and D-Adam.
 \end{changes}
 \end{revresponse}
 
@@ -467,8 +578,9 @@ Extending parameter-free decentralized coin betting to that setting is outside t
 The communication design of \algname{}-i should be justified, and \algname{}-i and \algname{}-ii should be compared under normalized communication cost.
 \end{revcomment}
 \begin{revresponse}
-We now justify \algname{}-i as the direct decentralized form of classical wealth-based coin-betting and \algname{}-ii as the one-state betting-function variant that avoids communicating wealth.  The implementation was revised so \algname{}-ii gossips only $G$; \algname{}-i gossips $(\mathrm{Wealth},G)$.  The new experiments report total communicated scalars.  For example, on the synthetic cycle run with $d=10$, \algname{}-i (KT) used $44{,}000$ scalars and \algname{}-ii (KT) used $40{,}000$ scalars.  This lets the reader attribute performance differences to both update rule and communication budget rather than conflating the two.
-The exact added manuscript text is:
+We now justify \algname{}-i as the direct decentralized form of classical wealth-based coin betting and \algname{}-ii as the one-state betting-function variant that avoids communicating wealth.  The implementation gossips only $G$ for \algname{}-ii and $(\mathrm{Wealth},G)$ for \algname{}-i.
+The rerun reports both variants under the same cycle graph, data order, horizon, and gossip schedule on all four LIBSVM streams.  For example, on \texttt{space\_ga}, \algname{}-i communicates $43{,}400$ scalars and \algname{}-ii communicates $37{,}200$; on \texttt{cadata}, the corresponding counts are $371{,}520$ and $330{,}240$.  Table~II reports the loss and scalar count for every method so the update-rule and communication-state differences are visible together.
+The exact added manuscript text and complete communication-normalized table are:
 \begin{changes}
 \algname{}-\pmb{i} is the direct decentralized analogue of classical wealth-based coin betting: because its decision depends on both $\w_{n,t-1}$ and $G_{n,t-1}$, both states are gossiped.
 \algname{}-\pmb{ii} is the one-state betting-function variant $x_{n,t}=h_t(G_{n,t-1})$ and gossips only $G$.
@@ -478,27 +590,44 @@ We report total transmitted scalars so that their empirical comparison makes thi
 If $d$ is the model dimension and $|E_{\mathrm{dir}}|$ is the number of directed non-self neighbor transmissions, one gossip round communicates $|E_{\mathrm{dir}}|d$ real scalars for \algname{}-\pmb{ii}, DOGD, and the adaptive decentralized baselines, and $|E_{\mathrm{dir}}|(d+1)$ real scalars for \algname{}-\pmb{i} because it additionally communicates the scalar wealth.
 Over a horizon $T$, a schedule $q(t)$ therefore communicates $|E_{\mathrm{dir}}|d\sum_{t=1}^Tq(t)$ scalars for one-vector methods and $|E_{\mathrm{dir}}|(d+1)\sum_{t=1}^Tq(t)$ scalars for \algname{}-\pmb{i}.
 
-\emph{Communication-normalized experiments with $T=100$, $N=20$, and $q(t)=1$. Lower cumulative network loss is better. ``Scalars'' is the total number of real scalars exchanged by gossip.}
+\emph{Online LIBSVM experiments with $N=20$ and $q(t)=1$. For DOGD and the three adaptive baselines, ``Selected $\eta_0$'' is the best value in hindsight among the 25 values plotted in Fig.~6; it is not additional tuning hidden from the figure. Lower cumulative network loss is better.}
 \begin{center}
 \resizebox{\linewidth}{!}{%
-\begin{tabular}{llrr}
+\begin{tabular}{lrlrrr}
     \hline
-    Dataset / graph & Method & Cum. network loss & Scalars \\
+    Dataset & $T$ & Method & Selected $\eta_0$ & Cum. network loss & Scalars \\
     \hline
-    Synthetic cycle & \algname{}-i (KT) & 27.24 & 44,000 \\
-    Synthetic cycle & \algname{}-ii (KT) & 46.20 & 40,000 \\
-    Synthetic cycle & D-RMSProp & 20.67 & 40,000 \\
-    Diabetes & \algname{}-i (KT) & 64.47 & 44,000 \\
-    Diabetes & DGD & 59.41 & 40,000 \\
-    Breast cancer & \algname{}-i (KT) & 38.31 & 124,000 \\
-    Breast cancer & DGD & 35.76 & 120,000 \\
-    Digits & \algname{}-i (KT) & 81.08 & 260,000 \\
-    Digits & D-RMSProp & 63.03 & 256,000 \\
+    \texttt{space\_ga} & 155 & \algname{}-i (KT)  & --     & 92.51  & 43,400 \\
+    \texttt{space\_ga} & 155 & \algname{}-ii (KT) & --     & 101.76 & 37,200 \\
+    \texttt{space\_ga} & 155 & DOGD                 & 1      & 88.81  & 37,200 \\
+    \texttt{space\_ga} & 155 & D-AdaGrad            & 0.316  & 89.21  & 37,200 \\
+    \texttt{space\_ga} & 155 & D-RMSProp            & 0.0316 & 89.28  & 37,200 \\
+    \texttt{space\_ga} & 155 & D-Adam               & 0.178  & 89.53  & 37,200 \\
+    \hline
+    \texttt{cpusmall} & 409 & \algname{}-i (KT)  & --     & 136.59 & 212,680 \\
+    \texttt{cpusmall} & 409 & \algname{}-ii (KT) & --     & 147.13 & 196,320 \\
+    \texttt{cpusmall} & 409 & DOGD                 & 1.78   & 127.63 & 196,320 \\
+    \texttt{cpusmall} & 409 & D-AdaGrad            & 0.562  & 121.73 & 196,320 \\
+    \texttt{cpusmall} & 409 & D-RMSProp            & 0.0316 & 122.99 & 196,320 \\
+    \texttt{cpusmall} & 409 & D-Adam               & 0.1    & 122.09 & 196,320 \\
+    \hline
+    \texttt{cadata} & 1,032 & \algname{}-i (KT)  & --     & 517.87 & 371,520 \\
+    \texttt{cadata} & 1,032 & \algname{}-ii (KT) & --     & 583.69 & 330,240 \\
+    \texttt{cadata} & 1,032 & DOGD                 & 1.78   & 495.55 & 330,240 \\
+    \texttt{cadata} & 1,032 & D-AdaGrad            & 1      & 493.68 & 330,240 \\
+    \texttt{cadata} & 1,032 & D-RMSProp            & 0.0562 & 496.91 & 330,240 \\
+    \texttt{cadata} & 1,032 & D-Adam               & 0.1    & 499.85 & 330,240 \\
+    \hline
+    \texttt{abalone} & 208 & \algname{}-i (KT)  & --     & 130.13 & 74,880 \\
+    \texttt{abalone} & 208 & \algname{}-ii (KT) & --     & 137.66 & 66,560 \\
+    \texttt{abalone} & 208 & DOGD                 & 1.78   & 121.45 & 66,560 \\
+    \texttt{abalone} & 208 & D-AdaGrad            & 0.562  & 121.30 & 66,560 \\
+    \texttt{abalone} & 208 & D-RMSProp            & 0.0562 & 121.50 & 66,560 \\
+    \texttt{abalone} & 208 & D-Adam               & 0.1    & 121.07 & 66,560 \\
     \hline
 \end{tabular}%
 }
 \end{center}
 \end{changes}
 \end{revresponse}
-
 \end{document}

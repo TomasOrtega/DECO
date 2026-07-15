@@ -17,6 +17,10 @@ import numpy as np
 from src.deco.algorithms import run_simulation
 from src.deco.environments import RealDataEnvironment
 from src.deco.graph import create_gossip_matrix
+from src.deco.online_baselines import (
+    ONLINE_BASELINE_NAMES,
+    make_online_baseline_config,
+)
 from src.deco.potentials import ExponentialPotential, KTPotential
 
 
@@ -28,6 +32,13 @@ def parse_args():
     parser.add_argument("--T", type=int, default=100, help="online rounds")
     parser.add_argument("--N", type=int, default=20, help="number of agents")
     parser.add_argument("--seeds", type=int, nargs="+", default=[0], help="random seeds")
+    parser.add_argument(
+        "--learning-rates",
+        type=float,
+        nargs="+",
+        default=[0.01, 0.1, 1.0],
+        help="base learning-rate scales for DOGD and adaptive baselines",
+    )
     parser.add_argument("--datasets", nargs="+", default=list(DEFAULT_DATASETS))
     parser.add_argument(
         "--topology",
@@ -39,9 +50,9 @@ def parse_args():
     return parser.parse_args()
 
 
-def make_algorithms():
+def make_algorithms(learning_rates):
     common = {"gossip": True, "disable_tqdm": True}
-    return {
+    algorithms = {
         "DECO-ii KT q=1": {
             "agent_type": "Deco",
             "potential": KTPotential(),
@@ -60,51 +71,21 @@ def make_algorithms():
             "version": "ii",
             **common,
         },
-        "DGD lr=1/sqrt(t)": {"agent_type": "DGD", "lr": 1.0, **common},
-        "D-AdaGrad lr=0.3": {
-            "agent_type": "AdaptiveDGD",
-            "method": "adagrad",
-            "lr": 0.3,
-            **common,
-        },
-        "D-RMSProp lr=0.03": {
-            "agent_type": "AdaptiveDGD",
-            "method": "rmsprop",
-            "lr": 0.03,
-            "beta2": 0.99,
-            **common,
-        },
-        "D-Adam lr=0.03": {
-            "agent_type": "AdaptiveDGD",
-            "method": "adam",
-            "lr": 0.03,
-            **common,
-        },
-        "D-AdamW lr=0.03": {
-            "agent_type": "AdaptiveDGD",
-            "method": "adamw",
-            "lr": 0.03,
-            "weight_decay": 1e-3,
-            **common,
-        },
-        "D-Momentum lr=0.1": {
-            "agent_type": "AdaptiveDGD",
-            "method": "momentum",
-            "lr": 0.1,
-            **common,
-        },
-        "D-Nesterov lr=0.1": {
-            "agent_type": "AdaptiveDGD",
-            "method": "nesterov",
-            "lr": 0.1,
-            **common,
-        },
         "Centralized KT": {
             "agent_type": "Centralized",
             "potential": KTPotential(),
             "disable_tqdm": True,
         },
     }
+    for name in ONLINE_BASELINE_NAMES:
+        for learning_rate in learning_rates:
+            label = f"{name} eta0={learning_rate:g}"
+            algorithms[label] = make_online_baseline_config(
+                name,
+                learning_rate,
+                **common,
+            )
+    return algorithms
 
 
 def summarize(history):
@@ -124,7 +105,7 @@ def main():
     for seed in args.seeds:
         W = create_gossip_matrix(args.N, topology=args.topology, p=0.2, seed=seed)
         for dataset in args.datasets:
-            for name, config in make_algorithms().items():
+            for name, config in make_algorithms(args.learning_rates).items():
                 env = RealDataEnvironment(args.N, dataset=dataset, seed=seed)
                 history = run_simulation(
                     args.T, args.N, env.dim, env, W, config, env.u_star
@@ -134,6 +115,7 @@ def main():
                     "dataset": dataset,
                     "topology": args.topology,
                     "algorithm": name,
+                    "initial_lr": config.get("lr", ""),
                     "n_samples": env.n_samples,
                     "dim": env.dim,
                 }
@@ -147,6 +129,7 @@ def main():
         "dataset",
         "topology",
         "algorithm",
+        "initial_lr",
         "n_samples",
         "dim",
         "final_cumulative_network_loss",

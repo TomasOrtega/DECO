@@ -2,7 +2,7 @@
 # This script runs all experiments and stops if any command fails.
 set -e
 
-echo "--- (1/7) Running DGD Tuning Experiment ---"
+echo "--- (1/7) Running Online Baseline Learning-Rate Sweeps ---"
 python -m experiments.tune_dgd
 
 echo ""

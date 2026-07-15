@@ -1,5 +1,4 @@
 # experiments/run_multi_dataset_comparison.py
-import numpy as np
 import h5py
 import os
 import time
@@ -8,6 +7,11 @@ from tqdm import tqdm
 from src.deco.algorithms import run_simulation
 from src.deco.graph import create_gossip_matrix
 from src.deco.environments import RealDataEnvironment
+from src.deco.online_baselines import (
+    LEARNING_RATES,
+    ONLINE_BASELINE_NAMES,
+    make_online_baseline_config,
+)
 from src.deco.potentials import ExponentialPotential, KTPotential
 from src.deco.utils import save_results_to_hdf5
 
@@ -16,10 +20,8 @@ CONFIG = {
     "N": 20,  # Number of agents
     "TOPOLOGY": "cycle",
     "RESULTS_DIR": "results",
+    "SEED": 0,
 }
-
-# Add the learning rates for DGD tuning
-LEARNING_RATES_DGD = np.logspace(-3, 7, num=100)
 
 # Datasets to compare
 DATASETS_TO_TEST = [
@@ -63,16 +65,21 @@ def run_single_dataset_experiment(dataset_name):
     print(f"Starting experiments on {dataset_name}...")
 
     try:
-        env = RealDataEnvironment(CONFIG["N"], dataset=dataset_name)
+        base_env = RealDataEnvironment(
+            CONFIG["N"], dataset=dataset_name, seed=CONFIG["SEED"]
+        )
     except ValueError as e:
         print(f"Error loading dataset {dataset_name}: {e}")
         return None
 
-    T = int(env.n_samples // CONFIG["N"])
-    print(f"  Using T={T} iterations (floor({env.n_samples} / {CONFIG['N']}))")
+    T = int(base_env.n_samples // CONFIG["N"])
+    print(
+        f"  Using T={T} iterations "
+        f"(floor({base_env.n_samples} / {CONFIG['N']}))"
+    )
 
     W = create_gossip_matrix(CONFIG["N"], topology=CONFIG["TOPOLOGY"])
-    U_STAR = env.u_star
+    U_STAR = base_env.u_star
 
     dataset_results = {}
 
@@ -80,30 +87,54 @@ def run_single_dataset_experiment(dataset_name):
     for algo_name, algo_config in ALGORITHMS.items():
         print(f"  Running {algo_name} on {dataset_name}...")
         start_time = time.time()
+        env = RealDataEnvironment(
+            CONFIG["N"], dataset=dataset_name, seed=CONFIG["SEED"]
+        )
         results = run_simulation(T, CONFIG["N"], env.dim, env, W, algo_config, U_STAR)
         elapsed = time.time() - start_time
         dataset_results[algo_name] = results
         print(f"    Completed in {elapsed:.1f}s")
 
-    # Run DGD tuning sweep
-    print(
-        f"  Tuning DGD on {dataset_name} over {len(LEARNING_RATES_DGD)} "
-        f"learning rates..."
-    )
-    dgd_results = {}
-    for lr in tqdm(LEARNING_RATES_DGD, desc="    DGD tuning", leave=False):
-        dgd_config = {"agent_type": "DGD", "lr": lr, "gossip": True}
-        results = run_simulation(T, CONFIG["N"], env.dim, env, W, dgd_config, U_STAR)
-        dgd_results[lr] = results
+    tuned_results = {}
+    for baseline_name in ONLINE_BASELINE_NAMES:
+        print(
+            f"  Tuning {baseline_name} on {dataset_name} over "
+            f"{len(LEARNING_RATES)} learning rates..."
+        )
+        rate_results = {}
+        for lr in tqdm(
+            LEARNING_RATES,
+            desc=f"    {baseline_name} tuning",
+            leave=False,
+        ):
+            env = RealDataEnvironment(
+                CONFIG["N"], dataset=dataset_name, seed=CONFIG["SEED"]
+            )
+            config = make_online_baseline_config(
+                baseline_name,
+                lr,
+                gossip=True,
+                disable_tqdm=True,
+            )
+            rate_results[lr] = run_simulation(
+                T,
+                CONFIG["N"],
+                env.dim,
+                env,
+                W,
+                config,
+                U_STAR,
+            )
+        tuned_results[baseline_name] = rate_results
 
-    dataset_results["DGD_tune"] = dgd_results
+    dataset_results["Online_tune"] = tuned_results
 
     return {
         "dataset_name": dataset_name,
         "dataset_info": {
-            "task_type": env.task_type,
-            "n_features": env.dim,
-            "n_samples": env.n_samples,
+            "task_type": base_env.task_type,
+            "n_features": base_env.dim,
+            "n_samples": base_env.n_samples,
             "T": T,
         },
         "results": dataset_results,

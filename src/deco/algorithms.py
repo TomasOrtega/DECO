@@ -65,6 +65,7 @@ def run_simulation(T, N, DIM, env, W, config, u_star):
     # Get the gossip schedule, q(t). Default to a constant 1.
     gossip_schedule = config.get("q_t", lambda t: 1)
     per_gossip_scalars = _off_diagonal_messages(W) * _state_dimension(config, DIM)
+    gossip_powers = {}
 
     for t in tqdm(range(T), leave=False, disable=config.get("disable_tqdm", False)):
         decisions = [agent.predict(t) for agent in agents]
@@ -96,35 +97,23 @@ def run_simulation(T, N, DIM, env, W, config, u_star):
             q = max(int(gossip_schedule(t)), 0)
             history["communication_scalars"][t] = q * per_gossip_scalars
 
-            # Apply gossip q times
-            for round_idx in range(q):
-                # Gather state from all agents before gossiping
-                network_state = {}
+            if q > 0:
+                # W**q is exactly q synchronous linear gossip rounds.
+                if q not in gossip_powers:
+                    gossip_powers[q] = np.linalg.matrix_power(W, q)
+                mixing = gossip_powers[q]
                 if config["agent_type"] == "Deco":
-                    # DECO-i gossips wealth and accumulated gradients; DECO-ii
-                    # gossips only the accumulated gradients used by h_t(G).
+                    gradients = mixing @ np.asarray([agent.hat_G for agent in agents])
                     if config.get("version") == "i":
-                        network_state["w"] = [
-                            agent.hat_w if round_idx == 0 else agent.w
-                            for agent in agents
-                        ]
-                    network_state["G"] = [
-                        agent.hat_G if round_idx == 0 else agent.G for agent in agents
-                    ]
-
+                        wealth = mixing @ np.asarray([agent.hat_w for agent in agents])
+                    for i, agent in enumerate(agents):
+                        state = {"G": gradients[i]}
+                        if config.get("version") == "i":
+                            state["w"] = wealth[i]
+                        agent.apply_gossip_state(state)
                 elif config["agent_type"] in {"DGD", "AdaptiveDGD"}:
-                    network_state["x"] = [agent.x for agent in agents]
-
-                # Create a temporary list to store post-gossip states
-                gossiped_states = []
-
-                for agent in agents:
-                    # Each agent calculates its new state based on the network state
-                    gossiped_state = agent.gossip(network_state, W, return_state=True)
-                    gossiped_states.append(gossiped_state)
-
-                # Atomically update all agents with their new gossiped states
-                for i, agent in enumerate(agents):
-                    agent.apply_gossip_state(gossiped_states[i])
+                    decisions = mixing @ np.asarray([agent.x for agent in agents])
+                    for i, agent in enumerate(agents):
+                        agent.apply_gossip_state({"x": decisions[i]})
 
     return history

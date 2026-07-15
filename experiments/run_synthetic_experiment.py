@@ -6,6 +6,11 @@ import os
 from src.deco.algorithms import run_simulation
 from src.deco.graph import create_gossip_matrix
 from src.deco.environments import SyntheticRegression
+from src.deco.online_baselines import (
+    ADAPTIVE_BASELINE_NAMES,
+    REFERENCE_LEARNING_RATE,
+    make_online_baseline_config,
+)
 from src.deco.potentials import ExponentialPotential, KTPotential
 from src.deco.utils import save_results_to_hdf5
 
@@ -19,16 +24,19 @@ CONFIG = {
     "SEED": 0,
 }
 
+def make_environment(u_star):
+    np.random.seed(CONFIG["SEED"])
+    return SyntheticRegression(CONFIG["N"], CONFIG["DIM"], u_star)
+
+
 if __name__ == "__main__":
     os.makedirs(CONFIG["RESULTS_DIR"], exist_ok=True)
-    U_STAR = np.random.randn(CONFIG["DIM"])
-    # fix random seed for reproducibility
-    np.random.seed(CONFIG["SEED"])
+    rng = np.random.default_rng(CONFIG["SEED"])
+    U_STAR = rng.standard_normal(CONFIG["DIM"])
 
     for topo in CONFIG["TOPOLOGIES"]:
         print(f"===== Running on Topology: {topo.upper()} =====")
         W = create_gossip_matrix(CONFIG["N"], topology=topo)
-        env = SyntheticRegression(CONFIG["N"], CONFIG["DIM"], U_STAR)
 
         algorithms = {
             "DECO-ii (exp)": {
@@ -63,12 +71,27 @@ if __name__ == "__main__":
                 "potential": KTPotential(),
             },
         }
+        for name in ADAPTIVE_BASELINE_NAMES:
+            algorithms[f"{name} (eta0={REFERENCE_LEARNING_RATE:g})"] = (
+                make_online_baseline_config(
+                    name,
+                    REFERENCE_LEARNING_RATE,
+                    gossip=True,
+                    disable_tqdm=True,
+                )
+            )
 
         all_results = {}
         for name, algo_config in algorithms.items():
             print(f"--- Running Algorithm: {name} ---")
             results = run_simulation(
-                CONFIG["T"], CONFIG["N"], CONFIG["DIM"], env, W, algo_config, U_STAR
+                CONFIG["T"],
+                CONFIG["N"],
+                CONFIG["DIM"],
+                make_environment(U_STAR),
+                W,
+                algo_config,
+                U_STAR,
             )
             all_results[name] = results
 

@@ -67,7 +67,7 @@ In these instructions we will use the Anaconda or Miniconda package manager.
     The review real-data experiment below also supports bundled scikit-learn datasets, so it can run even when external dataset mirrors are unavailable.
 
 4.  **Run the full workflow:**
-    This single script will execute all experiments, save the results to the `results/` directory, and then generate the final plots in the `plots/Figs/` directory.
+    This single script will execute all experiments, save the results to the `results/` directory, and then generate the final manuscript plots in the `tex/Figs/` directory.
 
       * On **macOS or Linux**:
         ```bash
@@ -82,7 +82,7 @@ In these instructions we will use the Anaconda or Miniconda package manager.
 
 The review-response revision adds two focused experiment scripts.
 
-`experiments/run_review_baseline_experiment.py` compares DECO against decentralized adaptive-gradient baselines requested by the reviewers: AdaGrad, RMSProp, Adam, AdamW, momentum, and Nesterov. The script reports cumulative network loss and scalar communication cost, distinguishing DECO-i's `(wealth, G)` messages from DECO-ii's `G`-only messages.
+`experiments/run_review_baseline_experiment.py` compares DECO against three representative online decentralized adaptive-gradient baselines: AdaGrad, RMSProp, and Adam. Each method predicts, observes one local gradient, updates its local optimizer state, and then gossips its decision vector. The script evaluates multiple base learning-rate scales and reports cumulative network loss and scalar communication cost, distinguishing DECO-i's `(wealth, G)` messages from DECO-ii's `G`-only messages.
 
 `experiments/run_review_real_data_experiment.py` repeats the same comparison on real datasets. It defaults to bundled scikit-learn datasets (`diabetes`, `breast_cancer`, and `digits`) for offline/Docker reproducibility while preserving the existing LIBSVM dataset support in `RealDataEnvironment`.
 
@@ -93,7 +93,7 @@ python -m experiments.run_review_baseline_experiment --T 1000 --seeds 0 1 2
 python -m experiments.run_review_real_data_experiment --T 1000 --seeds 0 1 2 --datasets diabetes breast_cancer digits
 ```
 
-The summaries are written to `results/review_baseline_summary.csv` and `results/review_real_data_summary.csv` with cumulative network loss, average network loss, cumulative local loss, and total communicated scalars.
+The summaries are written to `results/review_baseline_summary.csv` and `results/review_real_data_summary.csv` with the initial learning rate, cumulative network loss, average network loss, cumulative local loss, and total communicated scalars. The full workflow also writes `results/online_baseline_table.csv` and regenerates the manuscript PDFs directly under `tex/Figs/`.
 
 ### Method 2: Docker (Recommended for Full Reproducibility)
 
@@ -109,10 +109,10 @@ This is the easiest and most reliable method. It uses Docker to build a self-con
     ```
 
 2.  **Run the container:**
-    This command will run the entire workflow inside the container. It uses volumes (`-v`) to ensure the generated data and plots are saved directly to the `results/` and `plots/Figs/` folders on your local machine.
+    This command will run the entire workflow inside the container. It uses volumes (`-v`) to ensure the generated data and plots are saved directly to the `results/` and `tex/Figs/` folders on your local machine.
     **If you are on Windows, make sure to use PowerShell.**
     ```bash
-    docker run --rm -v "$(pwd)/results:/app/results" -v "$(pwd)/plots/Figs:/app/plots/Figs" deco-repro
+    docker run --rm -v "$(pwd)/results:/app/results" -v "$(pwd)/tex/Figs:/app/tex/Figs" deco-repro
     ```
 
 3.  **Run only the review experiments inside Docker:**
