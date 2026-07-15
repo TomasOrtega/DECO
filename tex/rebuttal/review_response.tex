@@ -24,6 +24,7 @@
 \usepackage{stfloats}
 \usepackage{url}
 \usepackage{verbatim}
+\usepackage{graphicx}
 \usepackage{hyperref,cleveref}
 
 \newcommand{\cmark}{\textcolor{green}{\ding{51}}}%
@@ -88,6 +89,14 @@
         Consequently, $q(t)=1$ has linear total communication in $T$, whereas $q(t)=\lceil\alpha t\rceil$ has quadratic total communication.
     \end{changes}
     This makes clear that the proposed method is local-neighbor decentralized and that the communication cost is now measurable per algorithm and per graph.
+    \begin{center}
+        \begin{minipage}{0.9\linewidth}
+            \centering
+            \includegraphics[width=0.64\linewidth]{../Figs/connectivity_impact.pdf}
+            \par\smallskip
+            \raggedright\small\textbf{Revised manuscript Fig.~4.} Synthetic online performance of \algname{}-\pmb{ii} (KT) under varying connectivity, with ER edge probabilities $p\in\{0.1,0.3,1.0\}$ and the centralized reference. \textbf{Top}: cumulative network loss. \textbf{Bottom}: per-round network loss smoothed over 250 rounds.
+        \end{minipage}
+    \end{center}
 \end{revresponse}
 
 \begin{revcomment}
@@ -125,6 +134,14 @@
 
         \emph{Revised figure caption:} Cumulative network loss on the synthetic online stream for \algname{}-\pmb{ii} (KT) with constant, logarithmic, and linear gossip schedules, together with the centralized reference. Increasing the communication budget reduces loss.
     \end{changes}
+    \begin{center}
+        \begin{minipage}{0.9\linewidth}
+            \centering
+            \includegraphics[width=0.69\linewidth]{../Figs/gossip_tradeoff.pdf}
+            \par\smallskip
+            \raggedright\small\textbf{Revised manuscript Fig.~5.} Cumulative network loss on the synthetic online stream for \algname{}-\pmb{ii} (KT) with constant, logarithmic, and linear gossip schedules, together with the centralized reference. Increasing the communication budget reduces loss.
+        \end{minipage}
+    \end{center}
     Thus, the revised discussion no longer relies on an unqualified ``closely tracks'' interpretation.
 \end{revresponse}
 
@@ -242,6 +259,22 @@
 
         The results compare \algname{} with tuned DOGD, D-AdaGrad, D-RMSProp, and D-Adam across synthetic and real online streams. The tuned baselines can be better on some streams, while \algname{} remains competitive without selecting a learning-rate scale.
     \end{changes}
+    \begin{center}
+        \begin{minipage}{0.9\linewidth}
+            \centering
+            \includegraphics[width=0.69\linewidth]{../Figs/online_baseline_sensitivity.pdf}
+            \par\smallskip
+            \raggedright\small\textbf{Revised manuscript Fig.~3.} Final cumulative network loss on the synthetic online stream across the common base-rate grid $\eta_0\in[10^{-3},10^3]$. DOGD, D-AdaGrad, D-RMSProp, and D-Adam are swept over all 25 values; the horizontal lines are the untuned \algname{}-\pmb{i}/\pmb{ii} (KT) and centralized references.
+        \end{minipage}
+    \end{center}
+    \begin{center}
+        \begin{minipage}{0.96\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{../Figs/multi_dataset_sensitivity.pdf}
+            \par\smallskip
+            \raggedright\small\textbf{Revised manuscript Fig.~6.} Final cumulative network loss on four online LIBSVM streams. Each panel shows the complete 25-value $\eta_0$ sweep for DOGD, D-AdaGrad, D-RMSProp, and D-Adam on a log-log scale. Horizontal lines show \algname{}-\pmb{i}/\pmb{ii} (KT) and the centralized reference without learning-rate tuning.
+        \end{minipage}
+    \end{center}
 \end{revresponse}
 \reviewer{}
 \begin{generalcomment}
@@ -402,6 +435,7 @@
 \begin{revresponse}
     We selected D-AdaGrad, D-RMSProp, and D-Adam as three representative adaptive-gradient baselines.  They derive their local updates from diagonal AdaGrad (Duchi et al.), RMSProp (Tieleman and Hinton), and Adam (Kingma and Ba), respectively.  AdamW mainly adds weight decay to Adam, while momentum and Nesterov are not adaptive-gradient methods; these three representatives directly test the reviewer's adaptive-method concern without overloading the figures.
     We implemented each method as a genuinely online decentralized algorithm: at every round it predicts, observes only the current local gradient, updates its local optimizer state, and gossips one decision vector.  DOGD and all three adaptive methods use the same 25-value initial-rate grid and identical streams.  The complete synthetic and four-LIBSVM sweeps appear in Figs.~3 and~6.  Figures~4 and~5 are focused controlled ablations of connectivity and gossip schedule, respectively.
+    The revised sensitivity figures are reproduced above with our response to the experimental-evaluation comment.
     The exact added or modified manuscript text, including the affected figure captions, is:
     \begin{changes}
         We compare them against the following baselines:
