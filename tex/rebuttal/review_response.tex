@@ -32,7 +32,9 @@
 \newcommand{\xmark}{\textcolor{red}{\ding{55}}}%
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
 \newcommand{\order}[1]{\mathcal{O}\left(#1\right)}
+\newcommand{\bigo}[1]{\mathcal{O}\left(#1\right)}
 \newcommand{\algname}{{DECO}\xspace}
+\newcommand{\w}{\text{Wealth}}
 
 \title{Decentralized Parameter-Free Online Learning}
 \author{Tomas Ortega and Hamid Jafarkhani}
@@ -61,9 +63,10 @@ The main changes are:
     \item We clarified that $q(t)=\order{t}$ is a sufficient schedule for the current proof, not a claim that quadratic communication is necessary or desirable in constrained networks.  The practical experiments emphasize the constrained $q(t)=1$ regime.
     \item We reframed \algname{}-ii as a one-state betting-function formulation rather than an unqualified approximation to \algname{}-i.  We explicitly state the communication/performance trade-off and do not claim that \algname{}-ii uniformly improves over \algname{}-i.
     \item We added decentralized adaptive baselines: AdaGrad, RMSProp, Adam, AdamW, momentum, and Nesterov-type momentum, all with the same gossip interface and communication accounting.
-    \item We added real-data review experiments, including bundled real datasets for Docker/offline reproducibility, and preserved the original LIBSVM workflow.
+    \item We added real-data review experiments, including bundled real datasets for offline and Docker reproducibility, and preserved the original LIBSVM workflow.
     \item We revised the experimental discussion to avoid overclaiming empirical dominance: tuned adaptive methods can be competitive or better in some short-horizon settings, while the central contribution of \algname{} is learning-rate-free decentralized coin-betting with regret guarantees and explicit communication accounting.
 \end{enumerate}
+For transparency, the exact added or modified manuscript text supporting every item is reproduced under the corresponding point-by-point response below; no separate manuscript change was made solely for this summary.
 \end{revresponse}
 
 \reviewer
@@ -78,9 +81,13 @@ Although the paper proposes an interesting solution backed by regret guarantees,
 \end{revcomment}
 \begin{revresponse}
 We revised the manuscript to explicitly describe the communication setup.  The network is an undirected connected graph, implemented through a Metropolis-Hastings gossip matrix, and one gossip round means that each agent exchanges its current communicated state with its immediate neighbors only.
-We added the following manuscript text:
+The manuscript now states:
 \begin{changes}
-One gossip round consists of one local exchange over every directed neighbor relation induced by the graph. If $d$ is the model dimension and $|E_{\mathrm{dir}}|$ is the number of directed non-self neighbor transmissions, then one gossip round communicates $|E_{\mathrm{dir}}|d$ real scalars for \algname{}-\pmb{ii}, DOGD, and the adaptive decentralized baselines, and $|E_{\mathrm{dir}}|(d+1)$ real scalars for \algname{}-\pmb{i} because it additionally communicates the scalar wealth.
+We assume synchronous exchanges over a fixed, connected, undirected graph and construct $W$ with Metropolis--Hastings weights in the experiments.
+One gossip round consists of one local exchange over every directed neighbor relation induced by the graph; no all-to-all exchange or central coordinator is used.
+If $d$ is the model dimension and $|E_{\mathrm{dir}}|$ is the number of directed non-self neighbor transmissions, one gossip round communicates $|E_{\mathrm{dir}}|d$ real scalars for \algname{}-\pmb{ii}, DOGD, and the adaptive decentralized baselines, and $|E_{\mathrm{dir}}|(d+1)$ real scalars for \algname{}-\pmb{i} because it additionally communicates the scalar wealth.
+Over a horizon $T$, a schedule $q(t)$ therefore communicates $|E_{\mathrm{dir}}|d\sum_{t=1}^Tq(t)$ scalars for one-vector methods and $|E_{\mathrm{dir}}|(d+1)\sum_{t=1}^Tq(t)$ scalars for \algname{}-\pmb{i}.
+Consequently, $q(t)=1$ has linear total communication in $T$, whereas $q(t)=\lceil\alpha t\rceil$ has quadratic total communication.
 \end{changes}
 This makes clear that the proposed method is local-neighbor decentralized and that the communication cost is now measurable per algorithm and per graph.
 \end{revresponse}
@@ -93,6 +100,17 @@ We agree that the previous text blurred a sufficient condition for the proof wit
 We now state that $q(t)=\order{t}$ is sufficient for the current disagreement proof, but the practical constrained-network regime is constant communication, $q(t)=1$.
 For a horizon $T$, constant gossip has cost $\order{T |E_{\mathrm{dir}}| d}$ for one-vector methods and $\order{T |E_{\mathrm{dir}}|(d+1)}$ for \algname{}-i; a linear schedule has $\order{T^2 |E_{\mathrm{dir}}| d}$ cost.
 We added code-level accounting of total communicated scalars and report this in the new review experiments.
+The exact revised manuscript text is:
+\begin{changes}
+Over a horizon $T$, a schedule $q(t)$ therefore communicates $|E_{\mathrm{dir}}|d\sum_{t=1}^Tq(t)$ scalars for one-vector methods and $|E_{\mathrm{dir}}|(d+1)\sum_{t=1}^Tq(t)$ scalars for \algname{}-\pmb{i}.
+Consequently, $q(t)=1$ has linear total communication in $T$, whereas $q(t)=\lceil\alpha t\rceil$ has quadratic total communication.
+
+They establish that by performing $\bigo{t}$ gossip steps at each round, the per-round communication grows linearly and the total communication through horizon $T$ grows as $\bigo{T^2}$; this sufficient schedule controls the disagreement term to the order of the local regret term and ensures sublinear network regret.
+
+The schedule $q(t)=\mathcal{O}(t)$ is sufficient under the present disagreement analysis and is not claimed to be necessary.
+Whether a constant number of gossip rounds, $q(t)=\mathcal{O}(1)$, suffices for sublinear network regret remains open.
+Accordingly, the constant-communication experiments evaluate the practically constrained regime, while the linear-schedule experiment illustrates the mechanism covered by the current proof.
+\end{changes}
 \end{revresponse}
 
 \begin{revcomment}
@@ -100,9 +118,14 @@ The claim that a linear schedule closely tracks the centralized oracle is too st
 \end{revcomment}
 \begin{revresponse}
 We agree.  We revised the discussion to treat the centralized gap as a real finite-horizon decentralization cost rather than as a negligible discrepancy.
-The revised manuscript qualifies the interpretation of the communication-regret trade-off as follows:
+The exact revised discussion is:
 \begin{changes}
-The gap to the centralized oracle in the gossip trade-off figure is a real finite-horizon decentralization cost rather than a claim of equality with the oracle. The linear schedule should be interpreted as a theory-motivated sufficient schedule for controlling the current disagreement bound, not as the recommended operating point for every constrained network.
+For $q(t)=\lceil0.1t\rceil$, the cumulative number of gossip rounds is quadratic in $T$, whereas the constant schedule uses only $T$ rounds.
+The linear schedule reduces loss relative to the constant and logarithmic schedules, but a visible finite-horizon gap to the centralized oracle remains.
+This gap is a real decentralization cost rather than a claim of equality with the oracle.
+The linear schedule should be interpreted as a theory-motivated sufficient schedule for controlling the current disagreement bound, not as the recommended operating point for every constrained network.
+
+\emph{Revised figure caption:} Cumulative network loss of \algname{}-ii (KT) on a cycle graph with different gossip schedules, $q(t)$. Increasing the communication budget from constant to logarithmic and linear progressively reduces loss, but the linear schedule retains a visible finite-horizon gap to the centralized oracle. The schedules illustrate the trade-off between communication cost and learning performance.
 \end{changes}
 Thus, the revised discussion no longer relies on an unqualified ``closely tracks'' interpretation.
 \end{revresponse}
@@ -112,6 +135,12 @@ Intuition into how everything is tied to a real application is missing.
 \end{revcomment}
 \begin{revresponse}
 We expanded the operational description in the manuscript to connect the algorithm to distributed sensing and collaborative prediction.  Each node makes a local prediction, observes local feedback, updates its coin-betting state, and then gossips only with physical or logical neighbors.  This matches applications such as sensor networks, device-to-device learning, or collaborative streaming regression, where no central coordinator is available and the communication budget is dominated by local neighbor exchanges.
+The added manuscript text is:
+\begin{changes}
+An operational example is collaborative streaming regression over a sensor or device-to-device network.
+At round $t$, each node predicts from its local stream, observes its local feedback, updates its coin-betting state, and gossips the communicated state only with physical or logical neighbors.
+No central coordinator is required, and the communication budget is determined by these local neighbor exchanges.
+\end{changes}
 \end{revresponse}
 
 \reviewer
@@ -127,6 +156,15 @@ The claimed novelty is not sufficiently justified; the method combines coin-bett
 \begin{revresponse}
 We revised the positioning to be more precise.  We no longer frame the contribution as novelty from gossip alone.  Instead, we emphasize three specific contributions: (i) a decentralized online-learning formulation with network regret guarantees for parameter-free coin-betting agents; (ii) an explicit decomposition of regret into average local coin-betting regret and a communication-controlled disagreement term; and (iii) the betting-function formulation underlying \algname{}-ii, which permits a one-state gossiped update and a direct network-regret analysis.
 We also expanded the related-work discussion to distinguish our convex online-learning setting from decentralized stochastic/nonconvex parameter-free optimization and from methods that require stepsizes or different problem models.
+The manuscript now states:
+\begin{changes}
+Our contribution is not a new gossip operator, reward--regret duality, or coin betting in isolation.
+It is the decentralized online-learning formulation and analysis that (i) equips parameter-free coin-betting agents with network-regret guarantees, (ii) decomposes network regret into average local coin-betting regret and a communication-controlled disagreement term, and (iii) uses the one-state betting-function formulation of \algname{}-\pmb{ii} to obtain a direct network-regret analysis.
+
+Recent parameter-free decentralized optimization methods address nonconvex stochastic objectives~[17], strongly convex smooth objectives~[18], and composite convex objectives~[19].
+These works study convergence to a minimizer under their respective optimization models, whereas our setting considers sequential convex losses and network regret against a comparator.
+The problem models and performance criteria are therefore complementary rather than directly interchangeable.
+\end{changes}
 \end{revresponse}
 
 \begin{revcomment}
@@ -134,6 +172,12 @@ The theoretical contribution appears limited and the proof techniques resemble e
 \end{revcomment}
 \begin{revresponse}
 We agree that the building blocks are classical, and the revised text is more explicit about this.  The contribution is in how these tools are combined for network regret in a decentralized online setting, and in identifying the disagreement term that must be controlled when coin-betting decisions are driven by gossiped cumulative gradients.  We clarified the proof structure so that readers can see which parts follow standard coin-betting duality and which parts are specific to the decentralized state and betting-function formulation.
+The added manuscript text is:
+\begin{changes}
+The analysis combines two classical ingredients: reward--regret duality for the average local coin-betting term and gossip-mixing bounds for consensus.
+The decentralized component is their coupling when decisions are generated from gossiped cumulative gradients.
+In particular, the disagreement term exposes how the betting-function Lipschitz constants, network spectral radius, and gossip schedule jointly affect network regret.
+\end{changes}
 \end{revresponse}
 
 \begin{revcomment}
@@ -141,6 +185,14 @@ The theory relies on increasing communication, while the experiments primarily u
 \end{revcomment}
 \begin{revresponse}
 We agree and now state this explicitly.  The sufficient $q(t)=\order{t}$ schedule is used to prove sublinear disagreement under the current analysis.  However, it is not presented as a practical requirement.  The constant-communication experiments address the constrained-network regime, while the increasing-communication experiment illustrates the theoretical mechanism.  We added text explaining that closing the theory/practice gap for $q(t)=\order{1}$ remains an important theoretical question.
+The manuscript now states:
+\begin{changes}
+They establish that by performing $\bigo{t}$ gossip steps at each round, the per-round communication grows linearly and the total communication through horizon $T$ grows as $\bigo{T^2}$; this sufficient schedule controls the disagreement term to the order of the local regret term and ensures sublinear network regret.
+
+The schedule $q(t)=\mathcal{O}(t)$ is sufficient under the present disagreement analysis and is not claimed to be necessary.
+Whether a constant number of gossip rounds, $q(t)=\mathcal{O}(1)$, suffices for sublinear network regret remains open.
+Accordingly, the constant-communication experiments evaluate the practically constrained regime, while the linear-schedule experiment illustrates the mechanism covered by the current proof.
+\end{changes}
 \end{revresponse}
 
 \begin{revcomment}
@@ -149,6 +201,43 @@ The experimental evaluation is not sufficiently convincing; baselines are limite
 \begin{revresponse}
 We added the requested adaptive decentralized baselines: AdaGrad, RMSProp, Adam, AdamW, momentum, and Nesterov-type momentum.  These baselines use the same gossip interface and the same scalar communication accounting as DOGD.
 We also added real-data review experiments and preserved the original multi-dataset LIBSVM comparison.  The new runs show that tuned adaptive baselines can be competitive or better on some datasets and horizons; consequently, the revised manuscript no longer claims empirical dominance over all adaptive methods.  Instead, it emphasizes the learning-rate-free property and regret guarantees of \algname{}.
+The exact added manuscript text is:
+\begin{changes}
+We compare them against the following baselines:
+
+\textbf{Decentralized adaptive baselines}: AdaGrad, RMSProp, Adam, AdamW, momentum, and Nesterov-type momentum, each followed by the same gossip operation used by DOGD. These methods adapt their effective update magnitude to past gradients but still require stepsize, momentum, and/or decay choices.
+
+For the added comparisons, we report cumulative network loss, average network loss, cumulative local loss, and total communicated scalars.
+The scalar count uses the same directed-neighbor accounting for every method: \algname{}-\pmb{i} sends $(\w,G)$, while \algname{}-\pmb{ii}, DOGD, and the adaptive baselines send one $d$-dimensional vector.
+
+We additionally evaluate the adaptive baselines on bundled real datasets (diabetes, breast cancer, and digits), while preserving the original LIBSVM workflow.
+The bundled datasets make the review experiments reproducible in offline and Docker environments.
+The following table reports $T=100$ runs on a cycle graph with $N=20$ and $q(t)=1$.
+
+\emph{Communication-normalized experiments with $T=100$, $N=20$, and $q(t)=1$. Lower cumulative network loss is better. ``Scalars'' is the total number of real scalars exchanged by gossip.}
+\begin{center}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{llrr}
+    \hline
+    Dataset / graph & Method & Cum. network loss & Scalars \\
+    \hline
+    Synthetic cycle & \algname{}-i (KT) & 27.24 & 44,000 \\
+    Synthetic cycle & \algname{}-ii (KT) & 46.20 & 40,000 \\
+    Synthetic cycle & D-RMSProp & 20.67 & 40,000 \\
+    Diabetes & \algname{}-i (KT) & 64.47 & 44,000 \\
+    Diabetes & DGD & 59.41 & 40,000 \\
+    Breast cancer & \algname{}-i (KT) & 38.31 & 124,000 \\
+    Breast cancer & DGD & 35.76 & 120,000 \\
+    Digits & \algname{}-i (KT) & 81.08 & 260,000 \\
+    Digits & D-RMSProp & 63.03 & 256,000 \\
+    \hline
+\end{tabular}%
+}
+\end{center}
+
+These short-horizon results show that tuned adaptive decentralized baselines can be competitive or better on some datasets.
+The empirical conclusion is therefore not that \algname{} uniformly dominates tuned adaptive methods; rather, \algname{} provides learning-rate-free decentralized coin-betting updates with explicit communication accounting and regret guarantees in the convex online-learning setting.
+\end{changes}
 \end{revresponse}
 
 \reviewer
@@ -162,7 +251,72 @@ The reviewer asks for notation cleanup, a quantitative explanation of \algname{}
 The notation is inconsistent: both $g$ and $c=-g$ are used, and $c$ is overloaded later.
 \end{revcomment}
 \begin{revresponse}
-We revised the notation discussion to reduce overloading.  The manuscript now emphasizes $g_{n,t}$ as the subgradient feedback and uses the coin-betting outcome notation only locally when recalling the classical single-agent coin-betting view.  We also avoid reusing $c$ for unrelated constants in the disagreement analysis.  This makes the OCO and coin-betting interpretations easier to follow.
+We revised the notation discussion to reduce overloading.  The manuscript now emphasizes $g_{n,t}$ as the subgradient feedback and uses the identification $c_t=-g_t$ locally when recalling the classical single-agent coin-betting view.  We also avoid reusing $c$ for unrelated constants in the disagreement analysis and corrected the operational update to match the algorithm's $G-g$ convention.  This makes the OCO and coin-betting interpretations easier to follow.
+The exact added notation text and corrected operational equation are:
+\begin{changes}
+To keep the two viewpoints distinct, $g_{n,t}$ denotes subgradient feedback throughout the OCO and network-regret development, whereas $c_t=-g_t$ is used only in the local recap of the classical coin-betting game.
+The coefficient of a linear gossip schedule is denoted by $\kappa$, so $q(t)=\lceil\kappa t\rceil$; it is not a coin outcome.
+
+\begin{align*}
+    \hat{G}_{n,t}=G_{n,t-1}-g_{n,t}.
+\end{align*}
+\end{changes}
+Every $c\to\kappa$ modification in the two schedule theorems and proofs is reproduced below in manuscript order; only unchanged intervening text is omitted:
+\begin{changes}
+and choosing the gossip step function to be
+\begin{equation*}
+    q(t) = \lceil \kappa \cdot t \rceil,
+\end{equation*}
+for any $\kappa \geq \frac{-3}{2\ln \rho}$ has sublinear regret and disagreement.
+
+Now, let $q(t) = \kappa \cdot t$.
+Notice that we can express
+\begin{align*}
+    Q(s,t) = \kappa \cdot \frac{(t-s+1)(s+t)}{2},
+\end{align*}
+Thus, we can upper bound
+\begin{align*}
+    e^{t/2} \sum_{s=1}^{t-1} \rho^{Q(s,t)} \leq e^{t/2} (t-1) \rho^{\kappa(2t-1)}.
+\end{align*}
+We want to ensure that
+\begin{align*}
+    e^{t/2} (t-1) \rho^{\kappa(2t-1)} \leq 1
+\end{align*}
+for all $t \geq 2$.
+Taking logarithms, we obtain
+\begin{align*}
+    \frac{t}{2} + \ln(t-1) + \frac{\kappa\ln \rho}{2}(2t-1) \leq 0
+\end{align*}
+The derivative of the LHS is
+\begin{align*}
+    \frac{1}{2} + \frac{1}{t-1} + \kappa\ln(\rho),
+\end{align*}
+and ensuring
+\begin{equation*}
+    \kappa \geq \frac{-3}{2\ln(\rho)},
+\end{equation*}
+it is non-positive for all $t \geq 2$, which ensures the non-increasing property.
+
+and choosing the gossip step function to be
+\begin{equation*}
+    q(t) = \lceil \kappa \cdot t \rceil,
+\end{equation*}
+for any $\kappa \geq \frac{-2\ln(2)}{\ln(\rho)}$ has sublinear regret and disagreement.
+
+We set $q(t) = \kappa \cdot t$ and check that
+\begin{align*}
+    2^{t}(\ln t - \psi(1/2)) (t-1) \rho^{\kappa(2t-1)} \leq 1.
+\end{align*}
+For $t \geq 2$, we can take logarithms and obtain
+\begin{align*}
+    t\ln(2) + \ln(\ln t - \psi(1/2)) + \ln(t-1) + \frac{\kappa\ln \rho}{2}(2t-1) \leq 0.
+\end{align*}
+for all $t \geq 2$, and the condition simplifies to
+\begin{align*}
+    2 t \ln(2) + \frac{\kappa\ln \rho}{2}(2t-1) \leq 0,
+\end{align*}
+which is satisfied when $\kappa \geq \frac{-2\ln(2)}{\ln(\rho)}$.
+\end{changes}
 \end{revresponse}
 
 \begin{revcomment}
@@ -170,13 +324,59 @@ We revised the notation discussion to reduce overloading.  The manuscript now em
 \end{revcomment}
 \begin{revresponse}
 We clarified that \algname{}-ii should not be read as a heuristic approximation to \algname{}-i with an unquantified error term.  It is a one-state betting-function formulation with update $x_{n,t}=h_t(G_{n,t-1})$.  The analysis for \algname{}-ii is stated directly in terms of the betting function and the disagreement induced by gossiped cumulative gradients.  Empirically, we also acknowledge that \algname{}-i can perform better, and that \algname{}-ii trades off some performance for a smaller communicated state.
+The manuscript now states:
+\begin{changes}
+\algname{}-\pmb{ii} is defined directly by the one-state update $x_{n,t}=h_t(G_{n,t-1})$; it is not obtained by substituting the approximation $\w_{n,t-1}\approx F_{t-1}(G_{n,t-1})$ into \algname{}-\pmb{i}.
+Its regret analysis is therefore stated in terms of $h_t$ and the disagreement induced by gossiped cumulative gradients, rather than an approximation-error term relative to \algname{}-\pmb{i}.
+This smaller communicated state can trade performance for communication, and \algname{}-\pmb{ii} is not claimed to dominate \algname{}-\pmb{i}.
+\end{changes}
 \end{revresponse}
 
 \begin{revcomment}
 Lemma 3 verifies the condition for \algname{}-i, but the paper should verify whether \algname{}-ii satisfies the same condition.
 \end{revcomment}
 \begin{revresponse}
-We revised the explanation around the betting-function formulation to make the proof path for \algname{}-ii explicit.  The \algname{}-ii theorem does not require gossiping wealth; it bounds network regret by combining average local coin-betting regret with a disagreement term controlled by the Lipschitz constants of $h_t$.  The sufficient gossip schedules are then derived for the exponential and KT potentials through those $h_t$-based bounds.
+We added a direct verification for the betting-function update, rather than relying on the omitted-proof statement in the previous manuscript.  The new derivation applies the potential condition before gossip, uses convexity and double stochasticity after gossip, and telescopes over time.  It shows explicitly that \algname{}-ii obtains the potential inequality needed by reward--regret duality without storing or gossiping wealth.  We also revised the average-local-regret proof so that it invokes the appropriate argument for each variant.
+The complete added and modified manuscript text is:
+\begin{changes}
+\textbf{Direct potential verification for \algname{}-\pmb{ii}.}
+For \algname{}-\pmb{ii}, let $\beta_{n,t}=\beta_t(G_{n,t-1})$ and $x_{n,t}=h_t(G_{n,t-1})=\beta_{n,t}F_{t-1}(G_{n,t-1})$.
+Substituting the coin outcome $-g_{n,t}$ in condition~(c) of the coin-betting potential gives
+\begin{align*}
+    F_{t-1}(G_{n,t-1}) - g_{n,t}x_{n,t}
+    & = \left(1-g_{n,t}\beta_{n,t}\right)F_{t-1}(G_{n,t-1}) \\
+    & \geq F_t(G_{n,t-1}-g_{n,t})
+    = F_t(\widehat G_{n,t}).
+\end{align*}
+After gossip, $G_{n,t}=\sum_mW_{mn}\widehat G_{m,t}$, so convexity of $F_t$ gives
+\begin{align*}
+    F_t(G_{n,t})
+    & \leq \sum_mW_{mn}F_t(\widehat G_{m,t}) \\
+    & \leq \sum_mW_{mn}\left(F_{t-1}(G_{m,t-1})-g_{m,t}x_{m,t}\right).
+\end{align*}
+Summing over agents and using double stochasticity yields
+\begin{align*}
+    \sum_nF_t(G_{n,t})
+    \leq \sum_nF_{t-1}(G_{n,t-1})-\sum_ng_{n,t}x_{n,t}.
+\end{align*}
+Telescoping from $F_0(0)=\epsilon$ and applying Jensen's inequality therefore gives
+\begin{align*}
+    \frac{1}{N}\sum_{t=1}^T\sum_{n=1}^Ng_{n,t}x_{n,t}
+    & \leq \epsilon-\frac{1}{N}\sum_{n=1}^NF_T(G_{n,T}) \\
+    & \leq \epsilon-F_T\left(\frac{1}{N}\sum_{n=1}^NG_{n,T}\right) \\
+    & = \epsilon-F_T\left(-\sum_{t=1}^T\bar g_t\right).
+\end{align*}
+Thus, \algname{}-\pmb{ii} satisfies the potential inequality needed by reward--regret duality without storing or gossiping a wealth variable.
+
+Using Lemma~3 for \algname{}-\pmb{i} and the direct potential verification above for \algname{}-\pmb{ii}, we can derive regret bounds for both algorithms.
+
+For \algname{}-\pmb{i}, the algorithmic state $G_{n,t}$ equals the accumulated coin outcome $C_{n,t}$ because both start at zero, subtract the same subgradient locally, and undergo the same gossip update. Hence, the wealth lower bound in Lemma~3 and preservation of network averages give the required reward inequality. For \algname{}-\pmb{ii}, the direct potential verification above gives the same inequality without introducing a wealth variable. Thus, for either variant,
+\begin{align*}
+    \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \langle g_{n,t}, x_{n,t} \rangle
+    & \leq \epsilon-\frac{1}{N}\sum_{n=1}^NF_T(G_{n,T}) \\
+    & \leq - F_T\left(- \sum_{t=1}^T \bar g_{t}\right) + \epsilon.
+\end{align*}
+\end{changes}
 \end{revresponse}
 
 \begin{revcomment}
@@ -184,6 +384,13 @@ The method removes learning-rate tuning but introduces the choice of potential f
 \end{revcomment}
 \begin{revresponse}
 We agree and revised the language to avoid implying that all design choices disappear.  The method is learning-rate-free and horizon/comparator adaptive, but the potential function is still a modeling choice.  We now state this explicitly and report both KT and exponential potentials.  We also clarify that cumulative-gradient storage is one $d$-dimensional vector per agent, comparable to storing optimizer state in adaptive-gradient methods.
+The added manuscript text is:
+\begin{changes}
+Here parameter-free means learning-rate-free and comparator/horizon adaptive; it does not mean free of every design choice.
+The potential family remains a modeling choice, and we evaluate both KT and exponential potentials.
+Each \algname{}-\pmb{ii} agent stores one $d$-dimensional accumulated-gradient vector; \algname{}-\pmb{i} additionally stores one scalar wealth.
+This memory is comparable to the vector state used by adaptive-gradient optimizers.
+\end{changes}
 \end{revresponse}
 
 \begin{revcomment}
@@ -191,6 +398,43 @@ The evaluation should include adaptive methods such as AdaGrad, RMSProp, Adam, A
 \end{revcomment}
 \begin{revresponse}
 We added these baselines in the repository and included communication-normalized review experiments.  In the $T=100$ synthetic cycle run, for example, \algname{}-i (KT) had cumulative network loss $27.24$ with $44{,}000$ communicated scalars, while D-RMSProp had loss $20.67$ with $40{,}000$ communicated scalars.  This result is intentionally reported without overclaiming: adaptive baselines can be strong when their hyperparameters are well chosen, whereas \algname{}'s advantage is the absence of learning-rate tuning together with network regret guarantees.
+The exact baseline description and added results are:
+\begin{changes}
+We compare them against the following baselines:
+
+\textbf{Decentralized adaptive baselines}: AdaGrad, RMSProp, Adam, AdamW, momentum, and Nesterov-type momentum, each followed by the same gossip operation used by DOGD. These methods adapt their effective update magnitude to past gradients but still require stepsize, momentum, and/or decay choices.
+
+For the added comparisons, we report cumulative network loss, average network loss, cumulative local loss, and total communicated scalars.
+The scalar count uses the same directed-neighbor accounting for every method: \algname{}-\pmb{i} sends $(\w,G)$, while \algname{}-\pmb{ii}, DOGD, and the adaptive baselines send one $d$-dimensional vector.
+
+We additionally evaluate the adaptive baselines on bundled real datasets (diabetes, breast cancer, and digits), while preserving the original LIBSVM workflow.
+The bundled datasets make the review experiments reproducible in offline and Docker environments.
+The following table reports $T=100$ runs on a cycle graph with $N=20$ and $q(t)=1$.
+
+\emph{Communication-normalized experiments with $T=100$, $N=20$, and $q(t)=1$. Lower cumulative network loss is better. ``Scalars'' is the total number of real scalars exchanged by gossip.}
+\begin{center}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{llrr}
+    \hline
+    Dataset / graph & Method & Cum. network loss & Scalars \\
+    \hline
+    Synthetic cycle & \algname{}-i (KT) & 27.24 & 44,000 \\
+    Synthetic cycle & \algname{}-ii (KT) & 46.20 & 40,000 \\
+    Synthetic cycle & D-RMSProp & 20.67 & 40,000 \\
+    Diabetes & \algname{}-i (KT) & 64.47 & 44,000 \\
+    Diabetes & DGD & 59.41 & 40,000 \\
+    Breast cancer & \algname{}-i (KT) & 38.31 & 124,000 \\
+    Breast cancer & DGD & 35.76 & 120,000 \\
+    Digits & \algname{}-i (KT) & 81.08 & 260,000 \\
+    Digits & D-RMSProp & 63.03 & 256,000 \\
+    \hline
+\end{tabular}%
+}
+\end{center}
+
+These short-horizon results show that tuned adaptive decentralized baselines can be competitive or better on some datasets.
+The empirical conclusion is therefore not that \algname{} uniformly dominates tuned adaptive methods; rather, \algname{} provides learning-rate-free decentralized coin-betting updates with explicit communication accounting and regret guarantees in the convex online-learning setting.
+\end{changes}
 \end{revresponse}
 
 \begin{revcomment}
@@ -198,6 +442,12 @@ The discussion of prior works on parameter-free decentralized learning is insuff
 \end{revcomment}
 \begin{revresponse}
 We expanded the related-work positioning to include recent parameter-free decentralized optimization papers, including the works named by the reviewer.  The revised manuscript distinguishes these settings from ours: those works focus on stochastic/nonconvex or composite decentralized optimization and convergence to minimizers, whereas our work addresses convex online learning and network regret against a comparator.
+The added manuscript text (with its citations retained in the manuscript) is:
+\begin{changes}
+Recent parameter-free decentralized optimization methods address nonconvex stochastic objectives~[17], strongly convex smooth objectives~[18], and composite convex objectives~[19].
+These works study convergence to a minimizer under their respective optimization models, whereas our setting considers sequential convex losses and network regret against a comparator.
+The problem models and performance criteria are therefore complementary rather than directly interchangeable.
+\end{changes}
 \end{revresponse}
 
 \begin{revcomment}
@@ -205,6 +455,12 @@ The parameter-free benefit is restricted to convex online learning; many decentr
 \end{revcomment}
 \begin{revresponse}
 We added this as an explicit limitation.  Our regret guarantees are for convex online learning (and the associated linearized OLO analysis).  Extending the approach to nonconvex decentralized learning would require a different performance criterion and is outside the scope of the present paper.
+The manuscript now states:
+\begin{changes}
+Our guarantees are restricted to convex online learning and its linearized OLO reduction.
+They do not establish stationarity or convergence for nonconvex decentralized learning, which requires a different performance criterion.
+Extending parameter-free decentralized coin betting to that setting is outside the present scope.
+\end{changes}
 \end{revresponse}
 
 \begin{revcomment}
@@ -212,6 +468,37 @@ The communication design of \algname{}-i should be justified, and \algname{}-i a
 \end{revcomment}
 \begin{revresponse}
 We now justify \algname{}-i as the direct decentralized form of classical wealth-based coin-betting and \algname{}-ii as the one-state betting-function variant that avoids communicating wealth.  The implementation was revised so \algname{}-ii gossips only $G$; \algname{}-i gossips $(\mathrm{Wealth},G)$.  The new experiments report total communicated scalars.  For example, on the synthetic cycle run with $d=10$, \algname{}-i (KT) used $44{,}000$ scalars and \algname{}-ii (KT) used $40{,}000$ scalars.  This lets the reader attribute performance differences to both update rule and communication budget rather than conflating the two.
+The exact added manuscript text is:
+\begin{changes}
+\algname{}-\pmb{i} is the direct decentralized analogue of classical wealth-based coin betting: because its decision depends on both $\w_{n,t-1}$ and $G_{n,t-1}$, both states are gossiped.
+\algname{}-\pmb{ii} is the one-state betting-function variant $x_{n,t}=h_t(G_{n,t-1})$ and gossips only $G$.
+Thus, \algname{}-\pmb{i} is a reference construction that preserves the classical wealth recursion, whereas \algname{}-\pmb{ii} reduces the communicated state.
+We report total transmitted scalars so that their empirical comparison makes this difference explicit.
+
+If $d$ is the model dimension and $|E_{\mathrm{dir}}|$ is the number of directed non-self neighbor transmissions, one gossip round communicates $|E_{\mathrm{dir}}|d$ real scalars for \algname{}-\pmb{ii}, DOGD, and the adaptive decentralized baselines, and $|E_{\mathrm{dir}}|(d+1)$ real scalars for \algname{}-\pmb{i} because it additionally communicates the scalar wealth.
+Over a horizon $T$, a schedule $q(t)$ therefore communicates $|E_{\mathrm{dir}}|d\sum_{t=1}^Tq(t)$ scalars for one-vector methods and $|E_{\mathrm{dir}}|(d+1)\sum_{t=1}^Tq(t)$ scalars for \algname{}-\pmb{i}.
+
+\emph{Communication-normalized experiments with $T=100$, $N=20$, and $q(t)=1$. Lower cumulative network loss is better. ``Scalars'' is the total number of real scalars exchanged by gossip.}
+\begin{center}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{llrr}
+    \hline
+    Dataset / graph & Method & Cum. network loss & Scalars \\
+    \hline
+    Synthetic cycle & \algname{}-i (KT) & 27.24 & 44,000 \\
+    Synthetic cycle & \algname{}-ii (KT) & 46.20 & 40,000 \\
+    Synthetic cycle & D-RMSProp & 20.67 & 40,000 \\
+    Diabetes & \algname{}-i (KT) & 64.47 & 44,000 \\
+    Diabetes & DGD & 59.41 & 40,000 \\
+    Breast cancer & \algname{}-i (KT) & 38.31 & 124,000 \\
+    Breast cancer & DGD & 35.76 & 120,000 \\
+    Digits & \algname{}-i (KT) & 81.08 & 260,000 \\
+    Digits & D-RMSProp & 63.03 & 256,000 \\
+    \hline
+\end{tabular}%
+}
+\end{center}
+\end{changes}
 \end{revresponse}
 
 \end{document}

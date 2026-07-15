@@ -105,7 +105,7 @@
 	\textbf{Response:} #1\par
 }{\vspace{4em plus 0.2em minus 1.5em}}
 
-\newenvironment{changes}{\begin{tcolorbox}[breakable,colback={colorchangebg}, colframe={colorchangeframe},enhanced jigsaw,]
+\newenvironment{changes}{\begin{tcolorbox}[breakable,colback={colorchangebg}, colframe={colorchangeframe},coltext=red,enhanced jigsaw,]
 	}{\end{tcolorbox}}
 
 \newcommand{\printpartbibliography}[1]{\begin{refsegment}\nocite{#1}\printbibliography[heading=none,segment=\therefsegment]\end{refsegment}}
