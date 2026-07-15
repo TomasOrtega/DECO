@@ -8,11 +8,6 @@ import numpy as np
 from src.deco.algorithms import run_simulation
 from src.deco.environments import SyntheticRegression
 from src.deco.graph import create_gossip_matrix
-from src.deco.online_baselines import (
-    ADAPTIVE_BASELINE_NAMES,
-    REFERENCE_LEARNING_RATE,
-    make_online_baseline_config,
-)
 from src.deco.potentials import KTPotential
 from src.deco.utils import save_results_to_hdf5
 
@@ -83,26 +78,6 @@ if __name__ == "__main__":
             U_STAR,
         )
         all_results[name] = results
-
-    for name in ADAPTIVE_BASELINE_NAMES:
-        print(f"===== Running {name} with q(t)=1 =====")
-        config = make_online_baseline_config(
-            name,
-            REFERENCE_LEARNING_RATE,
-            gossip=True,
-            disable_tqdm=True,
-            q_t=lambda t: 1,
-        )
-        label = f"{name} (q=1, eta0={REFERENCE_LEARNING_RATE:g})"
-        all_results[label] = run_simulation(
-            CONFIG["T"],
-            CONFIG["N"],
-            CONFIG["DIM"],
-            make_environment(U_STAR),
-            W,
-            config,
-            U_STAR,
-        )
 
     filepath = os.path.join(CONFIG["RESULTS_DIR"], "gossip_tradeoff_results.h5")
     with h5py.File(filepath, "w") as f:

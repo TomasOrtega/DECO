@@ -95,7 +95,7 @@ uv run --locked python -m experiments.run_review_baseline_experiment --T 1000 --
 uv run --locked python -m experiments.run_review_real_data_experiment --T 1000 --seeds 0 1 2 --datasets diabetes breast_cancer digits
 ```
 
-The summaries are written to `results/review_baseline_summary.csv` and `results/review_real_data_summary.csv` with the initial learning rate, cumulative network loss, average network loss, cumulative local loss, and total communicated scalars. The full workflow also writes `results/online_baseline_table.csv` and regenerates the manuscript PDFs directly under `tex/Figs/`.
+The summaries are written to `results/review_baseline_summary.csv` and `results/review_real_data_summary.csv` with the initial learning rate, cumulative network loss, average network loss, cumulative local loss, and total communicated scalars. The full workflow also regenerates the manuscript PDFs directly under `tex/Figs/`.
 
 ### Method 2: Docker (Recommended for Full Reproducibility)
 

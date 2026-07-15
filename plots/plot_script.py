@@ -1,16 +1,11 @@
 # plots/plot_script.py
-import csv
 import os
 
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
 
-from src.deco.online_baselines import (
-    ADAPTIVE_BASELINE_NAMES,
-    ONLINE_BASELINE_NAMES,
-    best_rate_and_loss,
-)
+from src.deco.online_baselines import ADAPTIVE_BASELINE_NAMES, ONLINE_BASELINE_NAMES
 from src.deco.plotting import mask_large_losses
 from src.deco.utils import load_results_from_hdf5
 
@@ -66,6 +61,13 @@ BASE_COLORS = {
 
 ER_COLORS = {"low": "#fde725", "med": "#35b779", "hi": "#31688e"}
 GOSSIP_COLORS = {"low": "#f0f921", "med": "#ed7953", "hi": "#9c179e"}
+CONNECTIVITY_SERIES = ("ER (p=0.1)", "ER (p=0.3)", "ER (p=1.0)", "Centralized")
+GOSSIP_SERIES = (
+    "Constant (q=1)",
+    "Logarithmic (q=log(t))",
+    "Linear (q=0.1*t)",
+    "Centralized",
+)
 BASE_LINESTYLES = {"DECO-i": "--", "DECO-ii": ":", "DOGD": "-", "Centralized": "-."}
 SETTING_MARKERS = {"KT": "x", "exp": "+", "central": ""}
 
@@ -256,7 +258,8 @@ if os.path.exists(connectivity_file):
     )
 
     # Panel 1: Cumulative Network Loss (Original Plot)
-    for name, data in results.items():
+    for name in CONNECTIVITY_SERIES:
+        data = results[name]
         cumulative_loss = np.cumsum(data["network_loss"])
         style = get_plot_style(name, len(cumulative_loss))
         display_label = get_display_label(name)
@@ -268,7 +271,8 @@ if os.path.exists(connectivity_file):
 
     # Panel 2: Per-Round Network Loss (Smoothed)
     smoothing_window = 250
-    for name, data in results.items():
+    for name in CONNECTIVITY_SERIES:
+        data = results[name]
         network_loss = data["network_loss"]
         smoothed_loss = moving_average(network_loss, window_size=smoothing_window)
         # Adjust time axis to center the moving average window
@@ -292,7 +296,8 @@ if os.path.exists(gossip_tradeoff_file):
         results = load_results_from_hdf5(f)
 
     fig3, ax3 = plt.subplots(figsize=(3.5, 2.6))  # IEEE single column
-    for name, data in results.items():
+    for name in GOSSIP_SERIES:
+        data = results[name]
         cumulative_loss = np.cumsum(data["network_loss"])
         style = get_plot_style(name, len(cumulative_loss))
         display_label = get_display_label(name)  # Use nicer LaTeX label
@@ -380,56 +385,9 @@ def plot_multi_dataset_sensitivity(all_data):
     plt.close()
 
 
-def write_online_baseline_table(all_data):
-    """Write the exact best-in-grid values used in the manuscript table."""
-    rows = []
-    for data in all_data["results"]:
-        if data is None:
-            continue
-        dataset_name = data["dataset_name"]
-        results = data["results"]
-        for name in ("DECO-i (KT)", "DECO-ii (KT)"):
-            history = results[name]
-            rows.append(
-                {
-                    "dataset": dataset_name,
-                    "method": name,
-                    "selected_eta0": "",
-                    "cumulative_network_loss": float(np.sum(history["network_loss"])),
-                    "communication_scalars": float(
-                        np.sum(history["communication_scalars"])
-                    ),
-                }
-            )
-        for name in ONLINE_BASELINE_NAMES:
-            rate_results = results["Online_tune"][name]
-            rate, loss = best_rate_and_loss(rate_results)
-            rate_key = min(rate_results, key=lambda key: abs(float(key) - rate))
-            history = rate_results[rate_key]
-            rows.append(
-                {
-                    "dataset": dataset_name,
-                    "method": name,
-                    "selected_eta0": rate,
-                    "cumulative_network_loss": loss,
-                    "communication_scalars": float(
-                        np.sum(history["communication_scalars"])
-                    ),
-                }
-            )
-
-    path = os.path.join(RESULTS_DIR, "online_baseline_table.csv")
-    with open(path, "w", newline="") as file:
-        writer = csv.DictWriter(file, fieldnames=rows[0].keys())
-        writer.writeheader()
-        writer.writerows(rows)
-    print(f"Saved table values to {path}")
-
-
 # --- FIGURE 4: Performance on Real-World Datasets (New Version) ---
 multi_dataset_file = os.path.join(RESULTS_DIR, "multi_dataset_comparison.h5")
 if os.path.exists(multi_dataset_file):
     with h5py.File(multi_dataset_file, "r") as f:
         all_data = load_results_from_hdf5(f)
     plot_multi_dataset_sensitivity(all_data)
-    write_online_baseline_table(all_data)

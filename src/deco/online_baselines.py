@@ -30,19 +30,3 @@ def make_online_baseline_config(name, learning_rate, **overrides):
     config["lr"] = float(learning_rate)
     config.update(overrides)
     return config
-
-
-def cumulative_network_loss(history):
-    return float(np.sum(history["network_loss"]))
-
-
-def best_rate_and_loss(rate_results):
-    """Select the finite minimum from a displayed learning-rate sweep."""
-    candidates = (
-        (float(rate), cumulative_network_loss(history))
-        for rate, history in rate_results.items()
-    )
-    finite = [(rate, loss) for rate, loss in candidates if np.isfinite(loss)]
-    if not finite:
-        raise ValueError("The learning-rate sweep contains no finite losses")
-    return min(finite, key=lambda item: item[1])
