@@ -1124,29 +1124,5 @@ Our theoretical findings were supported by a series of experiments on both synth
 
 \clearpage
 \bibliographystyle{ieeetr}
-\makeatletter
-\newif\ifrevision@reference%
-\let\revision@bibitem\bibitem%
-\renewcommand{\bibitem}[1]{%
-    \revision@referencefalse%
-    \def\revision@key{#1}%
-    \def\revision@li{li_problem_parameter_free_2024}%
-    \def\revision@kuruzov{kuruzov_achieving_2024}%
-    \def\revision@chen{chen_parameter_free_2025}%
-    \def\revision@dadam{nazari_dadam_2019}%
-    \def\revision@adagrad{duchi_adaptive_2011}%
-    \def\revision@rmsprop{tieleman_lecture_2012}%
-    \def\revision@adam{kingma_adam_2015}%
-    \ifx\revision@key\revision@li\revision@referencetrue\fi
-    \ifx\revision@key\revision@kuruzov\revision@referencetrue\fi
-    \ifx\revision@key\revision@chen\revision@referencetrue\fi
-    \ifx\revision@key\revision@dadam\revision@referencetrue\fi
-    \ifx\revision@key\revision@adagrad\revision@referencetrue\fi
-    \ifx\revision@key\revision@rmsprop\revision@referencetrue\fi
-    \ifx\revision@key\revision@adam\revision@referencetrue\fi
-    \ifrevision@reference\color{blue}\else\color{black}\fi
-    \revision@bibitem{#1}%
-}
-\makeatother
 \bibliography{zotero}
 \end{document} % chktex 17
