@@ -143,7 +143,7 @@ The collective goal is to minimize the \textbf{network regret}\footnote{We use t
 where $l_t(x) = \frac{1}{N}\sum_{m=1}^{N} l_{m,t}(x)$ is the global loss function.
 This formulation measures the performance of the entire network's decisions against a single best-in-hindsight comparator $u$.
 
-{\color{blue}
+    {\color{blue}
         Decentralized OCO with every agent active has previously been analyzed using prescribed step-size schedules~\cite{hosseini_online_2013,nedic_decentralized_2015}.
         Comparator-adaptive distributed learning has also been developed for a protocol in which one agent is activated per round~\cite{hoeven_distributed_2021}, while stochastic agent availability is treated in~\cite{achddou_distributed_2024}.
         These protocols differ from ours, where every agent predicts and incurs a local loss in every round; to the best of our knowledge, no parameter-free decentralized approach with \emph{network regret guarantees} has been proposed for this simultaneous protocol.
@@ -1069,12 +1069,12 @@ We investigate this trade-off by running \algname{}-ii (KT) on a cycle graph wit
 \end{itemize}
 \Cref{fig:gossip_tradeoff} shows a clear trade-off between communication and performance.
 While a single gossip step already performs well, increasing the number of communications over time systematically lowers the cumulative loss curves.
-{\color{blue}
-    For $q(t)=\lceil0.1t\rceil$, the cumulative number of gossip rounds is quadratic in $T$, whereas the constant schedule uses only $T$ rounds.
-    The linear schedule reduces loss relative to the constant and logarithmic schedules, but a visible finite-horizon gap to the centralized oracle remains.
-    This gap is a real decentralization cost rather than a claim of equality with the oracle.
-    The linear schedule should be interpreted as a theory-motivated sufficient schedule for controlling the current disagreement bound, not as the recommended operating point for every constrained network.
-    \par}
+    {\color{blue}
+        For $q(t)=\lceil0.1t\rceil$, the cumulative number of gossip rounds is quadratic in $T$, whereas the constant schedule uses only $T$ rounds.
+        The linear schedule reduces loss relative to the constant and logarithmic schedules, but a visible finite-horizon gap to the centralized oracle remains.
+        This gap is a real decentralization cost rather than a claim of equality with the oracle.
+        The linear schedule should be interpreted as a theory-motivated sufficient schedule for controlling the current disagreement bound, not as the recommended operating point for every constrained network.
+        \par}
 
 \begin{figure}[tbp!]
     \centering
@@ -1122,7 +1122,6 @@ Our theoretical findings were supported by a series of experiments on both synth
     \par
 }
 
-\clearpage
 \bibliographystyle{ieeetr}
 \bibliography{zotero}
 \end{document} % chktex 17
