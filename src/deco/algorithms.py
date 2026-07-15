@@ -93,28 +93,35 @@ def run_simulation(T, N, DIM, env, W, config, u_star):
                 agents[i].update(grads[i])
 
         # Gossip step
+        q = 0
         if use_gossip and N > 1:
             # Determine the number of gossip rounds for this timestep
             q = max(int(gossip_schedule(t)), 0)
             history["communication_scalars"][t] = q * per_gossip_scalars
 
-            if q > 0:
-                # W**q is exactly q synchronous linear gossip rounds.
-                if q not in gossip_powers:
-                    gossip_powers[q] = np.linalg.matrix_power(W, q)
-                mixing = gossip_powers[q]
-                if config["agent_type"] == "Deco":
-                    gradients = mixing @ np.asarray([agent.hat_G for agent in agents])
+        if q > 0:
+            # W**q is exactly q synchronous linear gossip rounds.
+            if q not in gossip_powers:
+                gossip_powers[q] = np.linalg.matrix_power(W, q)
+            mixing = gossip_powers[q]
+            if config["agent_type"] == "Deco":
+                gradients = mixing @ np.asarray([agent.hat_G for agent in agents])
+                if config.get("version") == "i":
+                    wealth = mixing @ np.asarray([agent.hat_w for agent in agents])
+                for i, agent in enumerate(agents):
+                    state = {"G": gradients[i]}
                     if config.get("version") == "i":
-                        wealth = mixing @ np.asarray([agent.hat_w for agent in agents])
-                    for i, agent in enumerate(agents):
-                        state = {"G": gradients[i]}
-                        if config.get("version") == "i":
-                            state["w"] = wealth[i]
-                        agent.apply_gossip_state(state)
-                elif config["agent_type"] in {"DGD", "AdaptiveDGD"}:
-                    decisions = mixing @ np.asarray([agent.x for agent in agents])
-                    for i, agent in enumerate(agents):
-                        agent.apply_gossip_state({"x": decisions[i]})
+                        state["w"] = wealth[i]
+                    agent.apply_gossip_state(state)
+            elif config["agent_type"] in {"DGD", "AdaptiveDGD"}:
+                decisions = mixing @ np.asarray([agent.x for agent in agents])
+                for i, agent in enumerate(agents):
+                    agent.apply_gossip_state({"x": decisions[i]})
+        elif config["agent_type"] == "Deco":
+            for agent in agents:
+                state = {"G": agent.hat_G}
+                if config.get("version") == "i":
+                    state["w"] = agent.hat_w
+                agent.apply_gossip_state(state)
 
     return history

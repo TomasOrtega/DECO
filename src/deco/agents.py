@@ -40,16 +40,15 @@ class DecoAgent(BaseAgent):
         self.hat_w, self.hat_G = 0, np.zeros(dim)  # Temp variables for gossip
 
     def predict(self, t):
-        if t == 0:
-            return self.x
+        round_t = t + 1
 
         if self.version == "i":
             # Version (i): x_t = beta_t(G_{t-1}) * w_{t-1}
-            beta_val = self.potential.beta(t, self.G)
+            beta_val = self.potential.beta(round_t, self.G)
             self.x = beta_val * self.w
         else:  # version 'ii'
             # Version (ii): x_t = h_t(G_{t-1})
-            self.x = self.potential.h(t, self.G)
+            self.x = self.potential.h(round_t, self.G)
         return self.x
 
     def update(self, g_t):

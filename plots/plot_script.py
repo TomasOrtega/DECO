@@ -263,7 +263,8 @@ if os.path.exists(connectivity_file):
         cumulative_loss = np.cumsum(data["network_loss"])
         style = get_plot_style(name, len(cumulative_loss))
         display_label = get_display_label(name)
-        ax_cum.plot(cumulative_loss, label=display_label, **style)
+        rounds = np.arange(1, len(cumulative_loss) + 1)
+        ax_cum.plot(rounds, cumulative_loss, label=display_label, **style)
 
     ax_cum.set_ylabel("Cumulative Network Loss")
     ax_cum.grid(True, which="both", linestyle="--", alpha=0.3)
@@ -276,7 +277,7 @@ if os.path.exists(connectivity_file):
         network_loss = data["network_loss"]
         smoothed_loss = moving_average(network_loss, window_size=smoothing_window)
         # Adjust time axis to center the moving average window
-        time_axis = np.arange(len(smoothed_loss)) + smoothing_window / 2
+        time_axis = np.arange(len(smoothed_loss)) + (smoothing_window + 1) / 2
         style = get_plot_style(name, len(network_loss))
         display_label = get_display_label(name)
         ax_inst.plot(time_axis, smoothed_loss, label=display_label, **style)
@@ -301,7 +302,8 @@ if os.path.exists(gossip_tradeoff_file):
         cumulative_loss = np.cumsum(data["network_loss"])
         style = get_plot_style(name, len(cumulative_loss))
         display_label = get_display_label(name)  # Use nicer LaTeX label
-        ax3.plot(cumulative_loss, label=display_label, **style)
+        rounds = np.arange(1, len(cumulative_loss) + 1)
+        ax3.plot(rounds, cumulative_loss, label=display_label, **style)
 
     ax3.set_xlabel("Time (t)")
     ax3.set_ylabel("Cumulative Network Loss")

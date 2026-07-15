@@ -130,6 +130,46 @@ class OnlineBaselineTest(unittest.TestCase):
                     atol=1e-12,
                 )
 
+    def test_zero_gossip_rounds_apply_the_identity_to_deco_state(self):
+        n_agents = 4
+        dimension = 2
+        horizon = 8
+        comparator = np.array([0.5, -0.25])
+
+        def run(version, mixing_matrix, rounds):
+            np.random.seed(11)
+            environment = SyntheticRegression(n_agents, dimension, comparator)
+            config = {
+                "agent_type": "Deco",
+                "potential": KTPotential(),
+                "version": version,
+                "gossip": True,
+                "disable_tqdm": True,
+                "q_t": lambda _: rounds,
+            }
+            return run_simulation(
+                horizon,
+                n_agents,
+                dimension,
+                environment,
+                mixing_matrix,
+                config,
+                comparator,
+            )
+
+        identity = np.eye(n_agents)
+        arbitrary_network = create_gossip_matrix(n_agents, topology="cycle")
+        for version in ("i", "ii"):
+            with self.subTest(version=version):
+                zero_rounds = run(version, arbitrary_network, 0)
+                identity_round = run(version, identity, 1)
+                np.testing.assert_allclose(
+                    zero_rounds["network_loss"],
+                    identity_round["network_loss"],
+                    rtol=1e-12,
+                    atol=1e-12,
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -96,10 +96,11 @@ This work was supported in part by the NSF Award ECCS-2207457.
 \maketitle
 
 \begin{abstract}
-    We propose the first parameter-free decentralized online learning algorithms with network regret guarantees, which achieve sublinear regret without requiring hyperparameter tuning.
+    \textcolor{blue}{We propose parameter-free decentralized online learning algorithms that achieve sublinear average local regret without requiring learning-rate tuning.}
     This family of algorithms connects multi-agent coin-betting and decentralized online learning via gossip steps.
     To enable our decentralized analysis, we introduce a novel ``betting function'' formulation for coin-betting that simplifies the multi-agent regret analysis.
-    Our analysis shows sublinear network regret bounds and is validated through experiments on synthetic and real datasets.
+    \textcolor{blue}{For the one-state betting-function variant, our analysis also gives a sublinear network-regret bound under a topology-dependent linear gossip schedule.}
+    \textcolor{blue}{We evaluate the methods on synthetic and real datasets.}
     This family of algorithms is applicable to distributed sensing, decentralized optimization, and collaborative ML applications.
 \end{abstract}
 \begin{IEEEkeywords}
@@ -108,7 +109,7 @@ This work was supported in part by the NSF Award ECCS-2207457.
 
 \section{Introduction}
 \IEEEPARstart{O}{nline} learning algorithms are essential for adapting to streaming data and changing environments, such as in online routing, ad selection, and spam filtering~\cite{hazan_introduction_2023,shalev-shwartz_online_2011}.
-In the standard Online Convex Optimization (OCO) framework, a learner makes a decision $x_{t}$ from a convex set $\mathcal{X}$ at each round $t$.
+In the standard Online Convex Optimization (OCO) framework, a learner makes a decision $x_{t}$ from a convex set $\mathcal{X}$ at each round $t$; \textcolor{blue}{our analysis specializes to the unconstrained Hilbert-space case $\mathcal{X}=\Hil$.}
 It then incurs a loss $l_{t}(x_{t})$, determined by a convex loss function $l_t$ that is unknown in advance.
 The goal is to minimize the \textbf{regret} after $T$ rounds, which measures the cumulative loss difference between the learner's decisions and those of a single decision in hindsight
 \begin{equation}
@@ -126,7 +127,7 @@ Incorrect tuning can lead to poor performance, requiring costly trial-and-error 
 \subsubsection*{Parameter-free learning}
 To overcome this limitation, \textbf{parameter-free algorithms} have been developed~\cite{mcmahan_no-regret_2012,mcmahan_unconstrained_2014,orabona_coin_2016,cutkosky_online_2017}.
 These methods are based on an analogy to \textbf{coin-betting}, where minimizing regret is reframed as maximizing a gambler's wealth in a sequential betting game.
-These algorithms achieve excellent bounds (which are optimal in some settings) without requiring any hyperparameter tuning.
+\textcolor{blue}{These algorithms achieve excellent bounds (which are optimal in some settings) without learning-rate tuning or prior knowledge of the horizon or comparator norm.}
 They automatically adapt to the characteristics of the problem, giving regret guarantees that depend on the unknown comparator $u$, hence why they are also known as comparator-adaptive algorithms~\cite{van_der_hoeven_comparator-adaptive_2020, hoeven_distributed_2021}.
 When the decision set $\mathcal{X}$ is unbounded and losses are $L$-Lipschitz, it has been shown that no algorithm can guarantee a regret better than $\Omega\br{\norm{u}L \sqrt{T \ln(\norm{u} LT + 1)}}$.
 Parameter-free algorithms can achieve this bound~\cite{mcmahan_no-regret_2012}.
@@ -151,26 +152,26 @@ This formulation measures the performance of the entire network's decisions agai
         D-NASA targets stationarity for nonconvex stochastic objectives~\cite{li_problem_parameter_free_2024}, Kuruzov et al.\ obtain linear convergence for strongly convex smooth objectives~\cite{kuruzov_achieving_2024}, and Chen et al.\ address composite convex objectives~\cite{chen_parameter_free_2025}.
         These methods solve fixed-objective optimization problems and measure stationarity or objective convergence.
         Separately, DADAM is a decentralized adaptive-moment method for online optimization with a dynamic-regret analysis~\cite{nazari_dadam_2019}, but it retains optimizer hyperparameters.
-        Our contribution instead concerns sequential predict-before-feedback losses: coin-betting agents coupled by local gossip, with network-regret guarantees that adapt to the unknown comparator and horizon without a learning-rate scale.
+        Our contribution instead concerns sequential predict-before-feedback losses: both coin-betting variants have comparator-adaptive average-local-regret guarantees, and the one-state variant has a communication-dependent network-regret guarantee without a learning-rate scale.
         \par}
 Note that the decentralized formulation described above also encompasses distributed scenarios with a central coordinator and various computing nodes.
 This is simply a special case of the topology of $\mathcal{G}$.
 
 \subsubsection*{Contributions}
-This paper introduces the first decentralized online learning algorithms that are parameter-free and come with network regret guarantees.
+\textcolor{blue}{This paper introduces decentralized online learning algorithms that are parameter-free and have centralized-order average-local-regret guarantees; the one-state variant additionally has a network-regret guarantee under sufficient communication.}
 We bridge the gap between adaptive single-agent learning and multi-agent coordination by combining the coin-betting framework with decentralized gossip protocols.
     {\color{blue}
         Our contribution is not a new gossip operator, reward-regret duality, or coin betting in isolation.
-        It is the decentralized online-learning formulation and analysis that (i) equips parameter-free coin-betting agents with network-regret guarantees, (ii) decomposes network regret into average local coin-betting regret and a communication-controlled disagreement term, and (iii) uses the one-state betting-function formulation of \algname{}-\pmb{ii} to obtain a direct network-regret analysis.
+        It is the decentralized online-learning formulation and analysis that (i) gives both variants average-local-regret guarantees, (ii) upper-bounds the network regret of \algname{}-\pmb{ii} by average local coin-betting regret and a communication-controlled disagreement penalty, and (iii) uses its one-state betting-function formulation to obtain that direct network-regret analysis.
         \par}
 
 Our main contributions are:
 \begin{itemize}
-    \item We propose a novel family of decentralized algorithms that allow agents to collaboratively minimize cumulative loss without any hyperparameter tuning.
-    \item We provide theoretical analysis showing that our algorithms achieve sublinear regret, comparable to centralized methods.
+    \item \textcolor{blue}{We propose a novel family of decentralized algorithms that allow agents to collaboratively minimize cumulative loss without learning-rate tuning or prior knowledge of the horizon or comparator norm.}
+    \item \textcolor{blue}{We show centralized-order average local regret for both variants and sublinear network regret for \algname{}-\pmb{ii} under an explicit topology-dependent communication condition.}
     \item We introduce a new \emph{betting function} formulation that simplifies the analysis of coin-betting algorithms in the multi-agent context.
 \end{itemize}
-We also validate our approach with experiments on synthetic and real-world datasets, demonstrating its effectiveness in decentralized networks.
+\textcolor{blue}{We also evaluate our approach empirically on synthetic and real-world datasets.}
 
 The remainder of the paper is organized as follows.~\Cref{sec:algorithm} introduces our proposed algorithm and its underlying intuition.
 \Cref{sec:preliminaries} provides the necessary technical background for our analysis.
@@ -219,8 +220,8 @@ We propose two closely related variants for making this decision:
 \textcolor{blue}{\algname{}-\pmb{ii} is the one-state betting-function variant $x_{n,t}=h_t(G_{n,t-1})$ and gossips only $G$.}
 \textcolor{blue}{Thus, \algname{}-\pmb{i} is a reference construction that preserves the classical wealth recursion, whereas \algname{}-\pmb{ii} reduces each directed-neighbor exchange from $d+1$ to $d$ real scalars.}
 
-\textcolor{blue}{\algname{}-\pmb{ii} is defined directly by the one-state update $x_{n,t}=h_t(G_{n,t-1})$; it is not obtained by substituting the approximation $\w_{n,t-1}\approx F_{t-1}(G_{n,t-1})$ into \algname{}-\pmb{i}.}
-\textcolor{blue}{Its regret analysis is therefore stated in terms of $h_t$ and the disagreement induced by gossiped cumulative gradients, rather than an approximation-error term relative to \algname{}-\pmb{i}.}
+\textcolor{blue}{The variants are algebraically related: at a shared state $(\w,G)$, their decisions differ by $\boldsymbol{\beta}_t(G)\br{\w-\Phi_{t-1}(G)}$, and \Cref{lemma:multi_agent_wealth_lb} shows that the bracket is nonnegative for \algname{}-\pmb{i}.}
+\textcolor{blue}{The potential is thus a certified wealth lower bound, not an estimator with an assumed approximation accuracy. After the different local and gossip updates, the two variants generally follow different state trajectories, so \algname{}-\pmb{ii} is analyzed directly rather than through a cumulative approximation-error claim.}
 \textcolor{blue}{This smaller communicated state can trade performance for communication, and \algname{}-\pmb{ii} is not claimed to dominate \algname{}-\pmb{i}.}
 
 After receiving the subgradient $g_{n,t}$, each agent performs a local update on its state.
@@ -248,19 +249,23 @@ This gossip step averages the states across neighbors, driving the entire system
 Before diving into the detailed description and mathematical proofs, we discuss our main theoretical guarantees.
 \subsubsection{The average local regret is independent of the topology}
 Our first key result (\Cref{thm:local_avg_regret_bound}) shows that the \emph{average} of local regrets across all agents is sublinear and matches the bounds for centralized parameter-free algorithms.
-Remarkably, this guarantee holds regardless of the network's topology or connectivity.
-Even if the agents never communicate ($W=I$), their average performance is still optimal.
-The only necessary condition is that the gossip matrix $W$ must be doubly stochastic.
+{\color{blue}
+Remarkably, this guarantee does not require a contracting network topology.
+Even if the agents never communicate, so the post-update mixing is $P_t=I$, their average local regret retains the same bound.
+The local result only requires each $P_t$ to be nonnegative and doubly stochastic.
+\par}
 
 \subsubsection{Network regret and disagreement}
 Our second key result (\Cref{thm:network_loss_regret_bound}) characterizes the more challenging \textbf{network regret}.
-We prove that it consists of two components: the sublinear average local regret mentioned above, plus a non-negative \textbf{disagreement term}.
-The latter term measures the cumulative cost incurred because agents' decisions differ from one another.
-For a complete graph, $\mathcal{G}$, the disagreement term is null, recovering \emph{both} the single-agent scenario and the regret guarantees.
+{\color{blue}
+We upper-bound it by the sublinear average local regret mentioned above plus a nonnegative \textbf{disagreement penalty}.
+The latter measures the cumulative pairwise difference between agents' decisions; the exact residual in the regret decomposition need not itself be nonnegative.
+With exact averaging, $W=N^{-1}\mathbf{1}\mathbf{1}^\top$---as obtained by one Metropolis-Hastings round on a complete graph---the disagreement penalty vanishes and the agents share the centralized state trajectory.
+\par}
 
 \subsubsection{Controlling disagreement with gossip}
 Finally, we show that the disagreement term is controlled by the rate of information mixing in the network, which is determined by the spectral properties of the gossip matrix $W$ and the number of gossip steps performed.
-By performing a number of gossip steps that grows slowly with time (e.g.~linearly with the round number $t$), we can ensure that the disagreement term also grows sublinearly, leading to an overall sublinear network regret (\Cref{lemma:square-root-disagreement}).
+\textcolor{blue}{By using $q(t)=\lceil\kappa t\rceil$ with the topology- and potential-dependent coefficient specified in \Cref{thm:exponential-disagreement,thm:KT-disagreement}, we ensure that the disagreement penalty grows sublinearly, leading to sublinear network regret (\Cref{lemma:square-root-disagreement}).}
 This shows that given enough communication, we can achieve sublinear network regret.
 
 \section{Preliminaries for the analysis}\label{sec:preliminaries}
@@ -268,12 +273,12 @@ To formally prove the guarantees stated in the previous section, we now introduc
 We describe each component (subgradients, coin-betting, and gossip) that plays a role in our framework separately.
 
 \subsection{Subgradients and Online Convex Optimization}
-Our analysis applies to the general problem of Online Convex Optimization (OCO).
+\textcolor{blue}{Our analysis applies to unconstrained OCO over the real Hilbert space $\Hil$.}
 A standard technique for analyzing OCO problems is to linearize the convex loss functions using subgradients.
 This allows us to bound the regret of the convex problem by analyzing an equivalent Online Linear Optimization (OLO) problem.
 
 \begin{definition}[Subgradient]
-    For a convex function $f: \mathcal{X}\rightarrow \mathbb{R}$, a vector $g \in \mathcal{X}$ is a \emph{subgradient} of $f$ at a point $x \in \mathcal{X}$ if for all $y \in \mathcal{X}$:
+    \textcolor{blue}{For a convex function $f: \Hil\rightarrow \mathbb{R}$, a vector $g \in \Hil$ is a \emph{subgradient} of $f$ at a point $x \in \Hil$ if for all $y \in \Hil$:}
     \begin{equation*}
         f(y) \geq f(x) + \langle g, y - x \rangle.
     \end{equation*}
@@ -290,19 +295,21 @@ The coin-betting framework is the engine that drives the local, adaptive learnin
 It provides a powerful method for designing parameter-free algorithms by establishing a duality between online learning and a sequential betting game.
 The formal connection is established by the reward-regret relationship, which states that an upper bound on regret is mathematically equivalent to a lower bound on cumulative reward (or wealth in the betting analogy).
 
+{\color{blue}
 \begin{lemma}[Reward-Regret Relationship~\cite{mcmahan_unconstrained_2014}]\label{lemma:reward-regret}
-    Let $V$, $V^*$ be a pair of dual vector spaces.
-    Let $F: V \to \mathbb{R} \cup \{+\infty\}$ be a proper convex lower semi-continuous function and let $F^*: V^* \to \mathbb{R} \cup \{+\infty\}$ be its Fenchel conjugate.
+    Let $V$ and $V^*$ be a pair of dual vector spaces.
+    Let $F: V^* \to \mathbb{R} \cup \{+\infty\}$ be a proper, convex, lower semi-continuous function and let $F^*: V \to \mathbb{R} \cup \{+\infty\}$ be its Fenchel conjugate.
     Let $x_1, x_2, \dots, x_T \in V$ and $g_1, g_2, \dots, g_T \in V^*$.
     For any $\epsilon > 0$,
     \begin{align}
-        \underbrace{\sum_{t=1}^T \langle g_t, x_t \rangle}_{\text{Reward}} \geq F\br{-\sum_{t=1}^T g_t } - \epsilon
+        \underbrace{-\sum_{t=1}^T \langle g_t, x_t \rangle}_{\text{Reward}} \geq F\br{-\sum_{t=1}^T g_t } - \epsilon
     \end{align}
     if and only if
     \begin{align}
-        \forall u \in V^*, \quad \underbrace{\sum_{t=1}^T \langle g_t, x_t - u \rangle}_{\text{Regret}} \leq F^*(u) + \epsilon.
+        \forall u \in V, \quad \underbrace{\sum_{t=1}^T \langle g_t, x_t - u \rangle}_{\text{Regret}} \leq F^*(u) + \epsilon.
     \end{align}
 \end{lemma}
+}
 This lemma tells us that if we can guarantee that our cumulative earnings (reward) are lower-bounded by some function $F$ of the cumulative outcomes, then our regret is automatically upper-bounded by its conjugate $F^*$.
 
 The function $F$ is constructed using a sequence of \textbf{coin-betting potentials}.
@@ -316,11 +323,11 @@ These are carefully designed functions that represent a guaranteed lower bound o
         \item For every $t \geq 0$, $F_t(x)$ is even, logarithmically convex, strictly increasing on $[0, a_t)$, and $\lim_{x \to a_t} F_t(x) = +\infty$. % chktex 9
         \item For every $t \geq 1$, every $x \in [-(t-1), t-1]$, and every $c \in [-1,1]$, it holds that
               \begin{align}
-                  \br{1 + c \beta_t} F_{t-1}(x) \geq F_t(x + c),
+                  {\color{blue}\br{1 + c \beta_t(x)} F_{t-1}(x) \geq F_t(x + c)},
               \end{align}
               where
               \begin{align}
-                  \beta_t = \frac{F_t(x + 1) - F_t(x - 1)}{F_t(x + 1) + F_t(x - 1)}.
+                  {\color{blue}\beta_t(x) = \frac{F_t(x + 1) - F_t(x - 1)}{F_t(x + 1) + F_t(x - 1)}}.
               \end{align}
     \end{enumerate}
     Moreover, it is an \textbf{excellent} sequence of coin betting potentials if it also satisfies
@@ -342,37 +349,92 @@ Popular choices for these potentials, such as the Krichevsky-Trofimov (KT) poten
         \toprule
         Name                & $F_t(x)$                                                                                                             & $\beta_t(x)$            \\
         \midrule
-        Exponential         & $\frac{\epsilon}{\sqrt{t}} \exp\br{\frac{x^2}{2t}}$                                                                  & $\tanh\br{\frac{x}{t}}$ \\
-        Krichevsky-Trofimov & $\frac{2^t \cdot \Gamma\br{\frac{t+1}{2} + \frac{x}{2}} \cdot \Gamma\br{\frac{t+1}{2} - \frac{x}{2}}}{\pi \cdot t!}$ & $\frac{x}{t}$           \\
+        Exponential         & \textcolor{blue}{$\epsilon\exp\br{\frac{x^2}{2t}-\frac{H_t}{2}}$}                                                                      & $\tanh\br{\frac{x}{t}}$ \\
+        Krichevsky-Trofimov & \textcolor{blue}{$\epsilon\frac{2^t \cdot \Gamma\br{\frac{t+1}{2} + \frac{x}{2}} \cdot \Gamma\br{\frac{t+1}{2} - \frac{x}{2}}}{\pi \cdot t!}$} & $\frac{x}{t}$           \\
         \bottomrule
     \end{tabular}
 \end{table}
+\textcolor{blue}{Here $H_t=\sum_{i=1}^t i^{-1}$, with $H_0=0$ and $F_0(0)=\epsilon$; this is the exact normal-potential normalization in~\cite[Theorem 9]{orabona_coin_2016}.}
 
 \subsubsection*{Betting functions}
 For our decentralized analysis, we introduce a new tool called a \textbf{betting function}.
 This function, derived from the potentials, maps the accumulated subgradients directly to a decision (a bet).
 This decouples the betting decision from the agent's wealth, simplifying the algorithm and its analysis.
 
-\begin{definition}[Betting function]\label{def:betting-function}
-    Let $\{F_t\}$ be a sequence of coin-betting potentials.
-    The betting function at time $t > 0$ is defined as $h_t(x) = \beta_t(x) \cdot F_{t-1}(x)$, where $\beta_t(x)$ is the betting fraction derived from $F_t$.
+{\color{blue}
+\begin{definition}[Hilbert-space betting function]\label{def:betting-function}
+    Let $\{F_t\}$ be an excellent sequence of coin-betting potentials and let $z\in\Hil$.
+    Define the radial potential $\Phi_t(z)\coloneqq F_t(\norm{z})$ and the Hilbert-space betting fraction
+    \begin{equation}
+        \boldsymbol{\beta}_t(z) \coloneqq
+        \begin{cases}
+            \displaystyle \beta_t(\norm{z})\frac{z}{\norm{z}}, & z\neq 0, \\
+            0,                                                    & z=0.
+        \end{cases}
+    \end{equation}
+    The betting function at time $t>0$ is
+    \begin{equation}
+        h_t(z)\coloneqq F_{t-1}(\norm{z})\boldsymbol{\beta}_t(z).
+    \end{equation}
+    For a scalar input, this reduces to $h_t(z)=\beta_t(z)F_{t-1}(z)$.
 \end{definition}
+}
 This function $h_t$ is used in \algname{}-\pmb{ii} to determine $x_{n,t}$ based only on the gossiped state $G_{n,t-1}$.
+
+{\color{blue}
+\begin{lemma}[Radial one-step potential inequality~\cite{orabona_coin_2016}]\label{lemma:radial-potential}
+    Let $\{F_t\}$ be an excellent sequence of coin-betting potentials.
+    For every $z,c\in\Hil$ satisfying $\norm{z}\leq t-1$ and $\norm{c}\leq 1$,
+    \begin{equation}
+        \Phi_{t-1}(z)+\langle c,h_t(z)\rangle \geq \Phi_t(z+c).
+    \end{equation}
+    Moreover, $\Phi_t$ is convex.
+\end{lemma}
+\begin{proof}
+    Convexity follows because $F_t$ is convex and nondecreasing on $[0,a_t)$. % chktex 9
+    For $z\neq0$, let $r=\norm{z}$ and $\alpha=\langle c,z/r\rangle\in[-1,1]$.
+    Monotonicity gives
+    \begin{equation}
+        F_t(\norm{z+c})
+        \leq F_t\left(\sqrt{r^2+2r\alpha+1}\right).
+    \end{equation}
+    Condition~(d) makes the right-hand side convex as a function of $\alpha$: writing $s=\sqrt{r^2+2r\alpha+1}$, its second derivative, where $s>0$, is
+    \begin{equation}
+        \frac{r^2}{s^3}\br{sF_t''(s)-F_t'(s)}\geq0.
+    \end{equation}
+    Continuity covers $s=0$, so the function is upper-bounded by the chord between $\alpha=-1$ and $\alpha=1$.
+    Evenness of $F_t$ and condition~(c), applied with outcomes $-1$ and $1$, yield
+    \begin{align}
+        F_t(\norm{z+c})
+        &\leq \frac{1+\alpha}{2}F_t(r+1)
+            +\frac{1-\alpha}{2}F_t(r-1) \\
+        &\leq \br{1+\alpha\beta_t(r)}F_{t-1}(r) \\
+        &=\Phi_{t-1}(z)+\langle c,h_t(z)\rangle.
+    \end{align}
+    When $z=0$, the result follows from monotonicity, evenness, and condition~(c) at the origin.
+\end{proof}
+}
 
 \subsection{Gossip algorithms for consensus}\label{subsection:consensus}
 Gossip algorithms are the communication backbone of our method, enabling agents to coordinate and reach a consensus.
 They are decentralized protocols for averaging information across a network.
 
 An agent's communication with its neighbors is defined by a \textbf{gossip matrix} $W$.
+{\color{blue}
 \begin{definition}[Gossip Matrix]\label{def:gossip_matrix}
-    Given a connected graph $\mathcal{G} = (\mathcal{V}, \mathcal{E})$, a real $N\times N$ matrix $W$ is a \textbf{gossip matrix} if it is doubly stochastic ($\sum_m W_{mn} = \sum_n W_{mn} = 1$), its non-zero entries correspond to the edges of the graph ($W_{mn}>0$ only if $(m,n) \in \mathcal{E}$ or $m=n$), and its spectral radius $\rho(W - \frac{1}{N} \mathbf {1} \mathbf{1}^\top)$ is less than 1.
+    Given a connected, undirected graph $\mathcal{G} = (\mathcal{V}, \mathcal{E})$, a real $N\times N$ matrix $W$ is a \textbf{gossip matrix} if it is nonnegative, symmetric, and doubly stochastic; its nonzero entries correspond to edges of the graph or the diagonal; and
+    \begin{equation}
+        \rho\coloneqq\norm{W-\frac{1}{N}\mathbf{1}\mathbf{1}^\top}_2<1.
+    \end{equation}
 \end{definition}
+}
 {\color{blue}
     We assume synchronous exchanges over a fixed, connected, undirected graph and construct $W$ with Metropolis-Hastings weights in the experiments.
     One gossip round consists of one local exchange over every directed neighbor relation induced by the graph; no all-to-all exchange or central coordinator is used.
     If $d$ is the model dimension and $|E_{\mathrm{dir}}|$ is the number of directed non-self neighbor transmissions, one gossip round communicates $|E_{\mathrm{dir}}|d$ real scalars for \algname{}-\pmb{ii}, DOGD, and the adaptive decentralized baselines, and $|E_{\mathrm{dir}}|(d+1)$ real scalars for \algname{}-\pmb{i} because it additionally communicates the scalar wealth.
     Over a horizon $T$, a schedule $q(t)$ therefore communicates $|E_{\mathrm{dir}}|d\sum_{t=1}^{T} q(t)$ scalars for one-vector methods and $|E_{\mathrm{dir}}|(d+1)\sum_{t=1}^{T} q(t)$ scalars for \algname{}-\pmb{i}.
-    Consequently, $q(t)=1$ has linear total communication in $T$, whereas $q(t)=\lceil\alpha t\rceil$ has quadratic total communication.
+    Direct comparisons between the two variants keep the graph and gossip schedule fixed, isolating their behavior under the same consensus operator. Their payloads differ by one scalar per directed message, a relative difference of $1/d$. Exact scalar equality would require different integer numbers or timings of gossip rounds and hence a different mixing process, so we report exact scalar counts under the matched schedule.
+    Consequently, $q(t)=1$ has linear total communication in $T$, whereas $q(t)=\lceil\kappa t\rceil$ has quadratic total communication.
     \par}
 Crucially, such a matrix can be constructed using only local information (e.g., via the Metropolis-Hastings method~\cite{boyd_randomized_2006}), making it suitable for decentralized systems.
 When a vector of $N$ values is multiplied by $W$, each agent's value becomes a weighted average of its own and its neighbors' values.
@@ -391,11 +453,13 @@ For our analysis, we will need the following corollary, proved using the triangl
 \begin{corollary}[Gossip component-wise convergence rate]\label{cor:gossip-components}
     Given the conditions in~\Cref{lemma:gossip}, the components of the gossip iterations converge to the mean as
     \begin{align}
-        \norm{x_{n,k} - \bar{x}}\leq \rho^k \norm{x_0 - \bar x}.
+        {\color{blue}\norm{x_{n,k} - \bar{x}}\leq \rho^k \norm{x_0 - \bar{x}\otimes\mathbf{1}}}.
     \end{align}
 \end{corollary}
-To ease the analysis, without loss of generality, we will often write that \algname{} does one round of gossip per round of coin-betting.
-The reasoning is identical for $q(t)$ rounds of gossip per round of coin-betting, since the multiplication of two gossip matrices is also a gossip matrix.
+{\color{blue}
+At round $t$, $q(t)$ repetitions of the fixed gossip matrix are represented by $P_t=W^{q(t)}$.
+The analysis uses the resulting contraction factor $\rho^{q(t)}$; it does not require treating $P_t$, whose support may extend beyond immediate neighbors, as a one-round gossip matrix.
+\par}
 
 \section{Analysis}\label{sec:analysis}
 
@@ -405,7 +469,7 @@ The reasoning is identical for $q(t)$ rounds of gossip per round of coin-betting
 
     The analysis combines two classical ingredients: reward-regret duality for the average local coin-betting term and gossip-mixing bounds for consensus.
     The decentralized component is their coupling when decisions are generated from gossiped cumulative gradients.
-    In particular, the disagreement term exposes how the betting-function Lipschitz constants, network spectral radius, and gossip schedule jointly affect network regret.
+    In particular, the disagreement term exposes how the betting-function Lipschitz constants, network contraction factor, and gossip schedule jointly affect network regret.
     \par}
 
 \subsection{Multi-agent betting game}
@@ -430,107 +494,101 @@ In our multi-agent setting, each agent $n$ acts as a gambler with initial wealth
 At each round $t$, each agent decides its own betting amount $x_{n,t}$ based on its local information.
 After the betting decision, agents exchange information with their neighbors via a gossip protocol.
 
-More formally, for the \emph{local betting strategy}, each agent $n$ computes its betting fraction using the coin-betting potential
-\begin{equation}\label{eq:beta_nt}
-    \beta_{n,t} = \frac{F_t(C_{n,t-1} + 1) - F_t(C_{n,t-1} - 1)}{F_t(C_{n,t-1} + 1) + F_t(C_{n,t-1} - 1)},
-\end{equation}
-and sets
+{\color{blue}
+For \algname{}-\pmb{i}, each agent uses the radial betting fraction from \Cref{def:betting-function} and sets
 \begin{equation}\label{eq:x_nt}
-    x_{n,t} = \beta_{n,t} \w_{n,t-1}.
+    x_{n,t} = \boldsymbol{\beta}_t(G_{n,t-1})\w_{n,t-1}.
 \end{equation}
-Next, upon receiving the coin outcome $c_{n,t} \in [-1,1]$, each agent updates its wealth and accumulated coin output
+After observing a subgradient satisfying $\norm{g_{n,t}}\leq1$, the agent performs the local updates
 \begin{align}
-    \hat \w_{n,t} & = \w_{n,t-1} + c_{n,t} x_{n,t},\label{eq:w_nt} \\
-    \hat C_{n,t}  & = C_{n,t-1} + c_{n,t}.\label{eq:C_nt}
+    \widehat{\w}_{n,t} & = \w_{n,t-1}-\langle g_{n,t},x_{n,t}\rangle,\label{eq:w_nt} \\
+    \widehat G_{n,t}    & = G_{n,t-1}-g_{n,t}.\label{eq:C_nt}
 \end{align}
-Finally, agents exchange their wealth $\hat \w_{n,t}$, and accumulated coin outputs $\hat C_{n,t}$ with their neighbors.
-The updated variables after gossip are
+Writing $P_t=W^{q(t)}$, the post-gossip states are
 \begin{align}
-    \w_{n,t} & = \sum_{m=1}^N W_{mn} \hat \w_{m,t},\label{eq:gossiped_w} \\
-    C_{n,t}  & = \sum_{m=1}^N W_{mn} \hat C_{m,t}.\label{eq:gossiped_c}
+    \w_{n,t} & = \sum_{m=1}^N {(P_t)}_{nm}\widehat{\w}_{m,t},\label{eq:gossiped_w} \\
+    G_{n,t}  & = \sum_{m=1}^N {(P_t)}_{nm}\widehat G_{m,t}.\label{eq:gossiped_c}
 \end{align}
 
-Notice how the gossip exchange step ensures that agents' decisions and coin outputs are mixed and averaged across the network, preserving the network-wide accumulated coin output $\sum_{s=1}^t \bar c_s$, where $\bar c_t$ denotes the average coin outcome at time $t$.
+The gossip exchange preserves network averages, so $N^{-1}\sum_n G_{n,t}=-\sum_{s=1}^t \bar g_s$, where $\bar g_t=N^{-1}\sum_n g_{n,t}$.
+\par}
 
 \subsubsection*{Wealth lower bound in multi-agent setting}
 
 Our goal is to establish a wealth lower bound similar to the single-agent case.
 Specifically, we aim to show that
+{\color{blue}
 \begin{equation}\label{eq:wealth_lb}
-    \w_{n,t} \geq F_t(C_{n,t}).
+    \w_{n,t} \geq \Phi_t(G_{n,t}).
 \end{equation}
-By averaging this equation across all agents, we obtain
-\begin{align}
-    \overline{\w}_{t} & = \frac{1}{N} \sum_{n=1}^N \w_{n,t}                            \\
-                      & \geq \frac{1}{N} \sum_{n=1}^N F_t(C_{n,t})                     \\
-                      & \geq F_t \br{\frac{1}{N} \sum_{n=1}^N C_{n,t}}                 \\
-                      & = F_t \br{\sum_{s=1}^t \bar c_s}, \label{eq:wealth_lb_average}
-\end{align}
-where we have used the log-convexity of $F_t$ and the fact that the average of the accumulated coin outputs is equal to the accumulated average coin output.
+}
 
 To prove~\Cref{eq:wealth_lb}, we proceed by induction.
+{\color{blue}
 \begin{lemma}[Wealth lower bound in multi-agent setting]\label{lemma:multi_agent_wealth_lb}
-    Under the proposed multi-agent betting game and assuming the coin-betting potential $F_t$ satisfies the conditions in~\Cref{def:potential}, the wealth of each agent satisfies:
+    If $\{F_t\}$ is an excellent sequence of coin-betting potentials, $\norm{g_{n,t}}\leq1$, and every post-update mixing matrix $P_t$ is nonnegative and doubly stochastic, then \algname{}-\pmb{i} satisfies
     \begin{align}
-        \w_{n,t} \geq F_t(C_{n,t}),
+        \w_{n,t} \geq \Phi_t(G_{n,t}).
     \end{align}
-    as long as the gossip matrix $W$ is doubly stochastic.
 \end{lemma}
 
 \begin{proof}
     We use induction on $t$.
-    For the base case, $t=0$, for any agent $n$, we have $\w_{n,0} = \epsilon = F_0(0)$ and $C_{n,0} = 0$, so the inequality holds.
+    For $t=0$, $\w_{n,0}=\epsilon=\Phi_0(0)$ and $G_{n,0}=0$.
 
-    For the inductive step, we assume the inequality holds at time $t-1$.
-    At time $t$, the wealth update at Agent $n$ is given by:
+    Suppose the claim holds at time $t-1$.
+    Since $\norm{\boldsymbol{\beta}_t(G_{n,t-1})}<1$, the multiplier below is nonnegative.
+    The induction hypothesis and \Cref{lemma:radial-potential}, with $c=-g_{n,t}$, give
     \begin{align}
-        \w_{n,t} & = \sum_{m=1}^N W_{mn} \hat \w_{m,t}                                      \\
-                 & = \sum_{m=1}^N W_{mn} \br{\w_{m, t-1} + c_{m,t} x_{m,t} }                \\
-                 & = \sum_{m=1}^N W_{mn} \w_{m,t-1}\br{1 + \beta_{m,t} c_{m,t}}             \\
-                 & \geq \sum_{m=1}^N W_{mn} F_{t-1}(C_{m,t-1})\br{1 + \beta_{m,t} c_{m,t}}.
+        \widehat{\w}_{n,t}
+        &=\w_{n,t-1}\br{1-\langle g_{n,t},\boldsymbol{\beta}_t(G_{n,t-1})\rangle} \\
+        &\geq\Phi_{t-1}(G_{n,t-1})
+        \br{1-\langle g_{n,t},\boldsymbol{\beta}_t(G_{n,t-1})\rangle} \\
+        &=\Phi_{t-1}(G_{n,t-1})-\langle g_{n,t},h_t(G_{n,t-1})\rangle \\
+        &\geq\Phi_t(\widehat G_{n,t}).
     \end{align}
-    The last step is derived by the induction hypothesis, $\w_{m,t-1} \geq F_{t-1}(C_{m,t-1})$.
-    Using the coin-betting potential property (c) in~\Cref{def:potential}, we have:
-    \begin{align}\label{eq:wealth_update_bound}
-        F_{t-1}(C_{m,t-1})\br{1 + \beta_{m,t} c_{m,t}} & \geq F_t(C_{m,t-1} + c_{m,t}) \\
-                                                       & = F_t(\hat C_{m,t}).
-    \end{align}
-    Since $F_t$ is logarithmically convex and $W$ is doubly stochastic, applying Jensen's inequality yields:
+    Convexity of $\Phi_t$ then yields
     \begin{align}
-        \w_{n,t} & \geq \sum_{m=1}^N W_{mn} F_t(\hat C_{m,t})   \\
-                 & \geq F_t\br{\sum_{m=1}^N W_{mn}\hat C_{m,t}} \\
-                 & = F_t\br{C_{n,t}}.
+        \w_{n,t}
+        &\geq\sum_{m=1}^N{(P_t)}_{nm}\Phi_t(\widehat G_{m,t}) \\
+        &\geq\Phi_t\left(\sum_{m=1}^N{(P_t)}_{nm}\widehat G_{m,t}\right)
+        =\Phi_t(G_{n,t}).
     \end{align}
 \end{proof}
-This lemma shows that each agent's wealth is lower bounded by the coin-betting potential evaluated at its accumulated coin output.
+}
+{\color{blue}
+This lemma shows that each agent's wealth is lower-bounded by the radial potential evaluated at its accumulated negative subgradient.
 This relationship forms the basis for the regret bounds of our algorithm.
+By average preservation and Jensen's inequality, it also gives
+\begin{align}
+    \frac{1}{N}\sum_{t=1}^T\sum_{n=1}^N\langle g_{n,t},x_{n,t}\rangle
+    &=\epsilon-\frac{1}{N}\sum_{n=1}^N\w_{n,T} \\
+    &\leq\epsilon-\frac{1}{N}\sum_{n=1}^N\Phi_T(G_{n,T}) \\
+    &\leq\epsilon-F_T\left(\norm{\sum_{t=1}^T\bar g_t}\right).
+    \label{eq:wealth_lb_average}
+\end{align}
+}
     {\color{blue}
         \begin{remark}[Direct potential verification for \algname{}-\pmb{ii}]
-            For \algname{}-\pmb{ii}, let $\beta_{n,t}=\beta_t(G_{n,t-1})$ and $x_{n,t}=h_t(G_{n,t-1})=\beta_{n,t}F_{t-1}(G_{n,t-1})$.
-            Substituting the coin outcome $-g_{n,t}$ in condition~(c) of the coin-betting potential gives
+            Applying~\Cref{lemma:radial-potential} with $c=-g_{n,t}$ and $x_{n,t}=h_t(G_{n,t-1})$ gives
+            \begin{equation*}
+                \Phi_{t-1}(G_{n,t-1})-\langle g_{n,t},x_{n,t}\rangle
+                \geq\Phi_t(\widehat G_{n,t}).
+            \end{equation*}
+            Convexity of $\Phi_t$ and the gossip update give
             \begin{align*}
-                F_{t-1}(G_{n,t-1}) - g_{n,t}x_{n,t}
-                 & = \left(1-g_{n,t}\beta_{n,t}\right)F_{t-1}(G_{n,t-1}) \\
-                 & \geq F_t(G_{n,t-1}-g_{n,t})
-                = F_t(\widehat G_{n,t}).
+                \Phi_t(G_{n,t})
+                 &\leq\sum_m{(P_t)}_{nm}\Phi_t(\widehat G_{m,t}) \\
+                 &\leq\sum_m{(P_t)}_{nm}\left(
+                    \Phi_{t-1}(G_{m,t-1})-\langle g_{m,t},x_{m,t}\rangle
+                 \right).
             \end{align*}
-            After gossip, $G_{n,t}=\sum_{m} W_{mn}\widehat G_{m,t}$, so convexity of $F_t$ gives
+            Summing over agents, using double stochasticity, and telescoping yields
             \begin{align*}
-                F_t(G_{n,t})
-                 & \leq \sum_{m} W_{mn}F_t(\widehat G_{m,t})                           \\
-                 & \leq \sum_{m} W_{mn}\left(F_{t-1}(G_{m,t-1})-g_{m,t}x_{m,t}\right).
-            \end{align*}
-            Summing over agents and using double stochasticity yields
-            \begin{align*}
-                \sum_{n} F_t(G_{n,t})
-                \leq \sum_{n} F_{t-1}(G_{n,t-1})-\sum_{n} g_{n,t}x_{n,t}.
-            \end{align*}
-            Telescoping from $F_0(0)=\epsilon$ and applying Jensen's inequality therefore gives
-            \begin{align*}
-                \frac{1}{N}\sum_{t=1}^T\sum_{n=1}^{N} g_{n,t}x_{n,t}
-                 & \leq \epsilon-\frac{1}{N}\sum_{n=1}^{N} F_T(G_{n,T})            \\
-                 & \leq \epsilon-F_T\left(\frac{1}{N}\sum_{n=1}^{N} G_{n,T}\right) \\
-                 & = \epsilon-F_T\left(-\sum_{t=1}^T\bar g_t\right).
+                \frac{1}{N}\sum_{t=1}^T\sum_{n=1}^{N}\langle g_{n,t},x_{n,t}\rangle
+                 &\leq\epsilon-\frac{1}{N}\sum_{n=1}^{N}\Phi_T(G_{n,T}) \\
+                 &\leq\epsilon-\Phi_T\left(\frac{1}{N}\sum_{n=1}^{N}G_{n,T}\right) \\
+                 &=\epsilon-F_T\left(\norm{\sum_{t=1}^T\bar g_t}\right).
             \end{align*}
             Thus, \algname{}-\pmb{ii} satisfies the potential inequality needed by reward-regret duality without storing or gossiping a wealth variable.
         \end{remark}
@@ -539,285 +597,262 @@ This relationship forms the basis for the regret bounds of our algorithm.
 \subsection{Regret analysis}
 
 \textcolor{blue}{Using~\Cref{lemma:multi_agent_wealth_lb} for \algname{}-\pmb{i} and the direct potential verification above for \algname{}-\pmb{ii}, we can derive regret bounds for both algorithms.}
-Note that we have shown its proof for the case where $\{g_t\}$ are scalars, but the proof can be extended to elements of any Hilbert space $\Hil$ as in~\cite[Theorem 3]{orabona_coin_2016}.
+\textcolor{blue}{The radial inequality in~\Cref{lemma:radial-potential} is the Hilbert-space extension underlying~\cite[Theorem 3]{orabona_coin_2016}.}
 
+{\color{blue}
 \begin{theorem}[Average Local Regret Bound]\label{thm:local_avg_regret_bound}
-    Assuming that the coin-betting potential $F_t$ satisfies the conditions in~\Cref{def:potential}, both versions of \algname{} achieve the following regret bound for any comparator $u \in \Hil$:
+    Assume every $l_{n,t}$ is convex and $1$-Lipschitz on $\Hil$, let $\{F_t\}$ be an excellent sequence of coin-betting potentials, and let every post-update mixing matrix $P_t$ be nonnegative and doubly stochastic.
+    Both versions of \algname{} satisfy, for every comparator $u\in\Hil$,
     \begin{align}
-        R_T^{\text{local}}(u) & := \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T l_{n,t}(x_{n,t}) - l_{n,t}(u) \\
-                              & \leq F_T^*(u) + \epsilon,
+        R_T^{\text{local}}(u) & := \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T
+        \br{l_{n,t}(x_{n,t})-l_{n,t}(u)} \\
+                              & \leq \Phi_T^*(u)+\epsilon
+                                =F_T^*(\norm{u})+\epsilon,
     \end{align}
-    where $F_T^*$ is the Fenchel conjugate of $F_T$, and $\epsilon > 0$ is the initial endowment.
+    where $\epsilon>0$ is the initial endowment.
 \end{theorem}
 \begin{proof}
-    Notice that, due to convexity, we have:
+    Convexity gives
     \begin{align*}
-        \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T l_{n,t}(x_{n,t}) - l_{n,t}(u) & \leq \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \langle g_{n,t}, x_{n,t} - u \rangle.
+        R_T^{\mathrm{local}}(u)
+        &\leq \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T
+        \langle g_{n,t},x_{n,t}-u\rangle.
     \end{align*}
-    \textcolor{blue}{For \algname{}-\pmb{i}, the algorithmic state $G_{n,t}$ equals the accumulated coin outcome $C_{n,t}$ because both start at zero, subtract the same subgradient locally, and undergo the same gossip update. Hence, the wealth lower bound in~\Cref{lemma:multi_agent_wealth_lb} and preservation of network averages give the required reward inequality. For \algname{}-\pmb{ii}, the direct potential verification above gives the same inequality without introducing a wealth variable. Thus, for either variant,}
+    The wealth lower bound gives the following inequality for \algname{}-\pmb{i}; the direct verification gives the same inequality for \algname{}-\pmb{ii}:
     \begin{align}
-        \textcolor{blue}{\frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \langle g_{n,t}, x_{n,t} \rangle}
-         & \textcolor{blue}{\leq \epsilon-\frac{1}{N}\sum_{n=1}^{N} F_T(G_{n,T})} \\
-         & \textcolor{blue}{\leq - F_T\br{- \sum_{t=1}^T \bar g_{t}} + \epsilon.}
+        \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \langle g_{n,t}, x_{n,t} \rangle
+        &\leq\epsilon-\frac{1}{N}\sum_{n=1}^{N}\Phi_T(G_{n,T}) \\
+        &\leq\epsilon-F_T\left(\norm{\sum_{t=1}^T\bar g_t}\right).
     \end{align}
     Therefore,
     \begin{align}
-        \frac{1}{N} & \sum_{n=1}^N \sum_{t=1}^T \langle g_{n,t}, x_{n,t} - u \rangle                                                         \\
-                    & \leq - \frac{1}{N} \sum_{n=1}^N \sum_{t=1}^T \langle g_{n,t}, u \rangle - F_T\br{- \sum_{t=1}^T \bar g_{t}} + \epsilon \\
-                    & = \left\langle -\sum_{t=1}^T \bar g_{t}, u \right\rangle - F_T\br{- \sum_{t=1}^T \bar g_{t}} + \epsilon                \\
-                    & \leq \sup_{\theta \in \Hil{}} \langle \theta, u \rangle - F_T(\theta) + \epsilon                                       \\
-                    & = F_T^*(u) + \epsilon.
+        R_T^{\mathrm{local}}(u)
+        &\leq\left\langle-\sum_{t=1}^T\bar g_t,u\right\rangle
+        -F_T\left(\norm{\sum_{t=1}^T\bar g_t}\right)+\epsilon \\
+        &\leq\sup_{\theta\in\Hil}
+        \left\{\langle\theta,u\rangle-F_T(\norm{\theta})\right\}+\epsilon \\
+        &=\Phi_T^*(u)+\epsilon
+        =F_T^*(\norm{u})+\epsilon.
     \end{align}
 \end{proof}
 \begin{remark}
-    Applying~\cite[Corollary 5]{orabona_coin_2016}, any potential from~\Cref{tab:mappings} satisfies
+    Applying~\cite[Corollary 5]{orabona_coin_2016}, the KT potential satisfies
     \begin{align*}
         R_T^{\text{local}}(u) & \leq \norm{u} \sqrt{T \ln \br{1 + \frac{24T^2 \norm{u}^2}{\epsilon^2}}} + \epsilon,
     \end{align*}
-    which gives sublinear regret when $\epsilon = \bigo{\sqrt{T}}$.
+    which is sublinear for any fixed $\epsilon>0$; the experiments use $\epsilon=1$.
 \end{remark}
+}
+{\color{blue}
 \begin{remark}
-    Note that the regret bound in~\Cref{thm:local_avg_regret_bound} only uses the double stochasticity of the gossip matrix $W$, so it holds for any gossip algorithm that preserves averages.
-    Notably, this includes the case where agents do not communicate with each other, that is, $W = I_N$.
-    This means that \textbf{no matter the network topology}, the average local loss is minimized.
-    The effect of the network topology is reflected in the average network regret, which is analyzed in~\Cref{thm:network_loss_regret_bound}.
+    The regret bound in~\Cref{thm:local_avg_regret_bound} uses only nonnegative, doubly stochastic post-update mixing; it does not require contraction.
+    Thus it includes the no-communication choice $P_t=I_N$, even though $I_N$ is excluded from~\Cref{def:gossip_matrix} by the condition $\rho<1$.
+    Hence the average-local-regret guarantee is independent of network connectivity.
+    The effect of the network topology on \algname{}-\pmb{ii} is reflected in the network regret analyzed in~\Cref{thm:network_loss_regret_bound}.
 \end{remark}
+}
 
 We now prove that the network regret is related to the local regret, with a disagreement term that depends on the network topology.
 This disagreement will become larger when the output decisions at each node differ more, which in turn is a consequence of the difference between the node losses.
 The output decisions are a function of the accumulated subgradient variable at each node.
 These are gossiped at each round and their difference is bounded as follows.
+{\color{blue}
 \begin{lemma}\label{lemma:G-gossip}
     Let $W$ be a gossip matrix as in~\Cref{def:gossip_matrix}.
-    Let $G_{n,t}$ be the accumulated subgradient at Agent $n$, and let $g_t = (g_{1,t}, \ldots, g_{N,t})$ be the vector of subgradients at time $t$.
+    Let $G_{n,t}$ be the accumulated negative subgradient at Agent $n$, and let $g_t = (g_{1,t}, \ldots, g_{N,t})$ be the stacked subgradient at time $t$.
     If we perform $q(t)$ gossip steps at each round $t$, the error with respect to the average accumulated subgradient at time $t$ evolves as
     \begin{align}
         \norm{G_{n,t} - \bar G_t} \leq \sum_{s=1}^t \rho^{Q(s,t)} \norm{g_{s} - \bar g_s \otimes \mathbf{1}},
     \end{align}
-    where $\rho < 1$ is the spectral radius of $W - \frac{1}{N} \mathbf{1} \mathbf{1}^\top$, and
+    where
     \begin{equation}
         Q(s,t) = \sum_{r=s}^t q(r).
     \end{equation}
-    Since each $g_{n,t} \in (-1,1)$, we can further bound
+    If $\norm{g_{n,t}}\leq1$, then
     \begin{align}
         \norm{G_{n,t} - \bar G_t} \leq \sqrt{N} \sum_{s=1}^t \rho^{Q(s,t)}.
     \end{align}
 \end{lemma}
 \begin{proof}
-    The lemma immediately follows from the triangle inequality and~\Cref{lemma:gossip}.
+    In stacked form, the update is $G_t=W^{q(t)}(G_{t-1}-g_t)$.
+    Projecting onto the disagreement subspace, unrolling the recursion, and applying~\Cref{lemma:gossip} gives the first inequality.
+    The second follows because averaging is an orthogonal projection and $\norm{g_t}\leq\sqrt{N}$.
 \end{proof}
+}
 
-\begin{theorem}
-    [Network loss regret bound]\label{thm:network_loss_regret_bound}
-    Let $\{F_t\}$ be a family of excellent coin-betting potentials as in~\Cref{def:potential}, and let $W$ be a gossip matrix as in~\Cref{def:gossip_matrix}.
-    Then, the proposed \algname{}-$\pmb{ii}$ achieves the following regret bound for any comparator $u \in \Hil$:
-    \begin{align*}
-        R_T^{\text{net}}(u) & = \frac{1}{N} \sum_{n=1}^{N} R_T^{\text{local}}(u)                                                  \\
-                            & + \underbrace{2\sqrt{N} \sum_{t=1}^T L_{h_t} \sum_{s=1}^{t-1} \rho^{Q(s,t)}}_{\text{Disagreement}},
-    \end{align*}
-    where $L_{h_t}$ is the Lipschitz constant of $h_t$ in $[-(t-1),(t-1)]$.
+{\color{blue}
+\begin{theorem}[Network loss regret bound]\label{thm:network_loss_regret_bound}
+    Assume every $l_{n,t}$ is convex and $1$-Lipschitz, $\{F_t\}$ is an excellent sequence of coin-betting potentials, and $W$ is a gossip matrix as in~\Cref{def:gossip_matrix}. Let \algname{}-\pmb{ii} use the schedule $q(t)$, let $Q$ be defined as in~\Cref{lemma:G-gossip}, and suppose $h_t$ is $L_{h_t}$-Lipschitz on the ball
+    $B_{t-1}\coloneqq\{z\in\Hil:\norm{z}\leq t-1\}$.
+    Then \algname{}-\pmb{ii} satisfies, for every $u\in\Hil$,
+    \begin{align}
+        R_T^{\mathrm{net}}(u)
+        &\leq R_T^{\mathrm{local}}(u)+\Delta_T \\
+        &\leq F_T^*(\norm{u})+\epsilon
+        +2\sqrt{N}\sum_{t=1}^T L_{h_t}
+          \sum_{s=1}^{t-1}\rho^{Q(s,t-1)},
+    \end{align}
+    where
+    \begin{equation}
+        \Delta_T\coloneqq\frac{1}{N^2}
+        \sum_{t=1}^T\sum_{n=1}^N\sum_{m=1}^N
+        \norm{x_{m,t}-x_{n,t}}\geq0.
+    \end{equation}
 \end{theorem}
 \begin{proof}
-    Using the definition of network regret in~\Cref{eq:network_regret}, we have:
+    Expanding $l_t=N^{-1}\sum_n l_{n,t}$ gives the exact decomposition
     \begin{align}
-        R_T^{\text{net}}(u) & = \sum_{t=1}^{T} \frac{1}{N} \sum_{n=1}^{N} l_{t}(x_{n,t}) - \sum_{t=1}^{T} l_{t}(u).
+        R_T^{\mathrm{net}}(u)&=R_T^{\mathrm{local}}(u)+D_T, \\
+        D_T&\coloneqq\frac{1}{N^2}\sum_{t=1}^T\sum_{n=1}^N\sum_{m=1}^N
+        \br{l_{n,t}(x_{m,t})-l_{n,t}(x_{n,t})}.
+        \label{eq:disagreement}
     \end{align}
-    Next, we add and subtract the average local loss to obtain:
-    \begin{align*}
-        R_T^{\text{net}}(u) = \sum_{t=1}^{T} \frac{1}{N} \sum_{n=1}^{N} l_{t}(x_{n,t}) & \pm \sum_{t=1}^{T} \frac{1}{N} \sum_{n=1}^{N} l_{n,t}(x_{n,t}) \\
-                                                                                       & - \sum_{t=1}^{T} l_{t}(u),
-    \end{align*}
-    which we can re-arrange to
-    \begin{align*}
-        R_T^{\text{net}}(u) & = \frac{1}{N} \sum_{n=1}^{N} R_T^{\text{local}}(u)                                                                     \\
-                            & + \underbrace{\sum_{t=1}^{T} \frac{1}{N} \sum_{n=1}^{N} \br{l_{t}(x_{n,t}) - l_{n,t}(x_{n,t})}}_{\text{Disagreement}}.
-    \end{align*}
-    Note that the local regret term can be bounded using~\Cref{thm:local_avg_regret_bound}, so we just have to bound the disagreement term, which we will denote as $D$.
-    We can further re-arrange the disagreement term as
-    \begin{equation}\label{eq:disagreement}
-        D \coloneqq \sum_{t=1}^{T} \frac{1}{N} \sum_{n=1}^{N} \frac{1}{N} \sum_{m=1}^{N} \br{l_{n,t}(x_{m,t}) - l_{n,t}(x_{n,t})}.
+    The residual $D_T$ may have either sign, but $1$-Lipschitz continuity gives
+    $D_T\leq\Delta_T$.
+    Since $x_{n,t}=h_t(G_{n,t-1})$ and $\norm{G_{n,t-1}}\leq t-1$,
+    \begin{equation}
+        \norm{x_{m,t}-x_{n,t}}
+        \leq L_{h_t}\norm{G_{m,t-1}-G_{n,t-1}}.
     \end{equation}
-    Note that we can now use the 1-Lipschitz property to bound each term, that is,
-    \begin{align*}
-        l_{n,t}(x_{m,t}) - l_{n,t}(x_{n,t}) & \leq \norm{x_{m,t} - x_{n,t}}             \\
-                                            & = \norm{h_t(G_{m,t-1}) - h_t(G_{n,t-1})},
-    \end{align*}
-    where we have used the definition of $x_{m,t}$ according to \algname{}-$\pmb{ii}$.
-    Next, we use the property that $h_t$ is $L_{h_t}$-Lipschitz in its domain, and we obtain
-    \begin{align}
-        \norm{x_{m,t} - x_{n,t}} & \leq L_{h_t} \norm{G_{m,t-1} - G_{n,t-1}}.
-    \end{align}
-    Now, using the triangle inequality and~\Cref{lemma:G-gossip}, we derive
-    \begin{align}
-        \norm{x_{m,t} - x_{n,t}} & \leq L_{h_t} \cdot 2\sqrt{N} \sum_{s=1}^{t-1} \rho^{Q(s,t)}.
-    \end{align}
-    Finally, we plug this back into~\Cref{eq:disagreement} to show
-    \begin{align}
-        D \leq  2\sqrt{N} \sum_{t=1}^T L_{h_t} \sum_{s=1}^{t-1} \rho^{Q(s,t)}.
-    \end{align}
+    The triangle inequality and~\Cref{lemma:G-gossip}, applied at time $t-1$, yield
+    \begin{equation}\label{eq:decision-disagreement-bound}
+        \norm{x_{m,t}-x_{n,t}}
+        \leq2\sqrt{N}L_{h_t}\sum_{s=1}^{t-1}\rho^{Q(s,t-1)}.
+    \end{equation}
+    Averaging this bound over $(n,m)$ and applying~\Cref{thm:local_avg_regret_bound} proves the result.
 \end{proof}
+}
 
+{\color{blue}
 \begin{lemma}[Square-root disagreement bound]\label{lemma:square-root-disagreement}
-    Let $W$ be a gossip matrix as in~\Cref{def:gossip_matrix}, where $\rho$ is the spectral radius of $W - \frac{1}{N} \mathbf{1} \mathbf{1}^\top$, and let
-    $\{F_t\}$ be a family of excellent coin-betting potentials, as in~\Cref{def:potential}, where $\{L_{h_t}\}$ are the Lipschitz constants of $\{h_t\}$ derived from $\{F_t\}$ in $[-(t-1), (t-1)]$.
-    If we perform $q(t)$ gossip steps at round $t$, such that
+    Under the conditions of~\Cref{thm:network_loss_regret_bound}, define
+    $S_1=0$ and $S_t\coloneqq\sum_{s=1}^{t-1}\rho^{Q(s,t-1)}$ for $t\geq2$.
+    If
     \begin{equation}\label{eq:condition-disagreement}
-        \forall t \geq 1, \quad L_{h_t} \sum_{s=1}^{t-1} \rho^{Q(s,t)} \leq C \cdot \frac{1}{\sqrt{t}},
+        \forall t\geq1,\qquad L_{h_t}S_t\leq\frac{C}{\sqrt{t}},
     \end{equation}
-    where $Q(s,t) \coloneqq \sum_{r=s}^t q(r)$, we obtain sublinear regret and the disagreement is upper-bounded by $4 C \sqrt{N} \sqrt{T}$.
+    then
+    \begin{equation}
+        R_T^{\mathrm{net}}(u)
+        \leq F_T^*(\norm{u})+\epsilon+4C\sqrt{NT}.
+    \end{equation}
 \end{lemma}
 \begin{proof}
-    From~\Cref{thm:network_loss_regret_bound}, the disagreement term $D$ is upper bounded as
-    \begin{align}
-        D \leq 2\sqrt{N} \sum_{t=1}^T L_{h_t} \sum_{s=1}^{t-1} \rho^{Q(s,t)}.
-    \end{align}
-    Given the condition~\eqref{eq:condition-disagreement}, we can upper bound
-    \begin{align}
-        D \leq 2\sqrt{N} \sum_{t=1}^T C \cdot \frac{1}{\sqrt{t}}.
-    \end{align}
-    Note that
-    \begin{align}
-        \sum_{t=1}^T \frac{1}{\sqrt{t}} \coloneqq H_{T,1/2}
-    \end{align}
-    is the generalized harmonic number $H_{T,1/2}$.
-    From the classic square root reciprocals sum inequality,
-    \begin{equation}
-        H_{T,1/2} \leq 2 \sqrt{T} - 1,
-    \end{equation}
-    and, thus, we obtain that
-    \begin{equation}
-        D \leq 4 C \sqrt{N} \sqrt{T}.
-    \end{equation}
+    Substitute~\eqref{eq:condition-disagreement} into~\Cref{thm:network_loss_regret_bound} and use
+    $\sum_{t=1}^T t^{-1/2}\leq2\sqrt{T}$.
 \end{proof}
+}
 
+{\color{blue}
 \begin{theorem}[Exponential potentials and sublinear disagreement]\label{thm:exponential-disagreement}
-    \algname{}-\pmb{ii}, choosing $\{F_t\}$ to be the exponential potentials from~\Cref{tab:mappings}, defined as
+    Assume $0<\rho<1$ and choose the exponential potentials
     \begin{equation}
-        F_t(x) = \frac{\epsilon}{\sqrt{t}} \exp\br{\frac{x^2}{2t}},
+        F_0(0)=\epsilon,\qquad
+        F_t(x)=\epsilon\exp\br{\frac{x^2}{2t}-\frac{H_t}{2}},\quad t\geq1.
     \end{equation}
-    and choosing the gossip step function to be
+    If \algname{}-\pmb{ii} uses
     \begin{equation}
-        q(t) = \lceil \textcolor{blue}{\kappa} \cdot t \rceil,
+        q(t)=\lceil\kappa t\rceil,
     \end{equation}
-    for any $\textcolor{blue}{\kappa} \geq \frac{-3}{2\ln \rho}$ has sublinear regret and disagreement.
+    with $\kappa\geq-3/(2\ln\rho)$, then
+    \begin{equation}
+        R_T^{\mathrm{net}}(u)
+        \leq F_T^*(\norm{u})+\epsilon+6\epsilon\sqrt{NT}.
+    \end{equation}
 \end{theorem}
 \begin{proof}
-    The betting function derived from the exponential potential is
+    The odd scalar profile of the radial betting function is
     \begin{align}
-        h_t(x) = \tanh \br{\frac{x}{t}} \cdot F_{t-1}(x),
+        \eta_t(x)=\tanh\br{\frac{x}{t}}F_{t-1}(x).
     \end{align}
-    which is odd and has derivative
+    For $t\geq2$, its derivative is
     \begin{align}
-        h_t'(x) = F_t(x) \frac{\sech^2{\frac{x}{t}} + x \tanh{\frac{x}{t}}}{t}.
+        \eta_t'(x)=F_{t-1}(x)\left[
+        \frac{1}{t}\sech^2\br{\frac{x}{t}}
+        +\frac{x}{t-1}\tanh\br{\frac{x}{t}}
+        \right].
     \end{align}
-    For $t\geq 1$, and $|x| \leq t-1$, we can derive that
+    Since $H_{t-1}\geq\ln(t-1)$, for $|x|\leq t-1$,
     \begin{align}
-        |h_t'(x)| & \leq  F_t(t-1) \br{1 - \frac{2}{1 + e^2}}                                                        \\
-                  & \leq \frac{\epsilon}{\sqrt{t}} \exp \br{\frac{\br{t-1}^2}{2t}} \cdot \br{1 - \frac{2}{1 + e^2}},
+        |\eta_t'(x)|
+        \leq\frac{3\epsilon}{2\sqrt{t-1}}
+        \exp\br{\frac{t-1}{2}}.
     \end{align}
-    and we can use this quantity as $L_{h_t}$, needed in~\Cref{lemma:square-root-disagreement}.
-    The proof is complete if~\Cref{lemma:square-root-disagreement} holds and we apply it with $C \coloneqq \epsilon \cdot \br{1 - \frac{2}{1 + e^2}}$.
-    To use~\Cref{lemma:square-root-disagreement}, we need to show the validity of Ineq.~\eqref{eq:condition-disagreement}, i.e.,
-    \begin{align*}
-        \forall t \geq 1, \quad \exp \br{\frac{\br{t-1}^2}{2t}} \sum_{s=1}^{t-1} \rho^{Q(s,t)} \leq 1.
-    \end{align*}
-    For $t=1$, Ineq.~\eqref{eq:condition-disagreement} is trivial.
-    Next, for $t \geq 2$, we can ensure that
-    \begin{align*}
-        \exp \br{\frac{\br{t-1}^2}{2t}} \sum_{s=1}^{t-1} \rho^{Q(s,t)} \leq \exp \br{\frac{t}{2}} \sum_{s=1}^{t-1} \rho^{Q(s,t)},
-    \end{align*}
-    so the condition is satisfied if
-    \begin{align*}
-        e^{t/2}\sum_{s=1}^{t-1} \rho^{Q(s,t)} \leq 1.
-    \end{align*}
-    Now, let $q(t) = \textcolor{blue}{\kappa} \cdot t$.
-    In practice, we can take the ceiling of this quantity, since the number of gossip iterations has to be an integer.
-    For ease of analysis, we will disregard the ceiling, but the logic follows analogously.
-    Notice that we can express
+    Because $\eta_t(0)=0$, the radial lift has the same Lipschitz bound: its radial and tangential derivative magnitudes are $|\eta_t'(r)|$ and $|\eta_t(r)|/r$, and the latter is bounded by the former's supremum.
+
+    For $t\geq2$ and $1\leq s\leq t-1$, the ceiling in the schedule gives
     \begin{align}
-        Q(s,t) = \textcolor{blue}{\kappa} \cdot \frac{(t-s+1)(s+t)}{2},
+        Q(s,t-1)
+        &\geq\kappa\sum_{r=s}^{t-1}r
+        =\kappa\frac{(t-s)(s+t-1)}{2}
+        \geq\kappa(t-1).
     \end{align}
-    which is smallest when $s=t-1$.
-    Thus, we can upper bound
-    \begin{align*}
-        e^{t/2} \sum_{s=1}^{t-1} \rho^{Q(s,t)} \leq e^{t/2} (t-1) \rho^{\textcolor{blue}{\kappa}(2t-1)}.
-    \end{align*}
-    We want to ensure that
-    \begin{align*}
-        e^{t/2} (t-1) \rho^{\textcolor{blue}{\kappa}(2t-1)} \leq 1
-    \end{align*}
-    for all $t \geq 2$.
-    Taking logarithms, we obtain
+    Hence $S_t\leq(t-1)\rho^{\kappa(t-1)}$.
+    The condition on $\kappa$ implies $\rho^{\kappa(t-1)}\leq e^{-3(t-1)/2}$, so
     \begin{align}
-        \frac{t}{2} + \ln(t-1) + \frac{\textcolor{blue}{\kappa}\ln \rho}{2}(2t-1) \leq 0 \label{eq:taking-logs}
+        L_{h_t}S_t
+        &\leq\frac{3\epsilon}{2}\sqrt{t-1}\,e^{-(t-1)}
+        \leq\frac{3\epsilon}{2\sqrt{t}}.
     \end{align}
-    Notice that if the LHS is non-increasing, we only need to verify Ineq.~\eqref{eq:taking-logs} at $t=2$.
-    The derivative of the LHS is
-    \begin{align*}
-        \frac{1}{2} + \frac{1}{t-1} + \textcolor{blue}{\kappa}\ln(\rho),
-    \end{align*}
-    and ensuring
-    \begin{equation}
-        \textcolor{blue}{\kappa} \geq \frac{-3}{2\ln(\rho)}, \label{eq:cond_monotonicity}
-    \end{equation}
-    it is non-positive for all $t \geq 2$, which ensures the non-increasing property.
-    If Ineq.~\eqref{eq:cond_monotonicity} is satisfied, we can substitute $t=2$ in Ineq.~\eqref{eq:taking-logs} and verify that the bound holds, which concludes our proof.
+    The case $t=1$ has $S_1=0$.
+    Apply~\Cref{lemma:square-root-disagreement} with $C=3\epsilon/2$.
 \end{proof}
+}
+{\color{blue}
 \begin{theorem}[KT potentials and sublinear disagreement]\label{thm:KT-disagreement}
-    \algname{}-\pmb{ii}, choosing $\{F_t\}$ to be the KT potentials from~\Cref{tab:mappings}, defined as
+    Assume $0<\rho<1$ and choose the KT potentials
     \begin{equation}
         F_t(x) = \epsilon \frac{2^t \cdot \Gamma\br{\frac{t+1}{2} + \frac{x}{2}} \cdot \Gamma\br{\frac{t+1}{2} - \frac{x}{2}}}{\pi \cdot t!},
     \end{equation}
-    and choosing the gossip step function to be
+    If \algname{}-\pmb{ii} uses
     \begin{equation}
-        q(t) = \lceil \textcolor{blue}{\kappa} \cdot t \rceil,
+        q(t)=\lceil\kappa t\rceil,
     \end{equation}
-    for any $\textcolor{blue}{\kappa} \geq \frac{-2\ln(2)}{\ln(\rho)}$ has sublinear regret and disagreement.
+    with $\kappa\geq-4\ln(2)/\ln(\rho)$, then
+    \begin{equation}
+        R_T^{\mathrm{net}}(u)
+        \leq F_T^*(\norm{u})+\epsilon
+        +\frac{\epsilon}{\sqrt{\pi}}\sqrt{NT}.
+    \end{equation}
 \end{theorem}
 \begin{proof}
-    The betting function derived from the KT potential is
+    The odd scalar profile is
     \begin{align}
-        h_t(x) = \frac{x}{t} \cdot F_{t-1}(x).
+        \eta_t(x)=\frac{x}{t}F_{t-1}(x).
     \end{align}
-    Following a similar procedure to the one in~\Cref{thm:exponential-disagreement}, we obtain that for $t \geq 1$, and $|x| \leq t-1$, $|h'_t|$ is upper bounded by
+    Differentiating the gamma factors and using their monotonicity on $|x|\leq t-1$ gives, for $t\geq2$,
     \begin{align}
-        \frac{2^{t-2}(\ln t - \psi(1/2))}{\sqrt{\pi t}},
+        L_{h_t}
+        \leq\epsilon\frac{2^{t-2}\br{\ln t-\psi(1/2)}}{\sqrt{\pi t}},
     \end{align}
-    where $\psi$ is the digamma function.
-    Thus, we can set $C\coloneqq 4\sqrt{\pi}$, and apply~\Cref{lemma:square-root-disagreement}.
-    For a valid~\Cref{lemma:square-root-disagreement}, we need to verify Ineq.~\eqref{eq:condition-disagreement}, which in this case means ensuring
-    \begin{align}
-        \forall t \geq 1, \quad 2^{t}(\ln t - \psi(1/2)) \sum_{s=1}^{t-1} \rho^{Q(s,t)} \leq 1.
-    \end{align}
-    We set $q(t) = \textcolor{blue}{\kappa} \cdot t$ and check that
-    \begin{align}
-        2^{t}(\ln t - \psi(1/2)) (t-1) \rho^{\textcolor{blue}{\kappa}(2t-1)} \leq 1.
-    \end{align}
-    For $t=1$, this is trivial.
-    For $t \geq 2$, we can take logarithms and obtain
-    \begin{align*}
-        t\ln(2) + \ln(\ln t - \psi(1/2)) + \ln(t-1) + \frac{\textcolor{blue}{\kappa}\ln \rho}{2}(2t-1) \leq 0.
-    \end{align*}
-    Next, we use the bound
+    where $\psi$ is the digamma function; the same radial derivative argument used above transfers this scalar bound to $h_t$.
+    As in the exponential case, $S_t\leq(t-1)\rho^{\kappa(t-1)}$.
+    For $t\geq2$, the elementary bound
     \begin{align*}
         t\ln(2) + \ln(\ln t - \psi(1/2)) + \ln(t-1) \leq 2 t \ln(2)
     \end{align*}
-    for all $t \geq 2$, and the condition simplifies to
-    \begin{align*}
-        2 t \ln(2) + \frac{\textcolor{blue}{\kappa}\ln \rho}{2}(2t-1) \leq 0,
-    \end{align*}
-    which is satisfied when $\textcolor{blue}{\kappa} \geq \frac{-2\ln(2)}{\ln(\rho)}$.
-    This concludes our proof.
+    and $\kappa\ln\rho\leq-4\ln2$ imply
+    \begin{equation}
+        2^t\br{\ln t-\psi(1/2)}(t-1)\rho^{\kappa(t-1)}\leq1.
+    \end{equation}
+    Therefore,
+    \begin{equation}
+        L_{h_t}S_t\leq\frac{\epsilon}{4\sqrt{\pi t}}.
+    \end{equation}
+    The case $t=1$ again has $S_1=0$.
+    Apply~\Cref{lemma:square-root-disagreement} with $C=\epsilon/(4\sqrt{\pi})$.
 \end{proof}
+}
 
 \begin{remark}
     \Cref{thm:exponential-disagreement,thm:KT-disagreement} provide a clear trade-off between communication and performance.
-    \textcolor{blue}{They establish that by performing $\bigo{t}$ gossip steps at each round, the per-round communication grows linearly and the total communication through horizon $T$ grows as $\bigo{T^2}$; this sufficient schedule controls the disagreement term to the order of the local regret term and ensures sublinear network regret.}
+    \textcolor{blue}{They establish that a sufficiently large linear schedule $q(t)=\lceil\kappa t\rceil$, with the potential- and topology-dependent lower bound on $\kappa$ stated in each theorem, controls the disagreement penalty at order $\sqrt{T}$. The per-round communication is linear and the total communication through horizon $T$ is quadratic.}
 \end{remark}
 {\color{blue}
-    The schedule $q(t)=\mathcal{O}(t)$ is sufficient under the present disagreement analysis and is not claimed to be necessary.
+    These coefficient bounds are sufficient under the present disagreement analysis and are not claimed to be necessary.
     Whether a constant number of gossip rounds, $q(t)=\mathcal{O}(1)$, suffices for sublinear network regret remains open.
-    Accordingly, the constant-communication experiments evaluate the practically constrained regime, while the linear-schedule experiment illustrates the mechanism covered by the current proof.
+    Accordingly, the constant-communication experiments evaluate the practically constrained regime, while the linear-schedule experiment is a theory-motivated empirical ablation.
+    If $\rho=0$, one gossip round gives exact consensus and the logarithmic coefficient bounds are unnecessary.
     \par}
 
 \section{Operational Details}\label{sec:operational-details}
@@ -870,7 +905,7 @@ In practice, the two variants of \algname{} differ in what constitutes the agent
 \begin{figure}[tbp!]
     \centering
     \begin{tikzpicture}[
-            node distance=0.8cm and .5cm,
+            node distance=0.8cm and .2cm,
             font=\small
         ]
         % Nodes defining the loop for DECO-i
@@ -881,7 +916,7 @@ In practice, the two variants of \algname{} differ in what constitutes the agent
             $g_{n,t}$ as in~\Cref{eq:absolute_subgradient}};
         \node (update) [process, below=of observe] {Local update to get \\\colorbox{red!30}{$(\hat{\w}_{n,t}, \hat{G}_{n,t})$} as\\
             in~\colorbox{red!30}{\Cref{eq:local-update-wealth,eq:local-update-G}}};
-        \node (gossip) [process, right=of update, xshift=+.1cm] {Perform $q(t)$ gossip \\
+        \node (gossip) [process, right=of update] {Perform $q(t)$ gossip \\
             rounds with neighbors \\
             on the pair \colorbox{red!30}{$(\hat{\w}_{n,t}, \hat{G}_{n,t})$}};
 
@@ -892,8 +927,7 @@ In practice, the two variants of \algname{} differ in what constitutes the agent
         \draw [arrow] (update) -- (gossip);
         \draw [arrow] (gossip) |- node[above, pos=0.25, xshift=.8cm] {$t \to t+1$} (state);
     \end{tikzpicture}
-    \caption{Operational loop for an agent using \algname{}-\pmb{i}.
-        Key elements specific to this variant, related to tracking and communicating wealth, are highlighted in red.}\label{fig:flow-i}
+    \caption{\textcolor{blue}{Operational loop for \algname{}-\pmb{i}; wealth-specific state and communication are highlighted in red.}}\label{fig:flow-i}
 \end{figure}
 
 In~\Cref{fig:flow-i}, we illustrate the operational loop for \algname{}-\pmb{i}, which directly adapts the standard single-agent coin-betting algorithm.
@@ -903,13 +937,14 @@ For the exponential potential, it is
 \begin{equation}
     x_{n,t} = \tanh\br{\frac{\norm{G_{n,t-1}}}{t}} \cdot \w_{n,t-1} \cdot \frac{G_{n,t-1}}{\norm{G_{n,t-1}}}.\label{eq:deco1_bet_vec}
 \end{equation}
+\textcolor{blue}{The decision is defined as zero when $G_{n,t-1}=0$.}
 The local update then affects both state components:
 \begin{align}
     \hat{\w}_{n,t} & = \w_{n,t-1} - \langle g_{n,t}, x_{n,t} \rangle,\label{eq:local-update-wealth} \\
     \hat{G}_{n,t}  & = \textcolor{blue}{G_{n,t-1} - g_{n,t}}.\label{eq:local-update-G}
 \end{align}
 For communication, the agent gossips the pair $(\hat{\w}_{n,t}, \hat{G}_{n,t})$.
-Although this increases the communication load, the wealth is a scalar, which is often negligible compared to the dimension of the gradient vector.
+\textcolor{blue}{This adds one scalar to each $d$-dimensional message, a relative payload overhead of exactly $1/d$.}
 
 \begin{figure}[tbp!]
     \centering
@@ -945,16 +980,24 @@ Although this increases the communication load, the wealth is a scalar, which is
 However, the performance of \algname{}-\pmb{ii} is often worse than that of \algname{}-\pmb{i}.
 Here, the agent's state only consists of the accumulated gradients $G_{n,t-1}$.
 The prediction is computed directly from this state using the betting function $h_t(\cdot)$.
-For the exponential potential, this is
+{\color{blue}
+For the exponential potential, when $t\geq2$ and $G_{n,t-1}\neq0$, this is
 \begin{equation}
-    x_{n,t} = \underbrace{\tanh\br{\frac{\norm{G_{n,t-1}}}{t}} \cdot \frac{\epsilon e^{\frac{\norm{G_{n,t-1}}^2}{2(t-1)}}}{\sqrt{t-1}}}_{h_t(\norm{G_{n,t-1}})} \cdot \frac{G_{n,t-1}}{\norm{G_{n,t-1}}}.\label{eq:deco2_bet_vec}
+    \begin{aligned}
+        x_{n,t}
+        &=\epsilon\exp\br{\frac{\norm{G_{n,t-1}}^2}{2(t-1)}-\frac{H_{t-1}}{2}} \\
+        &\quad\cdot\tanh\br{\frac{\norm{G_{n,t-1}}}{t}}
+        \frac{G_{n,t-1}}{\norm{G_{n,t-1}}}.
+    \end{aligned}\label{eq:deco2_bet_vec}
 \end{equation}
+The decision is zero when $G_{n,t-1}=0$, including the first round.
+\par}
 Then, the local update is only applied to the accumulated gradient vector as in~\Cref{eq:local-update-G}.
 Thus, the agent only needs to gossip the vector $\hat{G}_{n,t}$.
 
 \section{Experiments}\label{sec:experiments}
 
-To validate our theoretical findings, we conduct a series of experiments on both synthetic and real-world datasets.
+\textcolor{blue}{We evaluate the algorithms empirically on both synthetic and real-world datasets.}
 Our implementation is publicly available.\footnote{Code available at: \url{https://github.com/TomasOrtega/Deco}}
 All experiments compare our decentralized coin-betting algorithms, which we will refer to as \textbf{\algname{}-i} and \textbf{\algname{}-ii}, against standard baselines.
 
@@ -985,7 +1028,8 @@ For the gossip step, we use a single round of communication ($q(t)=1$) by defaul
         All baselines use the same causal online protocol: predict, observe one local gradient, update the local optimizer state, and then gossip the decision vector once unless another schedule is stated.
         We sweep the same 25 values $\eta_0\in[10^{-3},10^3]$ for DOGD and the three adaptive methods on identical data streams.
         DOGD uses $\eta_t=\eta_0/\sqrt{t}$, whereas $\eta_0$ is the base scale multiplying the online moment-normalized update for D-AdaGrad, D-RMSProp, and D-Adam.
-        The two sensitivity figures report cumulative network loss over the complete sweep and therefore do not portray the adaptive methods as parameter-free.
+        All 25 settings are evaluated. For legibility on a common logarithmic scale, a plotted value above five times the lowest finite cumulative loss in its panel is masked; the underlying sweep result is retained.
+        The sensitivity figures therefore do not portray the adaptive methods as parameter-free.
         The scalar count uses the same directed-neighbor accounting for every method: \algname{}-\pmb{i} sends $(\w,G)$, while \algname{}-\pmb{ii}, DOGD, and the three adaptive baselines send one $d$-dimensional vector.
         \par}
 
@@ -1017,7 +1061,7 @@ Our implementation avoids these issues by performing calculations in the log-dom
 \begin{equation}
     \ln F_t(x) = \ln\br{\epsilon / \pi} + t \ln(2) + \ln B\br{a, b}.
 \end{equation}
-The term $\ln B(a,b)$ is computed using a highly optimized log-beta function, Python's \texttt{scipy.special.betaln}, which sidesteps the intermediate calculation of large or small numbers.
+\textcolor{blue}{The term $\ln B(a,b)$ is computed from standard-library log-gamma evaluations, which sidestep the intermediate calculation of large or small numbers.}
 The final value of $F_t(x)$ is then recovered by exponentiating the result.
 
 \subsection{The challenge of hyperparameter tuning}
@@ -1025,7 +1069,7 @@ The final value of $F_t(x)$ is then recovered by exponentiating the result.
 \begin{figure}[tbp!]
     \centering
     \includegraphics[width=\columnwidth]{Figs/online_baseline_sensitivity.pdf}
-    \caption{\textcolor{blue}{Final cumulative network loss on the synthetic online stream across the common base-rate grid $\eta_0\in[10^{-3},10^3]$. DOGD, D-AdaGrad, D-RMSProp, and D-Adam are swept over all 25 values; the horizontal lines are the untuned \algname{}-\pmb{i}/\pmb{ii} (KT) and centralized references.}}\label{fig:dgd_sensitivity}
+    \caption{\textcolor{blue}{Final cumulative network loss on the synthetic online stream across the 25-value base-rate grid $\eta_0\in[10^{-3},10^3]$. Values above five times the lowest finite loss are omitted from the plot to keep the useful range legible. Horizontal lines are the untuned \algname{}-\pmb{i}/\pmb{ii} (KT) and centralized references.}}\label{fig:dgd_sensitivity}
 \end{figure}
 
 {\color{blue}
@@ -1073,7 +1117,7 @@ While a single gossip step already performs well, increasing the number of commu
         For $q(t)=\lceil0.1t\rceil$, the cumulative number of gossip rounds is quadratic in $T$, whereas the constant schedule uses only $T$ rounds.
         The linear schedule reduces loss relative to the constant and logarithmic schedules, but a visible finite-horizon gap to the centralized oracle remains.
         This gap is a real decentralization cost rather than a claim of equality with the oracle.
-        The linear schedule should be interpreted as a theory-motivated sufficient schedule for controlling the current disagreement bound, not as the recommended operating point for every constrained network.
+        The linear form is theory-motivated, but the empirical coefficient $0.1$ is a tractable ablation setting and is not claimed to satisfy the sufficient topology-dependent bound in \Cref{thm:KT-disagreement}.
         \par}
 
 \begin{figure}[tbp!]
@@ -1087,13 +1131,13 @@ While a single gossip step already performs well, increasing the number of commu
 \begin{figure*}[!t]
     \centering
     \includegraphics[width=\textwidth]{Figs/multi_dataset_sensitivity.pdf}
-    \caption{\textcolor{blue}{Final cumulative network loss on four online LIBSVM streams. Each panel shows the complete 25-value $\eta_0$ sweep for DOGD, D-AdaGrad, D-RMSProp, and D-Adam on a log-log scale. Horizontal lines show \algname{}-\pmb{i}/\pmb{ii} (KT) and the centralized reference without learning-rate tuning.}}\label{fig:real_data_results}
+    \caption{\textcolor{blue}{Final cumulative network loss on four online LIBSVM streams across the 25-value $\eta_0$ grid. In each panel, values above five times its lowest finite loss are omitted to keep the useful range legible. Horizontal lines show \algname{}-\pmb{i}/\pmb{ii} (KT) and the centralized reference without learning-rate tuning.}}\label{fig:real_data_results}
 \end{figure*}
 
 {\color{blue}
     We evaluate DOGD, D-AdaGrad, D-RMSProp, and D-Adam on the same four LIBSVM online streams as \algname{}.
     Every run uses a cycle graph with $N=20$ and $q(t)=1$, and every baseline is swept over the same 25-value grid $\eta_0\in[10^{-3},10^3]$.
-    \Cref{fig:real_data_results} displays every value in this grid rather than selecting a best value after the fact.
+    \Cref{fig:real_data_results} uses the entire evaluated grid rather than selecting a best value after the fact; the disclosed five-times-loss mask only affects display.
     \par}
 
 {\color{blue}
@@ -1109,14 +1153,14 @@ This paper introduced a family of decentralized, parameter-free online learning 
 By combining the comparator-adaptive mechanism of coin-betting with information mixing via gossip protocols, our approach removes the need for setting a learning rate, a significant practical barrier for standard methods like Decentralized Online Gradient Descent (DOGD).
 A novel betting function formulation was also proposed to facilitate the theoretical analysis in the multi-agent context.
 
-We provided a theoretical analysis showing that our algorithms achieve sublinear network regret.
+\textcolor{blue}{We showed sublinear average local regret for both variants and a communication-dependent sublinear network-regret bound for \algname{}-\pmb{ii}.}
 The regret bounds characterize the influence of network connectivity and communication effort through a disagreement term.
 Theoretically, a key open question is whether a constant number of gossip steps per round, $q(t)=\mathcal{O}(1)$, is sufficient to guarantee sublinear network regret.
 We conjecture that this is the case.
-Our theoretical findings were supported by a series of experiments on both synthetic and real-world datasets.
+\textcolor{blue}{The theoretical results are complemented by experiments on both synthetic and real-world datasets.}
 \textcolor{blue}{The results compare \algname{} with tuned DOGD, D-AdaGrad, D-RMSProp, and D-Adam across synthetic and real online streams. The tuned baselines can be better on some streams, while \algname{} remains competitive without selecting a learning-rate scale.}
 {\color{blue}
-    Our guarantees are restricted to convex online learning and its linearized OLO reduction.
+    Our guarantees are restricted to unconstrained convex online learning on a Hilbert space and its linearized OLO reduction.
     They do not establish stationarity or convergence for nonconvex decentralized learning, which requires a different performance criterion.
     Extending parameter-free decentralized coin betting to that setting is outside the present scope.
     \par

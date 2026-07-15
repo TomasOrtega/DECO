@@ -43,13 +43,29 @@ class BasePotential(ABC):
 class ExponentialPotential(BasePotential):
     """Implements the exponential potential from Table I."""
 
+    def __init__(self, epsilon=1.0):
+        super().__init__(epsilon)
+        self._harmonic_numbers = [0.0]
+
+    def _harmonic_number(self, t):
+        while len(self._harmonic_numbers) <= t:
+            i = len(self._harmonic_numbers)
+            self._harmonic_numbers.append(self._harmonic_numbers[-1] + 1 / i)
+        return self._harmonic_numbers[t]
+
     def F(self, t, x):
         if t == 0:
             return self.epsilon
 
-        return (self.epsilon / np.sqrt(t)) * np.exp(x**2 / (2 * t))
+        return self.epsilon * np.exp(x**2 / (2 * t) - self._harmonic_number(t) / 2)
 
     def beta(self, t, x):
+        x = np.asarray(x)
+        if x.ndim > 0 and x.size > 1:
+            norm_x = np.linalg.norm(x)
+            if norm_x < 1e-8:
+                return np.zeros_like(x)
+            return np.tanh(norm_x / t) * x / norm_x
         return np.tanh(x / t)
 
 
@@ -84,7 +100,7 @@ class KTPotential(BasePotential):
         if t == 0:
             return self.epsilon
 
-        abs_x = abs(float(np.asarray(x)))
+        abs_x = abs(float(np.asarray(x).item()))
 
         # The domain requires |x| < t + 1.
         if abs_x >= t + 1:
