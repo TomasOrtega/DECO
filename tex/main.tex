@@ -146,6 +146,12 @@ This formulation measures the performance of the entire network's decisions agai
 
     {\color{blue}
         Decentralized OCO with every agent active has previously been analyzed using prescribed step-size schedules~\cite{hosseini_online_2013,nedic_decentralized_2015}.
+        Recent global-loss D-OCO analyses make the dependence on topology and communication more explicit.
+        Wan et al.\ use accelerated gossip to obtain nearly optimal dependence on the horizon, network size, and spectral gap; their expanded journal treatment also develops projection-free variants with explicit communication-round guarantees~\cite{wan_nearly_2024,wan_optimal_2025}.
+        Lei et al.\ characterize regret and communication trade-offs over Erd\H{o}s-R\'enyi random networks~\cite{lei_online_2020}.
+        Communication-efficient D-OCO has also been pursued through block updates with $\mathcal{O}(\sqrt{T})$ communication rounds~\cite{wan_projection-free_2020}, difference-compressed messages with explicit transmitted-bit accounting~\cite{tu_distributed_2022}, and multiple primal and gradient consensus iterations for dynamic regret~\cite{eshraghi_improving_2022}.
+        More recent extensions address unknown feedback delays~\cite{qiu_decentralized_2026} and compressed communication with improved graph- and compression-dependent regret and corresponding lower bounds~\cite{yang_decentralized_2026}.
+        These works establish communication efficiency and graph-dependent regret as central concerns in D-OCO, but address different axes from the learning-rate-free, comparator-adaptive guarantee studied here.
         Comparator-adaptive distributed learning has also been developed for a protocol in which one agent is activated per round~\cite{hoeven_distributed_2021}, while stochastic agent availability is treated in~\cite{achddou_distributed_2024}.
         These protocols differ from ours, where every agent predicts and incurs a local loss in every round; to the best of our knowledge, no parameter-free decentralized approach with \emph{network regret guarantees} has been proposed for this simultaneous protocol.
         Parameter-free decentralization itself is not unique to our work.
@@ -1087,6 +1093,7 @@ The final value of $F_t(x)$ is then recovered by exponentiating the result.
 \subsection{Impact of network connectivity}
 Our theoretical analysis in \Cref{thm:network_loss_regret_bound} shows that network regret is influenced by a disagreement term, which should decrease as network connectivity improves.
 To test this empirically, we evaluate the \algname{}-ii (KT) algorithm on several Erd\H{o}s-R\'enyi (ER) random graphs~\cite{erdos_random_1959} with different edge probabilities, $p$.
+\textcolor{blue}{This experiment complements the graph-dependent regret analysis of Lei et al.~\cite{lei_online_2020} by isolating the same ER-connectivity axis for the parameter-free \algname{}-\pmb{ii} method.}
 A higher $p$ results in a denser graph with a smaller spectral radius $\rho$, facilitating faster information mixing.
 The results are presented in \Cref{fig:connectivity_impact}.
 The top panel shows that, as predicted by the theory, the cumulative network loss decreases with better connectivity.
@@ -1105,6 +1112,10 @@ It illustrates that not only do more connected networks accumulate less total lo
 
 \subsection{The communication-regret trade-off}
 Our theory suggests that performing more gossip steps per round, $q(t)$, can further reduce disagreement and improve regret, at the cost of increased communication.
+{\color{blue}
+    Communication cost can instead be reduced through block updates~\cite{wan_projection-free_2020}, or measured at the bit level under compression~\cite{tu_distributed_2022,yang_decentralized_2026}; repeated consensus iterations also appear in dynamic-regret analyses~\cite{eshraghi_improving_2022}.
+    Our experiment varies rounds of full-precision gossip, so its scalar accounting is complementary to, rather than a substitute for, compressed-bit accounting.
+    \par}
 We investigate this trade-off by running \algname{}-ii (KT) on a cycle graph with three different gossip schedules:
 \begin{itemize}
     \item \textbf{Constant}: $q(t) = 1$ (minimal communication).

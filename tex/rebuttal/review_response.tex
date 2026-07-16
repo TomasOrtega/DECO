@@ -490,9 +490,17 @@
     The discussion of prior works on parameter-free decentralized learning is insufficient.
 \end{revcomment}
 \begin{revresponse}
+    We substantially broadened the positioning beyond the early decentralized OCO literature.  The revision now covers accelerated gossip and graph-dependent global-loss regret (Wan et al., COLT 2024 and JMLR 2025), Erd\H{o}s-R\'enyi networks (Lei et al., NeurIPS 2020), block communication (Wan et al., ICML 2020), compressed messages and bit accounting (Tu et al., NeurIPS 2022), multiple consensus iterations for dynamic regret (Eshraghi and Liang, L4DC 2022), unknown feedback delays (Qiu et al., AAAI 2026), and forthcoming improved bounds for compressed communication (Yang et al., ICML 2026).
     We now state explicitly that parameter-free decentralization itself is not unique to our work.  D-NASA targets nonconvex stochastic stationarity, Kuruzov and coauthors study strongly convex smooth objectives, and Chen and coauthors study composite convex objectives.  These fixed-objective problems and their stationarity or objective-convergence criteria differ from sequential prediction before feedback and network regret against a comparator.  We also discuss DADAM (Nazari et al.) as prior adaptive decentralized online optimization and distinguish it from our simple D-Adam experimental control.
     The relevant added manuscript text (with its citations retained in the manuscript) is:
     \begin{changes}
+        Recent global-loss D-OCO analyses make the dependence on topology and communication more explicit.
+        Wan et al.\ use accelerated gossip to obtain nearly optimal dependence on the horizon, network size, and spectral gap; their expanded journal treatment also develops projection-free variants with explicit communication-round guarantees.
+        Lei et al.\ characterize regret and communication trade-offs over Erd\H{o}s-R\'enyi random networks.
+        Communication-efficient D-OCO has also been pursued through block updates with $\mathcal{O}(\sqrt{T})$ communication rounds, difference-compressed messages with explicit transmitted-bit accounting, and multiple primal and gradient consensus iterations for dynamic regret.
+        More recent extensions address unknown feedback delays and compressed communication with improved graph- and compression-dependent regret and corresponding lower bounds.
+        These works establish communication efficiency and graph-dependent regret as central concerns in D-OCO, but address different axes from the learning-rate-free, comparator-adaptive guarantee studied here.
+
         Parameter-free decentralization itself is not unique to our work.
         D-NASA targets stationarity for nonconvex stochastic objectives (Li et al.), Kuruzov and coauthors obtain linear convergence for strongly convex smooth objectives, and Chen and coauthors address composite convex objectives.
         These methods solve fixed-objective optimization problems and measure stationarity or objective convergence.
