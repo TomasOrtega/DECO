@@ -101,9 +101,9 @@
 	\begin{tcolorbox}[adjusted title={Comment \arabic{revcomment}}, fonttitle={\bfseries}, colback={colorcommentbg}, colframe={colorcommentframe},coltitle={colorcommentbg},#1]
 	}{\end{tcolorbox}}
 
-\newenvironment{revresponse}[1][{Thank you for the constructive comment.}]{%
-	\textbf{Response:} #1\par
-}{\vspace{4em plus 0.2em minus 1.5em}}
+\newenvironment{revresponse}{%
+	\textbf{Response:}\space
+}{\par\vspace{4em plus 0.2em minus 1.5em}}
 
 \newenvironment{changes}{\begin{tcolorbox}[breakable,colback={colorchangebg}, colframe={colorchangeframe},coltext=red,enhanced jigsaw,]
 	}{\end{tcolorbox}}
