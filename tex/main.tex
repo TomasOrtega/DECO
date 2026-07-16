@@ -96,10 +96,10 @@ This work was supported in part by the NSF Award ECCS-2207457.
 \maketitle
 
 \begin{abstract}
-    \textcolor{blue}{We propose parameter-free decentralized online learning algorithms that achieve sublinear average local regret without requiring learning-rate tuning.}
+    We propose the first parameter-free decentralized online learning algorithms with network regret guarantees, which achieve sublinear regret without requiring hyperparameter tuning.
     This family of algorithms connects multi-agent coin-betting and decentralized online learning via gossip steps.
     To enable our decentralized analysis, we introduce a novel ``betting function'' formulation for coin-betting that simplifies the multi-agent regret analysis.
-    \textcolor{blue}{For this betting-function multi-agent framework, our analysis also gives a sublinear network-regret bound under a topology-dependent linear gossip schedule.}
+    \textcolor{blue}{For this betting-function multi-agent framework, we are able to prove a sublinear network-regret bound under a topology-dependent linear gossip schedule.}
     \textcolor{blue}{We evaluate the methods on synthetic and real datasets.}
     This family of algorithms is applicable to distributed sensing, decentralized optimization, and collaborative ML applications.
 \end{abstract}
@@ -109,7 +109,7 @@ This work was supported in part by the NSF Award ECCS-2207457.
 
 \section{Introduction}
 \IEEEPARstart{O}{nline} learning algorithms are essential for adapting to streaming data and changing environments, such as in online routing, ad selection, and spam filtering~\cite{hazan_introduction_2023,shalev-shwartz_online_2011}.
-In the standard Online Convex Optimization (OCO) framework, a learner makes a decision $x_{t}$ from a convex set $\mathcal{X}$ at each round $t$; \textcolor{blue}{our analysis specializes to the unconstrained Hilbert-space case $\mathcal{X}=\Hil$.}
+In the standard Online Convex Optimization (OCO) framework, a learner makes a decision $x_{t}$ from a convex set $\mathcal{X}$ at each round $t$.
 It then incurs a loss $l_{t}(x_{t})$, determined by a convex loss function $l_t$ that is unknown in advance.
 The goal is to minimize the \textbf{regret} after $T$ rounds, which measures the cumulative loss difference between the learner's decisions and those of a single decision in hindsight
 \begin{equation}
@@ -131,6 +131,8 @@ These methods are based on an analogy to \textbf{coin-betting}, where minimizing
 They automatically adapt to the characteristics of the problem, giving regret guarantees that depend on the unknown comparator $u$, hence why they are also known as comparator-adaptive algorithms~\cite{van_der_hoeven_comparator-adaptive_2020, hoeven_distributed_2021}.
 When the decision set $\mathcal{X}$ is unbounded and losses are $L$-Lipschitz, it has been shown that no algorithm can guarantee a regret better than $\Omega\br{\norm{u}L \sqrt{T \ln(\norm{u} LT + 1)}}$.
 Parameter-free algorithms can achieve this bound~\cite{mcmahan_no-regret_2012}.
+\textcolor{blue}{In the rest of this work, we will assume we operate in the unbounded $\mathcal{X}$ case, specifically a real Hilbert space which we will denote by $\Hil$.
+We will also assume, without loss of generality, that the losses are $1$-Lipschitz, since any $L$-Lipschitz loss can be rescaled to a $1$-Lipschitz loss by dividing by $L$.}
 
 \subsubsection*{The decentralized setting}
 While parameter-free methods solve the tuning problem for a single learner, many modern applications require collaboration among multiple agents in a network.
@@ -147,24 +149,25 @@ This formulation measures the performance of the entire network's decisions agai
     {\color{blue}
         Decentralized OCO with every agent active has previously been analyzed using prescribed step-size schedules~\cite{hosseini_online_2013,nedic_decentralized_2015}.
         Recent global-loss D-OCO analyses make the dependence on topology and communication more explicit.
-        Wan et al.\ use accelerated gossip to obtain nearly optimal dependence on the horizon, network size, and spectral gap; their expanded journal treatment also develops projection-free variants with explicit communication-round guarantees~\cite{wan_nearly_2024,wan_optimal_2025}.
-        Lei et al.\ characterize regret and communication trade-offs over Erd\H{o}s-R\'enyi random networks~\cite{lei_online_2020}.
+        In~\cite{wan_nearly_2024}, the authors use accelerated gossip to obtain nearly optimal dependence on the horizon, network size, and spectral gap, and their expanded journal work also develops projection-free variants with explicit communication-round guarantees~\cite{wan_optimal_2025}.
+        In~\cite{lei_online_2020}, the authors characterize regret and communication trade-offs over Erd\H{o}s-R\'enyi random networks.
         Communication-efficient D-OCO has also been pursued through block updates with $\mathcal{O}(\sqrt{T})$ communication rounds~\cite{wan_projection-free_2020}, difference-compressed messages with explicit transmitted-bit accounting~\cite{tu_distributed_2022}, and multiple primal and gradient consensus iterations for dynamic regret~\cite{eshraghi_improving_2022}.
         More recent extensions address unknown feedback delays~\cite{qiu_decentralized_2026} and compressed communication with improved graph- and compression-dependent regret and corresponding lower bounds~\cite{yang_decentralized_2026}.
-        These works establish communication efficiency and graph-dependent regret as central concerns in D-OCO, but address different axes from the learning-rate-free, comparator-adaptive guarantee studied here.
+        These works establish communication efficiency and graph-dependent regret as central concerns in D-OCO, but address different angles from the learning-rate-free, comparator-adaptive guarantee studied here.
         Comparator-adaptive distributed learning has also been developed for a protocol in which one agent is activated per round~\cite{hoeven_distributed_2021}, while stochastic agent availability is treated in~\cite{achddou_distributed_2024}.
         These protocols differ from ours, where every agent predicts and incurs a local loss in every round; to the best of our knowledge, no parameter-free decentralized approach with \emph{network regret guarantees} has been proposed for this simultaneous protocol.
         Parameter-free decentralization itself is not unique to our work.
-        D-NASA targets stationarity for nonconvex stochastic objectives~\cite{li_problem_parameter_free_2024}, Kuruzov et al.\ obtain linear convergence for strongly convex smooth objectives~\cite{kuruzov_achieving_2024}, and Chen et al.\ address composite convex objectives~\cite{chen_parameter_free_2025}.
-        These methods solve fixed-objective optimization problems and measure stationarity or objective convergence.
+        D-NASA targets stationarity for nonconvex stochastic objectives~\cite{li_problem_parameter_free_2024},~\cite{kuruzov_achieving_2024} obtain linear convergence for strongly convex smooth objectives, and~\cite{chen_parameter_free_2025} address composite convex objectives.
+        These methods solve fixed-objective optimization problems and measure stationarity or objective convergence, not online optimization.
         Separately, DADAM is a decentralized adaptive-moment method for online optimization with a dynamic-regret analysis~\cite{nazari_dadam_2019}, but it retains optimizer hyperparameters.
-        Our contribution instead concerns sequential predict-before-feedback losses: both coin-betting variants have comparator-adaptive average-local-regret guarantees, and the one-state variant has a communication-dependent network-regret guarantee without a learning-rate scale.
+        Our contribution instead concerns sequential predict-before-feedback losses: we present two coin-betting algorithm variants, both of which have comparator-adaptive average-local-regret guarantees, and one of which has a (communication-dependent) network-regret guarantee without a learning-rate scale.
         \par}
 Note that the decentralized formulation described above also encompasses distributed scenarios with a central coordinator and various computing nodes.
 This is simply a special case of the topology of $\mathcal{G}$.
 
 \subsubsection*{Contributions}
-\textcolor{blue}{This paper introduces decentralized online learning algorithms that are parameter-free and have centralized-order average-local-regret guarantees; the one-state variant additionally has a network-regret guarantee under sufficient communication.}
+\textcolor{blue}{This paper introduces two decentralized online learning algorithms that are parameter-free and have centralized-order average-local-regret guarantees.
+Additionally, the second variant has a network-regret guarantee under sufficient communication.}
 We bridge the gap between adaptive single-agent learning and multi-agent coordination by combining the coin-betting framework with decentralized gossip protocols.
     {\color{blue}
         Our contribution is not a new gossip operator, reward-regret duality, or coin betting in isolation.
