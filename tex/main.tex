@@ -424,7 +424,7 @@ For our analysis, we will need the following corollary, proved using the triangl
     \end{align}
 \end{corollary}
 {\color{blue}
-    At round $t$, $q(t)$ repetitions of the fixed gossip matrix are represented by $P_t=W^{q(t)}$.
+    At Round $t$, $q(t)$ repetitions of the fixed gossip matrix are represented by $P_t=W^{q(t)}$.
     The analysis uses the resulting contraction factor $\rho^{q(t)}$; it does not require treating $P_t$, whose support may extend beyond immediate neighbors, as a one-round gossip matrix.
     \par}
 
@@ -864,7 +864,7 @@ Each sensor acts as an agent, forming a wireless mesh network with nearby sensor
 The collective goal is to learn a single robust model to predict a value, such as air temperature or soil moisture, based on other local readings.
     {\color{blue}
         An operational example is collaborative streaming regression over a sensor or device-to-device network.
-        At round $t$, each node predicts from its local stream, observes its local feedback, updates its coin-betting state, and gossips the communicated state only with physical or logical neighbors.
+        At Round $t$, each node predicts from its local stream, observes its local feedback, updates its coin-betting state, and gossips the communicated state only with physical or logical neighbors.
         No central coordinator is required, and the communication budget is determined by these local neighbor exchanges.
         \par}
 
@@ -1119,7 +1119,7 @@ We investigate this trade-off by running \algname{}-ii (KT) on a cycle graph wit
 While a single gossip step already performs well, increasing the number of communications over time systematically lowers the cumulative loss curves.
     {\color{blue}
         For $q(t)=\lceil0.1t\rceil$, the cumulative number of gossip rounds is quadratic in $T$, whereas the constant schedule uses only $T$ rounds.
-        The linear schedule reduces loss relative to the constant and logarithmic schedules, but a visible finite-horizon gap to the centralized oracle remains.
+        The linear schedule reduces loss relative to the constant and logarithmic schedules. While the linear scheme maintains the same slope, a visible finite-horizon gap to the centralized oracle remains.
         This gap is a real decentralization cost rather than a claim of equality with the oracle.
         The linear form is theory-motivated, but the empirical coefficient $0.1$ is a tractable ablation setting and is not claimed to satisfy the sufficient topology-dependent bound in \Cref{thm:KT-disagreement}.
         \par}

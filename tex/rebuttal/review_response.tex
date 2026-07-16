@@ -86,14 +86,14 @@
     Although the paper proposes an interesting solution backed by regret guarantees, it is not clear for me what is the considered communication setup. In which way does the proposed approach fit the constrained-network scenario of the call.
 \end{revcomment}
 \begin{revresponse}
-    We appreciate the reviewer's concern, and we revised the manuscript to explicitly describe the communication setup.  
+    We appreciate the reviewer's concern, and we revised the manuscript to explicitly describe the communication setup.
     About the fit with the journal's call for papers, we argue that any ``drop-in'' online algorithm, which is the case for many IoT applications such as dropping a set of sensors on a field which must operate in a constrained network, requires learning rate tuning, which is particularly challenging given the distributed nature of the problem.
     The proposed method is parameter-free and does not require learning rate tuning, which is a practical advantage in such scenarios.
     The manuscript now states:
     \begin{changes}
         We assume synchronous exchanges over a fixed, connected, undirected graph, whose nodes represent the agents.
 
-        At round $t$, $q(t)$ repetitions of the fixed gossip matrix are represented by $P_t=W^{q(t)}$.
+        At Round $t$, $q(t)$ repetitions of the fixed gossip matrix are represented by $P_t=W^{q(t)}$.
         The analysis uses the resulting contraction factor $\rho^{q(t)}$; it does not require treating $P_t$, whose support may extend beyond immediate neighbors, as a one-round gossip matrix.
 
         \algname{}-\pmb{i} is the direct decentralized analogue of classical wealth-based coin betting: because its decision depends on both $\w_{n,t-1}$ and $G_{n,t-1}$, both states are gossiped.
@@ -115,8 +115,9 @@
     How is the gossiping happening? What is the communication overhead of the solution? According to the authors $O(t)$ gossiping steps are needed in each round, which means that the gossiping scales with $O(T^2)$\ldots{} Going back to point~1, how does this impact its application in constrained networks
 \end{revcomment}
 \begin{revresponse}
-    We agree that the previous text blurred a sufficient condition for the proof with a practical communication recommendation.  Similarly to Reviewer~3's concern about communication-normalized comparison, we now distinguish the number of gossip repetitions from the payload sent in each neighbor exchange.
-    The sufficient condition is $q(t)=\lceil\kappa t\rceil$, where $\kappa$ satisfies the potential- and topology-dependent lower bound in the applicable theorem, while the practical communication-constrained regime uses $q(t)=1$.  Thus, constant gossip uses a linear number of repetitions through horizon $T$, whereas the sufficient linear schedule uses a quadratic total number.
+    We agree that the previous text blurred a sufficient condition for the proof with a practical communication recommendation.  %Similarly to Reviewer~3's concern about communication-normalized comparison, 
+    We now distinguish the number of gossip repetitions from the payload sent in each neighbor exchange.
+    The sufficient condition is $q(t)=\lceil\kappa t\rceil$, where $\kappa$ satisfies the potential- and topology-dependent lower bound in the applicable theorem, while the practical communication-constrained regime uses $q(t)=1$.  Thus, the constant gossip uses a linear number of repetitions through horizon $T$, whereas the sufficient linear schedule uses a quadratic total number.
     We agree that the linear schedule is impractical in constrained networks, and we do not claim that it is a practical recommendation.  Closing the theory/practice gap for $q(t)=\order{1}$ remains an important theoretical question, as we state in the manuscript.
     The corresponding revised manuscript text is:
     \begin{changes}
@@ -136,11 +137,11 @@
     The authors show in Figure~5 the trade-off between communication and performance and claim that \enquote{\ldots{}a linear schedule of the communication allows the decentralized algorithm to closely track the performance of the centralized oracle}. However, from the figure one can see that the losses of the linear schedule are approximately $50\%$ higher than the centralized solution. This is not closely tracking, there is a clear gap that the authors should address
 \end{revcomment}
 \begin{revresponse}
-    We agree.  We revised the discussion to treat the centralized gap as a real finite-horizon decentralization cost rather than as a negligible discrepancy.
+    By ``closely tracking'' we meant the slopes are the same. But, we agree that it was misleading.  We revised the discussion to treat the centralized gap as a real finite-horizon decentralization cost.
     The revised discussion is:
     \begin{changes}
         For $q(t)=\lceil0.1t\rceil$, the cumulative number of gossip rounds is quadratic in $T$, whereas the constant schedule uses only $T$ rounds.
-        The linear schedule reduces loss relative to the constant and logarithmic schedules, but a visible finite-horizon gap to the centralized oracle remains.
+        The linear schedule reduces loss relative to the constant and logarithmic schedules. While the linear scheme maintains the same slope, a visible finite-horizon gap to the centralized oracle remains.
         This gap is a real decentralization cost rather than a claim of equality with the oracle.
         The linear form is theory-motivated, but the empirical coefficient $0.1$ is a tractable ablation setting and is not claimed to satisfy the sufficient topology-dependent bound in the KT-potential theorem.
 
@@ -154,7 +155,7 @@
             \raggedright\small\textbf{Revised manuscript Fig.~5.} Cumulative network loss on the synthetic online stream for \algname{}-\pmb{ii} (KT) with constant, logarithmic, and linear gossip schedules, together with the centralized reference. Increasing the communication budget reduces loss.
         \end{minipage}
     \end{center}
-    Thus, the revised discussion no longer relies on an unqualified ``closely tracks'' interpretation.
+    %Thus, the revised discussion no longer relies on an unqualified ``closely tracks'' interpretation.
 \end{revresponse}
 
 \begin{revcomment}
@@ -165,7 +166,7 @@
     The added manuscript text is:
     \begin{changes}
         An operational example is collaborative streaming regression over a sensor or device-to-device network.
-        At round $t$, each node predicts from its local stream, observes its local feedback, updates its coin-betting state, and gossips the communicated state only with physical or logical neighbors.
+        At Round $t$, each node predicts from its local stream, observes its local feedback, updates its coin-betting state, and gossips the communicated state only with physical or logical neighbors.
         No central coordinator is required, and the communication budget is determined by these local neighbor exchanges.
     \end{changes}
 \end{revresponse}
@@ -182,8 +183,10 @@
     First, the claimed novelty is not sufficiently justified. The proposed method essentially combines existing coin-betting techniques with standard gossip-based consensus schemes. While this integration is non-trivial at an implementation level, the paper does not convincingly argue why this constitutes a conceptual breakthrough rather than a straightforward extension of prior work in decentralized online convex optimization and adaptive methods. The positioning against related literature is incomplete and lacks a clear delineation of what is fundamentally new.
 \end{revcomment}
 \begin{revresponse}
-    We revised the positioning to be more precise.  We acknowledge the recent graph-dependent and communication-efficient D-OCO literature and do not claim novelty for gossip or parameter-free decentralization by themselves.  Instead, we identify the contribution as the formulation and analysis that gives both variants average-local-regret guarantees and the second variant a communication-dependent network-regret guarantee.  This same modification also addresses Reviewer~3's concern about prior-work coverage; we repeat the relevant manuscript text here and in that response.
-    The manuscript now states:
+    We revised the positioning to be more precise.  We acknowledge the recent graph-dependent and communication-efficient D-OCO literature and do not claim novelty for gossip or parameter-free decentralization by themselves.
+    However, to the best of our knowledge, no parameter-free decentralized approach with network-regret guarantees has been proposed for the simultaneous protocol.
+    We identify our contribution as the formulation and analysis that provide both variants of our algorithm average-local-regret guarantees and the second variant a communication-dependent network-regret guarantee.  %This same modification also addresses Reviewer~3's concern about prior-work coverage; 
+    We repeat the relevant manuscript text below:
     \begin{changes}
         Decentralized OCO (D-OCO) with every agent active has previously been analyzed using prescribed step-size schedules.
         Recent global-loss D-OCO analyses make the dependence on topology and communication more explicit.
@@ -209,10 +212,11 @@
     Second, the theoretical contribution appears limited in depth. The main regret results largely follow from known reward-regret duality arguments and standard properties of gossip averaging. The decomposition of network regret into local regret plus a disagreement term is expected and has appeared in various forms in prior decentralized optimization literature. The analysis, while technically correct, does not introduce significantly new proof techniques or insights beyond adapting existing frameworks.
 \end{revcomment}
 \begin{revresponse}
-    We agree that the building blocks are classical, and the revised text is more explicit about this.  The contribution is in how these tools are combined for network regret in a decentralized online setting, and in identifying the disagreement that must be controlled when decisions are driven by gossiped cumulative gradients.  We also corrected some typos.
+    We agree that the building blocks are classical, and the revised text is more explicit about this.  The contribution is in how these tools are combined for network regret in a decentralized online setting, and in identifying the disagreement that must be controlled when decisions are driven by gossiped cumulative gradients.  %We also corrected some typos.
     However, we disagree that the techniques are not significantly new: our betting-function formulation is not present in previous literature, and is the key to the analysis.
     The betting-function formulation is also a new optimal parameter-free online learning algorithm, even in the single-agent case.
-    We revised the manuscript to clarify the contribution and to correct the typos, and we reproduce the relevant text here:
+    We revised the manuscript to clarify the contribution %and to correct the typos, 
+    and reproduce the relevant text here:
     \begin{changes}
         The analysis combines two classical ingredients: reward-regret duality for the average local coin-betting term and gossip-mixing bounds for consensus.
         The decentralized component is their coupling when decisions are generated from gossiped cumulative gradients.
@@ -223,8 +227,8 @@
         Then \algname{}-\pmb{ii} satisfies, for every $u\in\Hil$,
         \begin{align*}
             R_T^{\mathrm{net}}(u)
-            &\leq R_T^{\mathrm{local}}(u)+\Delta_T \\
-            &\leq F_T^*(\norm{u})+\epsilon
+             & \leq R_T^{\mathrm{local}}(u)+\Delta_T \\
+             & \leq F_T^*(\norm{u})+\epsilon
             +2\sqrt{N}\sum_{t=1}^T L_{h_t}
             \sum_{s=1}^{t-1}\rho^{Q(s,t-1)},
         \end{align*}
@@ -237,8 +241,8 @@
 
         Expanding $l_t=N^{-1}\sum_n l_{n,t}$ gives the exact decomposition
         \begin{align*}
-            R_T^{\mathrm{net}}(u)&=R_T^{\mathrm{local}}(u)+D_T,\\
-            D_T&\coloneqq\frac{1}{N^2}\sum_{t=1}^T\sum_{n=1}^N\sum_{m=1}^N
+            R_T^{\mathrm{net}}(u) & =R_T^{\mathrm{local}}(u)+D_T,                              \\
+            D_T                   & \coloneqq\frac{1}{N^2}\sum_{t=1}^T\sum_{n=1}^N\sum_{m=1}^N
             \left(l_{n,t}(x_{m,t})-l_{n,t}(x_{n,t})\right).
         \end{align*}
         The residual $D_T$ may have either sign, but $1$-Lipschitz continuity gives $D_T\leq\Delta_T$.
@@ -254,7 +258,8 @@
     Third, there is a notable gap between theory and practice. The theoretical guarantees rely on increasing communication rounds (e.g., $q(t)=O(t)$) to control disagreement, which is impractical in realistic decentralized systems due to communication constraints. However, the experiments are conducted primarily under a constant communication budget, without adequately reconciling this discrepancy. This raises concerns about whether the theoretical results meaningfully explain the empirical performance.
 \end{revcomment}
 \begin{revresponse}
-    Similarly to Reviewer~1's concern regarding gossip overhead, we distinguish the sufficient linear schedule used in the analysis from the constant schedule used in the communication-constrained experiments.  The proof uses $q(t)=\lceil\kappa t\rceil$ with a sufficiently large topology-dependent coefficient; this is not presented as a practical recommendation.  Closing the theory/practice gap for $q(t)=\order{1}$ remains an important theoretical question.
+    %Similarly to Reviewer~1's concern regarding gossip overhead, 
+    We distinguish the sufficient linear schedule used in the analysis from the constant schedule used in the communication-constrained experiments.  The proof uses $q(t)=\lceil\kappa t\rceil$ with a sufficiently large topology-dependent coefficient; this is not presented as a practical recommendation.  Closing the theory/practice gap for $q(t)=\order{1}$ remains an important theoretical question.
     The manuscript now states:
     \begin{changes}
         The exponential- and KT-potential theorems provide a clear trade-off between communication and performance.
@@ -341,6 +346,7 @@
 \end{generalcomment}
 \begin{revresponse}
     We thank the reviewer for the detailed technical comments.
+    The reviewer has a list of detailed comments that represent the above concerns. In what follows, we address all reviewer's comments in detail.
 \end{revresponse}
 
 \begin{revcomment}
@@ -367,10 +373,10 @@
         For $q(r)=\lceil\kappa r\rceil$ and $t\geq2$,
         \begin{align*}
             Q(s,t-1)
-            &\geq\kappa\sum_{r=s}^{t-1}r
+                & \geq\kappa\sum_{r=s}^{t-1}r
             =\kappa\frac{(t-s)(s+t-1)}{2}
-            \geq\kappa(t-1), \\
-            S_t&\leq(t-1)\rho^{\kappa(t-1)}.
+            \geq\kappa(t-1),                   \\
+            S_t & \leq(t-1)\rho^{\kappa(t-1)}.
         \end{align*}
         The exponential-potential theorem uses
         \begin{equation*}
@@ -426,13 +432,13 @@
 
         Define the radial potential and betting fraction by
         \begin{align*}
-            \Phi_t(z)&=F_t(\norm{z}), \\
-            \boldsymbol{\beta}_t(z)&=
+            \Phi_t(z)               & =F_t(\norm{z}),                            \\
+            \boldsymbol{\beta}_t(z) & =
             \begin{cases}
-                \displaystyle\beta_t(\norm{z})\frac{z}{\norm{z}},&z\neq0,\\
-                0,&z=0,
-            \end{cases} \\
-            h_t(z)&=F_{t-1}(\norm{z})\boldsymbol{\beta}_t(z).
+                \displaystyle\beta_t(\norm{z})\frac{z}{\norm{z}}, & z\neq0, \\
+                0,                                                & z=0,
+            \end{cases}      \\
+            h_t(z)                  & =F_{t-1}(\norm{z})\boldsymbol{\beta}_t(z).
         \end{align*}
         For an excellent potential and $\norm{z}\leq t-1$, $\norm{c}\leq1$, the radial one-step inequality is
         \begin{equation*}
@@ -447,17 +453,17 @@
         Convexity of $\Phi_t$ and the gossip update give
         \begin{align*}
             \Phi_t(G_{n,t})
-            &\leq\sum_m{(P_t)}_{nm}\Phi_t(\widehat G_{m,t}) \\
-            &\leq\sum_m{(P_t)}_{nm}\left(
+             & \leq\sum_m{(P_t)}_{nm}\Phi_t(\widehat G_{m,t}) \\
+             & \leq\sum_m{(P_t)}_{nm}\left(
             \Phi_{t-1}(G_{m,t-1})-\langle g_{m,t},x_{m,t}\rangle
             \right).
         \end{align*}
         Summing over agents, using double stochasticity, and telescoping yields
         \begin{align*}
             \frac{1}{N}\sum_{t=1}^T\sum_{n=1}^{N}\langle g_{n,t},x_{n,t}\rangle
-            &\leq\epsilon-\frac{1}{N}\sum_{n=1}^{N}\Phi_T(G_{n,T}) \\
-            &\leq\epsilon-\Phi_T\left(\frac{1}{N}\sum_{n=1}^{N}G_{n,T}\right) \\
-            &=\epsilon-F_T\left(\norm{\sum_{t=1}^T\bar g_t}\right).
+             & \leq\epsilon-\frac{1}{N}\sum_{n=1}^{N}\Phi_T(G_{n,T})            \\
+             & \leq\epsilon-\Phi_T\left(\frac{1}{N}\sum_{n=1}^{N}G_{n,T}\right) \\
+             & =\epsilon-F_T\left(\norm{\sum_{t=1}^T\bar g_t}\right).
         \end{align*}
         Thus, \algname{}-\pmb{ii} satisfies the potential inequality needed by reward-regret duality without storing or gossiping a wealth variable.
         Together with the wealth lower bound for \algname{}-\pmb{i}, this shows that both variants satisfy
@@ -488,7 +494,8 @@
     The update magnitude in DECO is ultimately determined by $\beta_t$, which itself depends on the cumulative sum of past gradients. Therefore, it is not sufficient to compare DECO only against DOGD, whose learning rate decreases deterministically with $t$. A more appropriate evaluation would include comparisons with methods that also adapt their effective update size based on past gradients, such as AdaGrad, RMSProp, Adam, AdamW, momentum, and Nesterov-type methods applied in the decentralized online learning setting. Without such baselines, the empirical evaluation does not convincingly demonstrate the claimed advantage of DECO.\@
 \end{revcomment}
 \begin{revresponse}
-    Similarly to Reviewer~2's concern about experimental breadth and adaptive baselines, we selected D-AdaGrad, D-RMSProp, and D-Adam as three representative adaptive-gradient baselines.  They derive their local updates from diagonal AdaGrad (Duchi et al.), RMSProp (Tieleman and Hinton), and Adam (Kingma and Ba), respectively.  AdamW mainly adds weight decay to Adam, while momentum and Nesterov are not adaptive-gradient methods; these three representatives directly test the reviewer's adaptive-method concern without overloading the figures.
+    %Similarly to Reviewer~2's concern about experimental breadth and adaptive baselines, 
+    Per reviewer's suggestion, we have selected D-AdaGrad, D-RMSProp, and D-Adam as three representative adaptive-gradient baselines.  They derive their local updates from diagonal AdaGrad (Duchi et al.), RMSProp (Tieleman and Hinton), and Adam (Kingma and Ba), respectively.  AdamW mainly adds weight decay to Adam, while momentum and Nesterov are not adaptive-gradient methods; these three representatives directly test the reviewer's adaptive-method concern without overloading the figures.
     We implemented each method as a genuinely online decentralized algorithm: at every round it predicts, observes only the current local gradient, updates its local optimizer state, and gossips one decision vector. DOGD and all three adaptive methods use the same 25-value initial-rate grid and identical streams. Figs.~3 and~6 use the full evaluated grid with the disclosed five-times-loss display mask. Figures~4 and~5 are focused controlled ablations of connectivity and gossip schedule, respectively.
     The revised sensitivity figures are reproduced above with our response to the experimental-evaluation comment.
     The relevant added or modified manuscript text, including the affected figure captions, is:
@@ -537,14 +544,15 @@
 \begin{revcomment}
     The discussion of prior works on parameter-free decentralized learning is insufficient, and the experimental baselines are incomplete in this regard. Several studiess on parameter-free decentralized learning already exit (e.g., [1]--[3]). However, the paper neither provide adequate discussion about these works adequately nor includes relevant parameter-free decentralized methods in the baseline comparisons.
 
-    [1] Li, Jiaxiang, et al.\ \enquote{Problem-parameter-free decentralized nonconvex stochastic optimization.} arXiv preprint arXiv:2402.08821 (2024).
+        [1] Li, Jiaxiang, et al.\ \enquote{Problem-parameter-free decentralized nonconvex stochastic optimization.} arXiv preprint arXiv:2402.08821 (2024).
 
-    [2] Kuruzov, Ilya, Gesualdo Scutari, and Alexander Gasnikov.\ \enquote{Achieving linear convergence with parameter-free algorithms in decentralized optimization.} Advances in Neural Information Processing Systems 37 (2024): 96011--96044.
+        [2] Kuruzov, Ilya, Gesualdo Scutari, and Alexander Gasnikov.\ \enquote{Achieving linear convergence with parameter-free algorithms in decentralized optimization.} Advances in Neural Information Processing Systems 37 (2024): 96011--96044.
 
-    [3] Chen, Xiaokai, et al.\ \enquote{A parameter-free decentralized algorithm for composite convex optimization.} 2025 IEEE 64th Conference on Decision and Control (CDC). IEEE, 2025.
+        [3] Chen, Xiaokai, et al.\ \enquote{A parameter-free decentralized algorithm for composite convex optimization.} 2025 IEEE 64th Conference on Decision and Control (CDC). IEEE, 2025.
 \end{revcomment}
 \begin{revresponse}
-    Similarly to Reviewer~2's concern about novelty and positioning, we substantially broadened the discussion beyond the early decentralized OCO literature.  The revision now covers accelerated gossip and graph-dependent global-loss regret, Erd\H{o}s-R\'enyi networks, block communication, compressed messages and bit accounting, multiple consensus iterations for dynamic regret, unknown feedback delays, and recent improved bounds for compressed communication.  We repeat the same positioning text below.
+    %Similarly to Reviewer~2's concern about novelty and positioning, 
+    Per reviewer's suggestion, we have  substantially broadened the discussion beyond the early decentralized OCO literature.  The revision now covers accelerated gossip and graph-dependent global-loss regret, Erd\H{o}s-R\'enyi networks, block communication, compressed messages and bit accounting, multiple consensus iterations for dynamic regret, unknown feedback delays, and recent improved bounds for compressed communication.  We repeat the same positioning text below.
     The relevant added manuscript text (with its citations retained in the manuscript) is:
     \begin{changes}
         Decentralized OCO (D-OCO) with every agent active has previously been analyzed using prescribed step-size schedules.
@@ -588,14 +596,16 @@
 \begin{revcomment}[breakable]
     While DECO-ii has a practical advantage over DECO-i in that it only gossips the accumulated gradient and no longer requires communicating the wealth variable, the paper does not sufficiently justify why the original communication design in DECO-i should be considered appropriate. In many decentralized learning methods (e.g., [4]-[6]), communication is typically performed over a single optimization-related state, such as the model or gradient. In contrast, DECO-i requires transmitting both the accumulated gradient and the wealth variable at each round. The paper should therefore clarify why this additional communicated variable is necessary and why this design servers as an appropriate reference point for comparison. From this perspective, DECO-ii appears less like a fundamentally new algorithm and more like a reformulation of DECO-i that eliminates the need for two-variable communication by incorporating the role of wealth into the betting-function-based update. In addition, because DECO-i communicates both wealth and accumulated gradients, whereas DECO-ii communicates only the accumulated gradients, the two methods do not operate under the same communication overhead per round. Therefore, the empirical comparison between DECO-i and DECO-ii is not fully fair unless the communication cost is properly normalized. The authors should explicitly justify this communication design and include experiments comparing the methods under the same communication budget, so that the reported performance differences can be attributed to the update rule itself rather than to unequal communication overhead.
 
-    [4] H. Xing, O. Simeone and S. Bi, \enquote{Federated Learning Over Wireless Device-to-Device Networks: Algorithms and Convergence Analysis,} in IEEE Journal on Selected Areas in Communications, vol. 39, no. 12, pp. 3723--3741, Dec. 2021.
+        [4] H. Xing, O. Simeone and S. Bi, \enquote{Federated Learning Over Wireless Device-to-Device Networks: Algorithms and Convergence Analysis,} in IEEE Journal on Selected Areas in Communications, vol. 39, no. 12, pp. 3723--3741, Dec. 2021.
 
-    [5] Y. Wang, Y. Xu, Q. Shi and T. -H. Chang, \enquote{Quantized Federated Learning Under Transmission Delay and Outage Constraints,} in IEEE Journal on Selected Areas in Communications, vol. 40, no. 1, pp. 323--341, Jan. 2022.
+        [5] Y. Wang, Y. Xu, Q. Shi and T. -H. Chang, \enquote{Quantized Federated Learning Under Transmission Delay and Outage Constraints,} in IEEE Journal on Selected Areas in Communications, vol. 40, no. 1, pp. 323--341, Jan. 2022.
 
-    [6] Z. Zhai, X. Yuan, X. Wang and G. Y. Li, \enquote{Decentralized Federated Learning With Distributed Aggregation Weight Optimization,} in IEEE Transactions on Pattern Analysis and Machine Intelligence, vol. 48, no. 3, pp. 3899--3910, March 2026.
+        [6] Z. Zhai, X. Yuan, X. Wang and G. Y. Li, \enquote{Decentralized Federated Learning With Distributed Aggregation Weight Optimization,} in IEEE Transactions on Pattern Analysis and Machine Intelligence, vol. 48, no. 3, pp. 3899--3910, March 2026.
 \end{revcomment}
 \begin{revresponse}
-    Similarly to Reviewer~1's questions about communication setup and overhead, and to this reviewer's earlier question about the relation between the variants, we clarify the communicated state and per-message payload.  In particular, \algname{}-i is the direct decentralized form of classical wealth-based coin betting, whereas \algname{}-ii is the one-state betting-function variant that avoids communicating wealth.
+    %Similarly to Reviewer~1's questions about communication setup and overhead, and to this reviewer's 
+    In response to earlier questions about the relation between DECO-i and DECO-ii (Comments 2 and 3), we clarified the communicated state and per-message payload.  In particular, \algname{}-i is the direct decentralized form of classical wealth-based coin betting, whereas \algname{}-ii is the one-state betting-function variant that avoids communicating wealth.
+    Nevertheless, both algorithms are our contribution.
     We compare the variants under the same graph, data order, horizon, and gossip schedule on all four LIBSVM streams, so their mixing operators are identical. Each directed transmission contains $d+1$ scalars for \algname{}-i and $d$ for \algname{}-ii, a relative overhead of $1/d$ for \algname{}-i: $10\%$ in the $d=10$ synthetic experiment and $8.3\%$--$16.7\%$ across the real-data dimensions.
     Exact scalar equality would require different integer numbers or timings of gossip rounds and would therefore change the mixing operator.  Because the payloads differ by only one scalar and the manuscript already reports the exact per-message difference under the matched schedule, we do not add a separate equal-budget experiment.
     Note that computing the wealth variable is often trivial, but computing the betting function can be more expensive, so the two variants are not necessarily equal in computational cost.
