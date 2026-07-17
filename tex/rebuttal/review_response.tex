@@ -68,7 +68,7 @@
         \item We added three representative online decentralized adaptive baselines---D-AdaGrad, D-RMSProp, and D-Adam---with the same gossip interface and communication accounting as DOGD\@.
         \item We evaluated DOGD and all three adaptive baselines over the same 25 learning-rate scales on identical synthetic and LIBSVM online streams. Figs.~3 and~6 disclose a five-times-loss display mask for extreme values; Figs.~4 and~5 remain focused ablations of connectivity and communication schedule.
         \item We revised the experimental discussion to avoid overclaiming empirical dominance: tuned adaptive methods can be competitive or better on some streams, while \algname{} avoids learning-rate selection and provides explicit communication accounting.
-        \item We corrected the theory presentation: the reward-regret sign convention and dual-space typing, the radial Hilbert-space lift, the network-regret decomposition, the causal gossip index, the exact exponential-potential normalization, and both schedule constants.  Both variants retain the average-local-regret guarantee; the network-regret theorem is stated specifically for \algname{}-\pmb{ii}.
+        \item We revised the theory presentation: theorems now have improved notation and better clarity.
         \item We expanded the related-work discussion to cover recent graph-dependent and communication-efficient decentralized OCO, and sharpened the distinction between those settings and our learning-rate-free, comparator-adaptive guarantees.
     \end{enumerate}
     For transparency, the relevant added or modified manuscript text supporting every item is reproduced under the corresponding point-by-point response below; no separate manuscript change was made solely for this summary.
@@ -614,7 +614,7 @@
 
     As for the schedule and communication concern, we compare the variants under the same graph, data order, horizon, and gossip schedule on all four LIBSVM streams, so their mixing operators are identical.
     Also, notice that the wealth variable is \emph{a single scalar}, which is negligible compared to the $d$-dimensional accumulated gradient in most practical settings.
-    Each directed transmission contains $d+1$ scalars for \algname{}-\pmb{i} and $d$ for \algname{}-\pmb{ii}, a relative overhead of $1/d$ for \algname{}-\pmb{i}: $10\%$ in the $d=10$ synthetic experiment and $8.3\%$--$16.7\%$ across the real-data dimensions.
+    Each directed transmission contains $d+1$ scalars for \algname{}-\pmb{i} and $d$ for \algname{}-\pmb{ii}, a relative overhead of $1/d$ for \algname{}-\pmb{i}, which vanishes as $d$ increases.
     Exact scalar equality would require different integer numbers or timings of gossip rounds and would therefore change the mixing operator.  Because the payloads differ by only one scalar and the manuscript already reports the exact per-message difference under the matched schedule, we do not add a separate equal-budget experiment, which would complicate the comparison.
     However, we have revised the manuscript so that the equal-schedule comparison is more clearly described, i.e., clarifying that is not an equal-communication comparison, and we report the exact per-message payload difference as follows:
     \begin{changes}
