@@ -1030,7 +1030,7 @@ For the gossip step, we use a single round of communication ($q(t)=1$) by defaul
         DOGD uses $\eta_t=\eta_0/\sqrt{t}$, whereas $\eta_0$ is the base scale multiplying the online moment-normalized update for D-AdaGrad, D-RMSProp, and D-Adam.
         All 25 settings are evaluated. For legibility on a common logarithmic scale, a plotted value above five times the lowest finite cumulative loss in its panel is masked; the underlying sweep result is retained.
         The sensitivity figures therefore do not portray the adaptive methods as parameter-free.
-        The scalar count uses the same directed-neighbor accounting for every method: \algname{}-\pmb{i} sends $(\w,G)$, while \algname{}-\pmb{ii}, DOGD, and the three adaptive baselines send one $d$-dimensional vector.
+        The scalar count uses the same directed-neighbor accounting for every method: \algname{}-\pmb{i} sends $(\w,G)$, that is, a $d+1$ vector, while \algname{}-\pmb{ii}, DOGD, and the three adaptive baselines send one $d$-dimensional vector.
         \par}
 
 \subsubsection*{Datasets}

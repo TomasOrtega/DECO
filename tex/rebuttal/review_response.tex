@@ -54,7 +54,7 @@
 
 \editor{}
 \begin{generalcomment}
-    The manuscript requires a major revision. The main concerns are communication cost in constrained decentralized networks, the gap between the theoretical increasing-gossip schedule and practical constant communication, the role of \algname{}-ii relative to \algname{}-i, and the need for stronger empirical comparisons including adaptive baselines and real-data experiments.
+    The manuscript requires a major revision. The main concerns are communication cost in constrained decentralized networks, the gap between the theoretical increasing-gossip schedule and practical constant communication, the role of \algname{}-\pmb{ii} relative to \algname{}-\pmb{i}, and the need for stronger empirical comparisons including adaptive baselines and real-data experiments.
 \end{generalcomment}
 \begin{revresponse}
     We thank the editor and reviewers for the detailed and constructive comments.
@@ -62,13 +62,13 @@
     We revised the manuscript and repository to address these concerns directly.
     The main changes are:
     \begin{enumerate}
-        \item We made the communication model explicit: agents communicate over a fixed, connected, undirected graph, and each gossip repetition is a local exchange with immediate neighbors.  We distinguish \algname{}-i, which sends $(\mathrm{Wealth},G)$, from \algname{}-ii, DOGD, and the three adaptive baselines, which send one $d$-dimensional vector.
+        \item We made the communication model explicit: agents communicate over a fixed, connected, undirected graph, and each gossip repetition is a local exchange with immediate neighbors.  We distinguish \algname{}-\pmb{i}, which sends $(\mathrm{Wealth},G)$, from \algname{}-\pmb{ii}, DOGD, and the three adaptive baselines, which send one $d$-dimensional vector.
         \item We state the sufficient schedules precisely as $q(t)=\lceil\kappa t\rceil$, with the potential- and topology-dependent lower bound on $\kappa$ from each theorem.  The practical experiments emphasize the constrained $q(t)=1$ regime.
-        \item We reframed \algname{}-ii as a one-state betting-function formulation rather than an unqualified approximation to \algname{}-i.  The revised manuscript explains that the potential is a certified wealth lower bound and that the variants generally follow different trajectories.
+        \item We reframed \algname{}-\pmb{ii} as a one-state betting-function formulation rather than an unqualified approximation to \algname{}-\pmb{i}.  The revised manuscript explains that the potential is a certified wealth lower bound and that the variants generally follow different trajectories.
         \item We added three representative online decentralized adaptive baselines---D-AdaGrad, D-RMSProp, and D-Adam---with the same gossip interface and communication accounting as DOGD\@.
         \item We evaluated DOGD and all three adaptive baselines over the same 25 learning-rate scales on identical synthetic and LIBSVM online streams. Figs.~3 and~6 disclose a five-times-loss display mask for extreme values; Figs.~4 and~5 remain focused ablations of connectivity and communication schedule.
         \item We revised the experimental discussion to avoid overclaiming empirical dominance: tuned adaptive methods can be competitive or better on some streams, while \algname{} avoids learning-rate selection and provides explicit communication accounting.
-        \item We corrected the theory presentation: the reward-regret sign convention and dual-space typing, the radial Hilbert-space lift, the network-regret decomposition, the causal gossip index, the exact exponential-potential normalization, and both schedule constants.  Both variants retain the average-local-regret guarantee; the network-regret theorem is stated specifically for \algname{}-ii.
+        \item We corrected the theory presentation: the reward-regret sign convention and dual-space typing, the radial Hilbert-space lift, the network-regret decomposition, the causal gossip index, the exact exponential-potential normalization, and both schedule constants.  Both variants retain the average-local-regret guarantee; the network-regret theorem is stated specifically for \algname{}-\pmb{ii}.
         \item We expanded the related-work discussion to cover recent graph-dependent and communication-efficient decentralized OCO, and sharpened the distinction between those settings and our learning-rate-free, comparator-adaptive guarantees.
     \end{enumerate}
     For transparency, the relevant added or modified manuscript text supporting every item is reproduced under the corresponding point-by-point response below; no separate manuscript change was made solely for this summary.
@@ -118,7 +118,7 @@
     We agree that the previous text blurred a sufficient condition for the proof with a practical communication recommendation.  %Similarly to Reviewer~3's concern about communication-normalized comparison, 
     We now distinguish the number of gossip repetitions from the payload sent in each neighbor exchange.
     The sufficient condition is $q(t)=\lceil\kappa t\rceil$, where $\kappa$ satisfies the potential- and topology-dependent lower bound in the applicable theorem, while the practical communication-constrained regime uses $q(t)=1$.  Thus, the constant gossip uses a linear number of repetitions through horizon $T$, whereas the sufficient linear schedule uses a quadratic total number.
-    We agree that the linear schedule is impractical in constrained networks, and we do not claim that it is a practical recommendation.  Closing the theory/practice gap for $q(t)=\order{1}$ remains an important theoretical question, as we state in the manuscript.
+    Closing the theory/practice gap for $q(t)=\order{1}$ remains an important theoretical question, as we state in the manuscript.
     The corresponding revised manuscript text is:
     \begin{changes}
         The exponential- and KT-potential theorems provide a clear trade-off between communication and performance.
@@ -340,9 +340,9 @@
 \end{revresponse}
 \reviewer{}
 \begin{generalcomment}
-    This paper proposes a coin-betting-based decentralized online learning, DECO, for parameter-free updates with regret guarantees. In particular, the paper presents DECO-i and its simplified variant DECO-ii as the main algorithms.
+    This paper proposes a coin-betting-based decentralized online learning, DECO, for parameter-free updates with regret guarantees. In particular, the paper presents \algname{}-\pmb{i} and its simplified variant \algname{}-\pmb{ii} as the main algorithms.
 
-    However, the central claims do not yet appear to be fully supported. Although DECO-ii is presented as the main proposed method, the paper lacks sufficient quantitative analysis of the approximation that it introduces relative to DECO-i, as well as its impact on regret over $T$ iterations. In addition, while the paper emphasizes that the method is learning-rate-free, it still depends on the choice of a potential function, which is itself a consequential design decision. As such, the approach does not fully eliminate the need for tuning, but rather shifts it to another component. Moreover, although DECO-ii has a practical advantage over DECO-i by avoidng communication of the wealth variable and only gossiping the accumulated gradient, the paper does not sufficiently justify why the two-variable communication structure in DECO-i should be considered as an appropriate design in the first place. In many decentralized learning frameworks, communication typically involves a single optimization-related state, such as the model parameters or gradient information. In contrast, DECO-i requires transmitting both the accumulated gradient and the wealth variable at each round, which may introduce unnecessary overhead without sufficient justification. More detailed concerns are as follows:
+    However, the central claims do not yet appear to be fully supported. Although \algname{}-\pmb{ii} is presented as the main proposed method, the paper lacks sufficient quantitative analysis of the approximation that it introduces relative to \algname{}-\pmb{i}, as well as its impact on regret over $T$ iterations. In addition, while the paper emphasizes that the method is learning-rate-free, it still depends on the choice of a potential function, which is itself a consequential design decision. As such, the approach does not fully eliminate the need for tuning, but rather shifts it to another component. Moreover, although \algname{}-\pmb{ii} has a practical advantage over \algname{}-\pmb{i} by avoidng communication of the wealth variable and only gossiping the accumulated gradient, the paper does not sufficiently justify why the two-variable communication structure in \algname{}-\pmb{i} should be considered as an appropriate design in the first place. In many decentralized learning frameworks, communication typically involves a single optimization-related state, such as the model parameters or gradient information. In contrast, \algname{}-\pmb{i} requires transmitting both the accumulated gradient and the wealth variable at each round, which may introduce unnecessary overhead without sufficient justification. More detailed concerns are as follows:
 \end{generalcomment}
 \begin{revresponse}
     We thank the reviewer for the detailed technical comments.
@@ -396,10 +396,10 @@
 \end{revresponse}
 
 \begin{revcomment}
-    The main proposed method is DECO-ii, whereas DECO-i is essentially the standard coin-betting approach augmented with a gossip step, as also acknowledged by the authors. DECO-ii appears to be obtained by replacing $\text{Wealth}_{t-1}$ in DECO-i with the approximation $\text{Wealth}_{t-1} \approx F_{t-1}(G_{t-1})$. The authors should provide a quantitative analysis of the approximation error introduced by this simplification, as well as its impact on regret after $T$ iterations. However, the paper does not provide such an explanation or theoretical characterization. Instead, it only shows experimentally that DECO-ii performs worse than DECO-i, which is insufficient. A rigorous quantitative analysis of the approximation error in DECO-ii and its effect on the regret bound is necessary to substantiate the validity of the method.
+    The main proposed method is \algname{}-\pmb{ii}, whereas \algname{}-\pmb{i} is essentially the standard coin-betting approach augmented with a gossip step, as also acknowledged by the authors. \algname{}-\pmb{ii} appears to be obtained by replacing $\text{Wealth}_{t-1}$ in \algname{}-\pmb{i} with the approximation $\text{Wealth}_{t-1} \approx F_{t-1}(G_{t-1})$. The authors should provide a quantitative analysis of the approximation error introduced by this simplification, as well as its impact on regret after $T$ iterations. However, the paper does not provide such an explanation or theoretical characterization. Instead, it only shows experimentally that \algname{}-\pmb{ii} performs worse than \algname{}-\pmb{i}, which is insufficient. A rigorous quantitative analysis of the approximation error in \algname{}-\pmb{ii} and its effect on the regret bound is necessary to substantiate the validity of the method.
 \end{revcomment}
 \begin{revresponse}
-    We clarify that \algname{}-ii is not obtained by assuming that the potential approximates wealth.  The wealth lemma certifies the potential as a lower bound for \algname{}-i, while the different local and gossip updates generally lead the two variants along different trajectories.  We therefore analyze \algname{}-ii directly rather than introducing a cumulative approximation-error term.
+    We clarify that \algname{}-\pmb{ii} is not obtained by assuming that the potential approximates wealth.  The wealth lemma certifies the potential as a lower bound for \algname{}-\pmb{i}, while the different local and gossip updates generally lead the two variants along different trajectories.  We therefore analyze \algname{}-\pmb{ii} directly rather than introducing a cumulative approximation-error term.
     The manuscript now states:
     \begin{changes}
         \algname{}-\pmb{i} is the direct decentralized analogue of classical wealth-based coin betting: because its decision depends on both $\w_{n,t-1}$ and $G_{n,t-1}$, both states are gossiped.
@@ -411,7 +411,7 @@
 \end{revresponse}
 
 \begin{revcomment}
-    Lemma 3 only establishes whether Eq.~(4) is satisfied when learning is based on DECO-i. Since DECO-i is essentially corresponds to the conventional coin-betting framework combined with gossip, it is not surprising that the condition holds. However, the paper does not provide a proper analysis to verify whether the same condition is satisfied for DECO-ii, which is the simplified version of DECO-i. Without such an analysis, it remains unclear whether DECO-ii can truly enjoy the same regret guarantees as DECO-i.
+    Lemma 3 only establishes whether Eq.~(4) is satisfied when learning is based on \algname{}-\pmb{i}. Since \algname{}-\pmb{i} is essentially corresponds to the conventional coin-betting framework combined with gossip, it is not surprising that the condition holds. However, the paper does not provide a proper analysis to verify whether the same condition is satisfied for \algname{}-\pmb{ii}, which is the simplified version of \algname{}-\pmb{i}. Without such an analysis, it remains unclear whether \algname{}-\pmb{ii} can truly enjoy the same regret guarantees as \algname{}-\pmb{i}.
 \end{revcomment}
 \begin{revresponse}
     We added a direct verification for the betting-function update and corrected the Hilbert-space step.  The scalar potential condition cannot be applied componentwise to a vector state; the revised proof uses the standard radial lift of an excellent potential, including condition~(d).  The radial one-step inequality is then applied before gossip, followed by convexity, nonnegative doubly stochastic mixing, and telescoping.  We also made the scalar conjugate type-correct by evaluating it at $\norm{u}$.
@@ -582,7 +582,7 @@
 \begin{revresponse}
     We agree that our guarantees do not cover nonconvex decentralized learning.  The current manuscript states the scope directly as unconstrained convex OCO on a real Hilbert space and explains the associated linearized OLO reduction; it makes no nonconvex stationarity or convergence claim.  This scope also distinguishes our setting from the fixed-objective nonconvex work discussed in response to the preceding concern.
     Adapting parameter-free (comparator-adaptive) online learning methods to nonconvex optimization is a well-known open problem, and far beyond the scope of this work.
-    The manuscript now states:
+    We have clarified the exact scope of our work, and the manuscript now states:
     \begin{changes}
         In the rest of this work, we will assume we operate in the unbounded $\mathcal{X}$ case, specifically a real Hilbert space which we will denote by $\Hil$.
         We will also assume, without loss of generality, that the losses are $1$-Lipschitz, since any $L$-Lipschitz loss can be rescaled to a $1$-Lipschitz loss by dividing by $L$.
@@ -594,7 +594,7 @@
 \end{revresponse}
 
 \begin{revcomment}[breakable]
-    While DECO-ii has a practical advantage over DECO-i in that it only gossips the accumulated gradient and no longer requires communicating the wealth variable, the paper does not sufficiently justify why the original communication design in DECO-i should be considered appropriate. In many decentralized learning methods (e.g., [4]-[6]), communication is typically performed over a single optimization-related state, such as the model or gradient. In contrast, DECO-i requires transmitting both the accumulated gradient and the wealth variable at each round. The paper should therefore clarify why this additional communicated variable is necessary and why this design servers as an appropriate reference point for comparison. From this perspective, DECO-ii appears less like a fundamentally new algorithm and more like a reformulation of DECO-i that eliminates the need for two-variable communication by incorporating the role of wealth into the betting-function-based update. In addition, because DECO-i communicates both wealth and accumulated gradients, whereas DECO-ii communicates only the accumulated gradients, the two methods do not operate under the same communication overhead per round. Therefore, the empirical comparison between DECO-i and DECO-ii is not fully fair unless the communication cost is properly normalized. The authors should explicitly justify this communication design and include experiments comparing the methods under the same communication budget, so that the reported performance differences can be attributed to the update rule itself rather than to unequal communication overhead.
+    While \algname{}-\pmb{ii} has a practical advantage over \algname{}-\pmb{i} in that it only gossips the accumulated gradient and no longer requires communicating the wealth variable, the paper does not sufficiently justify why the original communication design in \algname{}-\pmb{i} should be considered appropriate. In many decentralized learning methods (e.g., [4]-[6]), communication is typically performed over a single optimization-related state, such as the model or gradient. In contrast, \algname{}-\pmb{i} requires transmitting both the accumulated gradient and the wealth variable at each round. The paper should therefore clarify why this additional communicated variable is necessary and why this design servers as an appropriate reference point for comparison. From this perspective, \algname{}-\pmb{ii} appears less like a fundamentally new algorithm and more like a reformulation of \algname{}-\pmb{i} that eliminates the need for two-variable communication by incorporating the role of wealth into the betting-function-based update. In addition, because \algname{}-\pmb{i} communicates both wealth and accumulated gradients, whereas \algname{}-\pmb{ii} communicates only the accumulated gradients, the two methods do not operate under the same communication overhead per round. Therefore, the empirical comparison between \algname{}-\pmb{i} and \algname{}-\pmb{ii} is not fully fair unless the communication cost is properly normalized. The authors should explicitly justify this communication design and include experiments comparing the methods under the same communication budget, so that the reported performance differences can be attributed to the update rule itself rather than to unequal communication overhead.
 
         [4] H. Xing, O. Simeone and S. Bi, \enquote{Federated Learning Over Wireless Device-to-Device Networks: Algorithms and Convergence Analysis,} in IEEE Journal on Selected Areas in Communications, vol. 39, no. 12, pp. 3723--3741, Dec. 2021.
 
@@ -604,12 +604,19 @@
 \end{revcomment}
 \begin{revresponse}
     %Similarly to Reviewer~1's questions about communication setup and overhead, and to this reviewer's 
-    In response to earlier questions about the relation between DECO-i and DECO-ii (Comments 2 and 3), we clarified the communicated state and per-message payload.  In particular, \algname{}-i is the direct decentralized form of classical wealth-based coin betting, whereas \algname{}-ii is the one-state betting-function variant that avoids communicating wealth.
+    In response to earlier questions about the relation between \algname{}-\pmb{i} and \algname{}-\pmb{ii} (Comments 2 and 3), we clarified the communicated state and per-message payload.
+    In particular, \algname{}-\pmb{i} is the direct decentralized form of classical wealth-based coin betting, whereas \algname{}-\pmb{ii} is the one-state betting-function variant that avoids communicating wealth.
     Nevertheless, both algorithms are our contribution.
-    We compare the variants under the same graph, data order, horizon, and gossip schedule on all four LIBSVM streams, so their mixing operators are identical. Each directed transmission contains $d+1$ scalars for \algname{}-i and $d$ for \algname{}-ii, a relative overhead of $1/d$ for \algname{}-i: $10\%$ in the $d=10$ synthetic experiment and $8.3\%$--$16.7\%$ across the real-data dimensions.
-    Exact scalar equality would require different integer numbers or timings of gossip rounds and would therefore change the mixing operator.  Because the payloads differ by only one scalar and the manuscript already reports the exact per-message difference under the matched schedule, we do not add a separate equal-budget experiment.
-    Note that computing the wealth variable is often trivial, but computing the betting function can be more expensive, so the two variants are not necessarily equal in computational cost.
-    The relevant added manuscript text is:
+    We believe that \algname{}-\pmb{i} is a natural reference construction for decentralized coin betting, and helps the reader understand the connection to classical coin betting and the role of wealth in the update.
+    So, it is useful to introduce \algname{}-\pmb{i} as a reference construction, even if it does not have the theoretical (and slight communication) advantages of \algname{}-\pmb{ii}.
+    The flow of the paper would not be as clear if we only presented \algname{}-\pmb{ii} without first introducing the classical wealth-based coin-betting recursion and its decentralized analogue.
+    Moreover, \algname{}-\pmb{i} is computationally simpler in some cases (e.g., when using the KT potential it does not require computing Gamma functions, unlike \algname{}-\pmb{ii}), so it might be of practical interest in some applications.
+
+    As for the schedule and communication concern, we compare the variants under the same graph, data order, horizon, and gossip schedule on all four LIBSVM streams, so their mixing operators are identical.
+    Also, notice that the wealth variable is \emph{a single scalar}, which is negligible compared to the $d$-dimensional accumulated gradient in most practical settings.
+    Each directed transmission contains $d+1$ scalars for \algname{}-\pmb{i} and $d$ for \algname{}-\pmb{ii}, a relative overhead of $1/d$ for \algname{}-\pmb{i}: $10\%$ in the $d=10$ synthetic experiment and $8.3\%$--$16.7\%$ across the real-data dimensions.
+    Exact scalar equality would require different integer numbers or timings of gossip rounds and would therefore change the mixing operator.  Because the payloads differ by only one scalar and the manuscript already reports the exact per-message difference under the matched schedule, we do not add a separate equal-budget experiment, which would complicate the comparison.
+    However, we have revised the manuscript so that the equal-schedule comparison is more clearly described, i.e., clarifying that is not an equal-communication comparison, and we report the exact per-message payload difference as follows:
     \begin{changes}
         \algname{}-\pmb{i} is the direct decentralized analogue of classical wealth-based coin betting: because its decision depends on both $\w_{n,t-1}$ and $G_{n,t-1}$, both states are gossiped.
         \algname{}-\pmb{ii} is the one-state betting-function variant $x_{n,t}=h_t(G_{n,t-1})$ and gossips only $G$.
@@ -617,7 +624,7 @@
 
         This adds one scalar to each $d$-dimensional message, a relative payload overhead of exactly $1/d$.
 
-        The scalar count uses the same directed-neighbor accounting for every method: \algname{}-\pmb{i} sends $(\w,G)$, while \algname{}-\pmb{ii}, DOGD, and the three adaptive baselines send one $d$-dimensional vector.
+        The scalar count uses the same directed-neighbor accounting for every method: \algname{}-\pmb{i} sends $(\w,G)$, that is, a $d+1$ vector, while \algname{}-\pmb{ii}, DOGD, and the three adaptive baselines send one $d$-dimensional vector.
     \end{changes}
 \end{revresponse}
 \end{document}
